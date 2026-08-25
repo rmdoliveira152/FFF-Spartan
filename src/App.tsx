@@ -163,7 +163,7 @@ function App() {
 
       <footer><div className="brand"><span className="brand-mark"><Shield size={20} /></span><span><b>FFF</b><strong>SPARTAN</strong></span></div><p>{copy.footer}<br /><small>{copy.fanNotice}</small></p><img src={asset('dark-war-logo.png')} alt="Dark War: Survival" /></footer>
       {notice && <div className="toast" role="status">{notice}</div>}
-      <AdminPortal open={adminOpen} copy={copy} user={portal.user} profile={portal.profile} availableMembers={portal.availableMembers} members={portal.members} onClose={() => setAdminOpen(false)} onSignIn={portal.signIn} onSignUp={portal.signUp} onSignOut={portal.signOut} onRefreshPolls={portal.refreshPolls} onRefreshMembers={portal.refreshMembers} />
+      <AdminPortal open={adminOpen || portal.passwordRecovery} copy={copy} user={portal.user} profile={portal.profile} availableMembers={portal.availableMembers} members={portal.members} onClose={() => { setAdminOpen(false); if (portal.passwordRecovery) void portal.signOut() }} onSignIn={portal.signIn} onSignUp={portal.signUp} onRequestPasswordReset={portal.requestPasswordReset} onUpdatePassword={async (password) => { const result = await portal.updatePassword(password); if (result.ok) setAdminOpen(true); return result }} passwordRecovery={portal.passwordRecovery} onSignOut={portal.signOut} onRefreshPolls={portal.refreshPolls} onRefreshMembers={portal.refreshMembers} />
     </div>
   )
 }

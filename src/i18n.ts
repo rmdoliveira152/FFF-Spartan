@@ -8,7 +8,7 @@ export const languages = [
 
 export type Language = (typeof languages)[number][0]
 
-export type Copy = {
+type BaseCopy = {
   navHome: string; navRanks: string; navPolls: string; navR4: string; navRules: string; admin: string
   eyebrow: string; heroTitle: string; heroText: string; enterRanks: string; officialGame: string
   alertLabel: string; alertText: string; strength: string; unity: string; discipline: string
@@ -30,7 +30,15 @@ export type Copy = {
   memberName: string; registrationRequests: string; noRegistrations: string; confirmDelete: string
 }
 
-const en: Copy = {
+type RecoveryCopy = {
+  forgotPassword: string; resetPasswordTitle: string; recoveryInstructions: string; sendRecovery: string
+  recoverySent: string; newPassword: string; confirmPassword: string; updatePassword: string
+  passwordUpdated: string; passwordMismatch: string
+}
+
+export type Copy = BaseCopy & RecoveryCopy
+
+const en: BaseCopy = {
   navHome: 'Command', navRanks: 'Roster', navPolls: 'Polls', navR4: 'R4 application', navRules: 'Code', admin: 'Admin',
   eyebrow: 'Dark War: Survival Alliance', heroTitle: 'Survive together. Conquer as one.',
   heroText: 'The operational hub of FFF-Spartan: roster performance, alliance decisions and leadership applications in one place.',
@@ -62,7 +70,7 @@ const en: Copy = {
   memberName: 'Member name', registrationRequests: 'Registration requests', noRegistrations: 'There are no pending registrations.', confirmDelete: 'Delete this member and their statistics?',
 }
 
-const pt: Copy = {
+const pt: BaseCopy = {
   ...en,
   navHome: 'Comando', navRanks: 'Membros', navPolls: 'Votações', navR4: 'Candidatura R4', navRules: 'Código', admin: 'Administração',
   eyebrow: 'Aliança de Dark War: Survival', heroTitle: 'Sobreviver juntos. Conquistar como um só.',
@@ -94,7 +102,7 @@ const pt: Copy = {
   memberName: 'Nome do membro', registrationRequests: 'Pedidos de cadastro', noRegistrations: 'Não existem cadastros pendentes.', confirmDelete: 'Excluir este membro e as respetivas estatísticas?',
 }
 
-const translated: Record<Exclude<Language, 'en' | 'pt'>, Copy> = {
+const translated: Record<Exclude<Language, 'en' | 'pt'>, BaseCopy> = {
   es: {
     navHome:'Comando',navRanks:'Miembros',navPolls:'Votaciones',navR4:'Candidatura R4',navRules:'Código',admin:'Administración',
     eyebrow:'Alianza de Dark War: Survival',heroTitle:'Sobrevivir juntos. Conquistar como uno.',heroText:'El centro operativo de FFF-Spartan: rendimiento de los miembros, decisiones de la alianza y candidaturas de liderazgo en un solo lugar.',
@@ -381,8 +389,27 @@ const translated: Record<Exclude<Language, 'en' | 'pt'>, Copy> = {
   },
 }
 
+const recoveryCopy: Record<Language, RecoveryCopy> = {
+  en: { forgotPassword:'Forgot password?',resetPasswordTitle:'Reset password',recoveryInstructions:'Enter your email to receive a secure recovery link.',sendRecovery:'Send recovery email',recoverySent:'Check your email for the recovery link.',newPassword:'New password',confirmPassword:'Confirm new password',updatePassword:'Update password',passwordUpdated:'Password updated successfully.',passwordMismatch:'The passwords do not match.' },
+  pt: { forgotPassword:'Esqueceu a palavra-passe?',resetPasswordTitle:'Redefinir palavra-passe',recoveryInstructions:'Introduza o seu email para receber uma ligação segura de recuperação.',sendRecovery:'Enviar email de recuperação',recoverySent:'Consulte o seu email para abrir a ligação de recuperação.',newPassword:'Nova palavra-passe',confirmPassword:'Confirmar nova palavra-passe',updatePassword:'Atualizar palavra-passe',passwordUpdated:'Palavra-passe atualizada com sucesso.',passwordMismatch:'As palavras-passe não coincidem.' },
+  es: { forgotPassword:'¿Olvidaste la contraseña?',resetPasswordTitle:'Restablecer contraseña',recoveryInstructions:'Introduce tu correo para recibir un enlace seguro de recuperación.',sendRecovery:'Enviar correo de recuperación',recoverySent:'Revisa tu correo para abrir el enlace de recuperación.',newPassword:'Nueva contraseña',confirmPassword:'Confirmar nueva contraseña',updatePassword:'Actualizar contraseña',passwordUpdated:'Contraseña actualizada correctamente.',passwordMismatch:'Las contraseñas no coinciden.' },
+  fr: { forgotPassword:'Mot de passe oublié ?',resetPasswordTitle:'Réinitialiser le mot de passe',recoveryInstructions:'Saisissez votre e-mail pour recevoir un lien de récupération sécurisé.',sendRecovery:'Envoyer l’e-mail de récupération',recoverySent:'Consultez votre e-mail pour ouvrir le lien de récupération.',newPassword:'Nouveau mot de passe',confirmPassword:'Confirmer le mot de passe',updatePassword:'Mettre à jour le mot de passe',passwordUpdated:'Mot de passe mis à jour.',passwordMismatch:'Les mots de passe ne correspondent pas.' },
+  de: { forgotPassword:'Passwort vergessen?',resetPasswordTitle:'Passwort zurücksetzen',recoveryInstructions:'Gib deine E-Mail-Adresse ein, um einen sicheren Wiederherstellungslink zu erhalten.',sendRecovery:'Wiederherstellungs-E-Mail senden',recoverySent:'Prüfe deine E-Mails und öffne den Wiederherstellungslink.',newPassword:'Neues Passwort',confirmPassword:'Neues Passwort bestätigen',updatePassword:'Passwort aktualisieren',passwordUpdated:'Passwort erfolgreich aktualisiert.',passwordMismatch:'Die Passwörter stimmen nicht überein.' },
+  it: { forgotPassword:'Password dimenticata?',resetPasswordTitle:'Reimposta password',recoveryInstructions:'Inserisci la tua email per ricevere un link di recupero sicuro.',sendRecovery:'Invia email di recupero',recoverySent:'Controlla la tua email e apri il link di recupero.',newPassword:'Nuova password',confirmPassword:'Conferma nuova password',updatePassword:'Aggiorna password',passwordUpdated:'Password aggiornata correttamente.',passwordMismatch:'Le password non coincidono.' },
+  pl: { forgotPassword:'Nie pamiętasz hasła?',resetPasswordTitle:'Zresetuj hasło',recoveryInstructions:'Wpisz adres e-mail, aby otrzymać bezpieczny link odzyskiwania.',sendRecovery:'Wyślij e-mail odzyskiwania',recoverySent:'Sprawdź pocztę i otwórz link odzyskiwania.',newPassword:'Nowe hasło',confirmPassword:'Potwierdź nowe hasło',updatePassword:'Zaktualizuj hasło',passwordUpdated:'Hasło zostało zaktualizowane.',passwordMismatch:'Hasła nie są zgodne.' },
+  ru: { forgotPassword:'Забыли пароль?',resetPasswordTitle:'Сбросить пароль',recoveryInstructions:'Введите адрес электронной почты, чтобы получить безопасную ссылку для восстановления.',sendRecovery:'Отправить письмо',recoverySent:'Проверьте почту и откройте ссылку для восстановления.',newPassword:'Новый пароль',confirmPassword:'Подтвердите новый пароль',updatePassword:'Обновить пароль',passwordUpdated:'Пароль успешно обновлён.',passwordMismatch:'Пароли не совпадают.' },
+  tr: { forgotPassword:'Şifrenizi mi unuttunuz?',resetPasswordTitle:'Şifreyi sıfırla',recoveryInstructions:'Güvenli kurtarma bağlantısı almak için e-posta adresinizi girin.',sendRecovery:'Kurtarma e-postası gönder',recoverySent:'Kurtarma bağlantısı için e-postanızı kontrol edin.',newPassword:'Yeni şifre',confirmPassword:'Yeni şifreyi doğrula',updatePassword:'Şifreyi güncelle',passwordUpdated:'Şifre başarıyla güncellendi.',passwordMismatch:'Şifreler eşleşmiyor.' },
+  id: { forgotPassword:'Lupa kata sandi?',resetPasswordTitle:'Atur ulang kata sandi',recoveryInstructions:'Masukkan email untuk menerima tautan pemulihan yang aman.',sendRecovery:'Kirim email pemulihan',recoverySent:'Periksa email Anda untuk membuka tautan pemulihan.',newPassword:'Kata sandi baru',confirmPassword:'Konfirmasi kata sandi baru',updatePassword:'Perbarui kata sandi',passwordUpdated:'Kata sandi berhasil diperbarui.',passwordMismatch:'Kata sandi tidak cocok.' },
+  vi: { forgotPassword:'Quên mật khẩu?',resetPasswordTitle:'Đặt lại mật khẩu',recoveryInstructions:'Nhập email để nhận liên kết khôi phục an toàn.',sendRecovery:'Gửi email khôi phục',recoverySent:'Kiểm tra email để mở liên kết khôi phục.',newPassword:'Mật khẩu mới',confirmPassword:'Xác nhận mật khẩu mới',updatePassword:'Cập nhật mật khẩu',passwordUpdated:'Đã cập nhật mật khẩu.',passwordMismatch:'Mật khẩu không khớp.' },
+  th: { forgotPassword:'ลืมรหัสผ่าน?',resetPasswordTitle:'รีเซ็ตรหัสผ่าน',recoveryInstructions:'กรอกอีเมลเพื่อรับลิงก์กู้คืนที่ปลอดภัย',sendRecovery:'ส่งอีเมลกู้คืน',recoverySent:'ตรวจสอบอีเมลเพื่อเปิดลิงก์กู้คืน',newPassword:'รหัสผ่านใหม่',confirmPassword:'ยืนยันรหัสผ่านใหม่',updatePassword:'อัปเดตรหัสผ่าน',passwordUpdated:'อัปเดตรหัสผ่านสำเร็จแล้ว',passwordMismatch:'รหัสผ่านไม่ตรงกัน' },
+  ja: { forgotPassword:'パスワードを忘れましたか？',resetPasswordTitle:'パスワードをリセット',recoveryInstructions:'安全な復旧リンクを受け取るメールアドレスを入力してください。',sendRecovery:'復旧メールを送信',recoverySent:'メールを確認して復旧リンクを開いてください。',newPassword:'新しいパスワード',confirmPassword:'新しいパスワードを確認',updatePassword:'パスワードを更新',passwordUpdated:'パスワードを更新しました。',passwordMismatch:'パスワードが一致しません。' },
+  ko: { forgotPassword:'비밀번호를 잊으셨나요?',resetPasswordTitle:'비밀번호 재설정',recoveryInstructions:'안전한 복구 링크를 받을 이메일을 입력하세요.',sendRecovery:'복구 이메일 보내기',recoverySent:'이메일에서 복구 링크를 확인하세요.',newPassword:'새 비밀번호',confirmPassword:'새 비밀번호 확인',updatePassword:'비밀번호 업데이트',passwordUpdated:'비밀번호가 업데이트되었습니다.',passwordMismatch:'비밀번호가 일치하지 않습니다.' },
+  ar: { forgotPassword:'هل نسيت كلمة المرور؟',resetPasswordTitle:'إعادة تعيين كلمة المرور',recoveryInstructions:'أدخل بريدك الإلكتروني لتلقي رابط استرداد آمن.',sendRecovery:'إرسال بريد الاسترداد',recoverySent:'تحقق من بريدك لفتح رابط الاسترداد.',newPassword:'كلمة المرور الجديدة',confirmPassword:'تأكيد كلمة المرور الجديدة',updatePassword:'تحديث كلمة المرور',passwordUpdated:'تم تحديث كلمة المرور بنجاح.',passwordMismatch:'كلمتا المرور غير متطابقتين.' },
+  'zh-CN': { forgotPassword:'忘记密码？',resetPasswordTitle:'重置密码',recoveryInstructions:'输入邮箱以接收安全的恢复链接。',sendRecovery:'发送恢复邮件',recoverySent:'请检查邮箱并打开恢复链接。',newPassword:'新密码',confirmPassword:'确认新密码',updatePassword:'更新密码',passwordUpdated:'密码已成功更新。',passwordMismatch:'两次输入的密码不一致。' },
+  'zh-TW': { forgotPassword:'忘記密碼？',resetPasswordTitle:'重設密碼',recoveryInstructions:'輸入電子郵件以接收安全的復原連結。',sendRecovery:'傳送復原郵件',recoverySent:'請檢查電子郵件並開啟復原連結。',newPassword:'新密碼',confirmPassword:'確認新密碼',updatePassword:'更新密碼',passwordUpdated:'密碼已成功更新。',passwordMismatch:'兩次輸入的密碼不一致。' },
+}
+
 export function getCopy(language: Language): Copy {
-  if (language === 'pt') return pt
-  if (language === 'en') return en
-  return { ...en, ...translated[language] }
+  const base = language === 'pt' ? pt : language === 'en' ? en : { ...en, ...translated[language] }
+  return { ...base, ...recoveryCopy[language] }
 }

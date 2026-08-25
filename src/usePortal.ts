@@ -10,6 +10,7 @@ export function usePortal() {
   const [polls, setPolls] = useState<PortalPoll[]>([])
   const [members, setMembers] = useState<AllianceMember[]>([])
   const [availableMembers, setAvailableMembers] = useState<AvailableMember[]>([])
+  const [passwordRecovery, setPasswordRecovery] = useState(false)
   const [loading, setLoading] = useState(isSupabaseConfigured)
 
   const loadMembers = async () => {
@@ -74,7 +75,8 @@ export function usePortal() {
       }
     }
     void initialise()
-    const { data: listener } = client.auth.onAuthStateChange((_event, session) => {
+    const { data: listener } = client.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') setPasswordRecovery(true)
       setUser(session?.user ?? null)
       if (session?.user) void loadProfile(session.user.id)
       else setProfile(null)
@@ -103,9 +105,24 @@ export function usePortal() {
     return { ok: true }
   }
 
+  const requestPasswordReset = async (email: string): Promise<ActionResult> => {
+    if (!supabase) return { ok: false, message: 'Supabase is not configured.' }
+    const redirectTo = `${window.location.origin}${import.meta.env.BASE_URL}`
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo })
+    return error ? { ok: false, message: error.message } : { ok: true }
+  }
+
+  const updatePassword = async (password: string): Promise<ActionResult> => {
+    if (!supabase) return { ok: false, message: 'Supabase is not configured.' }
+    const { error } = await supabase.auth.updateUser({ password })
+    if (!error) setPasswordRecovery(false)
+    return error ? { ok: false, message: error.message } : { ok: true }
+  }
+
   const signOut = async () => {
     await supabase?.auth.signOut()
     setProfile(null)
+    setPasswordRecovery(false)
   }
 
   const vote = async (pollId: string, optionId: string): Promise<ActionResult> => {
@@ -131,8 +148,11 @@ export function usePortal() {
     polls,
     members,
     availableMembers,
+    passwordRecovery,
     signIn,
     signUp,
+    requestPasswordReset,
+    updatePassword,
     signOut,
     vote,
     submitApplication,

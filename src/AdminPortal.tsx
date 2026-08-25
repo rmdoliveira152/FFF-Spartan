@@ -14,16 +14,20 @@ type Props = {
   onClose: () => void
   onSignIn: (email: string, password: string) => Promise<{ ok: boolean; message?: string }>
   onSignUp: (email: string, password: string, allianceMemberId: string) => Promise<{ ok: boolean; message?: string }>
+  onRequestPasswordReset: (email: string) => Promise<{ ok: boolean; message?: string }>
+  onUpdatePassword: (password: string) => Promise<{ ok: boolean; message?: string }>
+  passwordRecovery: boolean
   onSignOut: () => Promise<void>
   onRefreshPolls: () => Promise<void>
   onRefreshMembers: () => Promise<void>
 }
 
-export function AdminPortal({ open, copy, user, profile, availableMembers, members: initialMembers, onClose, onSignIn, onSignUp, onSignOut, onRefreshPolls, onRefreshMembers }: Props) {
+export function AdminPortal({ open, copy, user, profile, availableMembers, members: initialMembers, onClose, onSignIn, onSignUp, onRequestPasswordReset, onUpdatePassword, passwordRecovery, onSignOut, onRefreshPolls, onRefreshMembers }: Props) {
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
   const [registering, setRegistering] = useState(false)
+  const [requestingRecovery, setRequestingRecovery] = useState(false)
   const [editingMember, setEditingMember] = useState<AllianceMember | null>(null)
   const [polls, setPolls] = useState<PortalPoll[]>([])
   const [applications, setApplications] = useState<R4Application[]>([])
@@ -95,6 +99,35 @@ export function AdminPortal({ open, copy, user, profile, availableMembers, membe
     const result = await onSignUp(String(form.get('email')), String(form.get('password')), String(form.get('allianceMemberId')))
     if (!result.ok) setError(result.message ?? 'Unable to register.')
     else setMessage(copy.registrationSent)
+    setBusy(false)
+  }
+
+  const handleRecoveryRequest = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setBusy(true)
+    setError('')
+    setMessage('')
+    const form = new FormData(event.currentTarget)
+    const result = await onRequestPasswordReset(String(form.get('email')))
+    if (!result.ok) setError(result.message ?? 'Unable to send recovery email.')
+    else setMessage(copy.recoverySent)
+    setBusy(false)
+  }
+
+  const handlePasswordUpdate = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setBusy(true)
+    setError('')
+    const form = new FormData(event.currentTarget)
+    const password = String(form.get('password'))
+    if (password !== String(form.get('confirmPassword'))) {
+      setError(copy.passwordMismatch)
+      setBusy(false)
+      return
+    }
+    const result = await onUpdatePassword(password)
+    if (!result.ok) setError(result.message ?? 'Unable to update password.')
+    else setMessage(copy.passwordUpdated)
     setBusy(false)
   }
 
@@ -190,21 +223,30 @@ export function AdminPortal({ open, copy, user, profile, availableMembers, membe
     <section className={`login-modal ${profile?.role === 'admin' ? 'admin-portal' : ''}`} role="dialog" aria-modal="true" onMouseDown={(event) => event.stopPropagation()}>
       <button className="close-button" onClick={onClose} aria-label={copy.close}><X /></button>
       <Shield size={36} />
-      <h2>{profile?.role === 'admin' ? copy.adminDashboard : registering ? copy.createAccount : copy.adminTitle}</h2>
+      <h2>{passwordRecovery || requestingRecovery ? copy.resetPasswordTitle : profile?.role === 'admin' ? copy.adminDashboard : registering ? copy.createAccount : copy.adminTitle}</h2>
 
-      {!user && <>
-        <p>{copy.loginRequired}</p>
-        <div className="auth-switch"><button className={!registering ? 'active' : ''} onClick={() => setRegistering(false)}>{copy.login}</button><button className={registering ? 'active' : ''} onClick={() => setRegistering(true)}>{copy.register}</button></div>
-        <form onSubmit={registering ? handleRegistration : handleLogin}>
+      {passwordRecovery && <form onSubmit={handlePasswordUpdate}>
+        <p>{copy.recoveryInstructions}</p>
+        <label>{copy.newPassword}<input name="password" type="password" required minLength={8} autoComplete="new-password" /></label>
+        <label>{copy.confirmPassword}<input name="confirmPassword" type="password" required minLength={8} autoComplete="new-password" /></label>
+        <button className="primary-button" type="submit" disabled={busy}>{copy.updatePassword}</button>
+      </form>}
+
+      {!user && !passwordRecovery && <>
+        <p>{requestingRecovery ? copy.recoveryInstructions : copy.loginRequired}</p>
+        {!requestingRecovery && <div className="auth-switch"><button className={!registering ? 'active' : ''} onClick={() => setRegistering(false)}>{copy.login}</button><button className={registering ? 'active' : ''} onClick={() => setRegistering(true)}>{copy.register}</button></div>}
+        <form onSubmit={requestingRecovery ? handleRecoveryRequest : registering ? handleRegistration : handleLogin}>
           <label>{copy.email}<input name="email" type="email" required autoComplete="email" /></label>
-          <label>{copy.password}<input name="password" type="password" required minLength={8} autoComplete={registering ? 'new-password' : 'current-password'} /></label>
-          {registering && <label>{copy.selectMember}<select name="allianceMemberId" required defaultValue=""><option value="" disabled>{copy.choose}</option>{availableMembers.map((member) => <option value={member.id} key={member.id}>{member.member_name} · {member.rank}</option>)}</select></label>}
-          <button className="primary-button" type="submit" disabled={busy}>{registering ? copy.createAccount : copy.login}</button>
+          {!requestingRecovery && <label>{copy.password}<input name="password" type="password" required minLength={8} autoComplete={registering ? 'new-password' : 'current-password'} /></label>}
+          {registering && !requestingRecovery && <label>{copy.selectMember}<select name="allianceMemberId" required defaultValue=""><option value="" disabled>{copy.choose}</option>{availableMembers.map((member) => <option value={member.id} key={member.id}>{member.member_name} · {member.rank}</option>)}</select></label>}
+          <button className="primary-button" type="submit" disabled={busy}>{requestingRecovery ? copy.sendRecovery : registering ? copy.createAccount : copy.login}</button>
         </form>
-        {message && <p className="form-success" role="status">{message}</p>}
+        {!registering && <button className="auth-link" type="button" onClick={() => { setRequestingRecovery(!requestingRecovery); setError(''); setMessage('') }}>{requestingRecovery ? copy.backToLogin : copy.forgotPassword}</button>}
       </>}
 
-      {user && profile?.role !== 'admin' && <div className="account-state">
+      {message && <p className="form-success" role="status">{message}</p>}
+
+      {user && !passwordRecovery && profile?.role !== 'admin' && <div className="account-state">
         <p><strong>{copy.signedInAs}:</strong> {profile?.member_name ?? user.email}</p>
         {profile?.registration_status === 'pending' && <p>{copy.pendingApproval}</p>}
         {profile?.registration_status === 'rejected' && <p>{copy.rejectedRegistration}</p>}
@@ -212,7 +254,7 @@ export function AdminPortal({ open, copy, user, profile, availableMembers, membe
         <button className="ghost-button" onClick={onSignOut}><LogOut size={16} />{copy.signOut}</button>
       </div>}
 
-      {profile?.role === 'admin' && <div className="admin-content">
+      {!passwordRecovery && profile?.role === 'admin' && <div className="admin-content">
         <div className="admin-heading"><span>{copy.signedInAs}: <strong>{profile.member_name}</strong></span><button className="ghost-button" onClick={onSignOut}><LogOut size={16} />{copy.signOut}</button></div>
         {error && <p className="form-error" role="alert">{error}</p>}
 
