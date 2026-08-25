@@ -105,7 +105,7 @@ function App() {
 
       <main>
         <section className="hero" id="command" style={{ backgroundImage: `url(${asset('wasteland.webp')})` }}>
-          <div className="hero-shade" /><img className="survivor" src={asset('survivor.webp')} alt="" />
+          <div className="hero-shade" />
           <div className="hero-content">
             <p className="eyebrow"><span />{copy.eyebrow}</p><h1>FFF<span>SPARTAN</span></h1><h2>{copy.heroTitle}</h2>
             <p className="hero-copy">{copy.heroText}</p>
