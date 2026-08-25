@@ -1,8 +1,9 @@
-import { useMemo, useState, type FormEvent } from 'react'
-import { ChevronRight, ExternalLink, Globe2, LogIn, Menu, MessagesSquare, Radio, Search, Shield, Swords, Users, Vote, X } from 'lucide-react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { Archive, CalendarDays, ChevronRight, ExternalLink, Globe2, LogIn, Megaphone, Menu, MessagesSquare, Radio, Search, Shield, Swords, Users, Vote, X } from 'lucide-react'
 import { getCopy, languages, type Language } from './i18n'
 import { AdminPortal } from './AdminPortal'
 import { usePortal } from './usePortal'
+import type { BoardNews, BoardNewsTranslation } from './supabase'
 import './App.css'
 
 type Metric = 'combat_power' | 'kills' | 'weekly_contribution'
@@ -14,19 +15,42 @@ const demoMembers = [
 ]
 
 const rankOrder: AllianceRank[] = ['R5', 'R4', 'R3', 'R2', 'R1']
+const initialClock = Date.now()
+
+const getNewsTranslation = (news: BoardNews, language: Language): BoardNewsTranslation => {
+  const translations = news.translations
+  return translations[language]
+    ?? translations[news.default_language]
+    ?? translations.en
+    ?? translations.pt
+    ?? Object.values(translations)[0]
+    ?? { title: '', body: '' }
+}
 
 function App() {
   const asset = (name: string) => `${import.meta.env.BASE_URL}${name}`
-  const [language, setLanguage] = useState<Language>(() => (localStorage.getItem('fff-language') as Language) || 'pt')
+  const [language, setLanguage] = useState<Language>(() => (localStorage.getItem('fff-language') as Language) || 'en')
   const [metric, setMetric] = useState<Metric>('combat_power')
   const [rankFilter, setRankFilter] = useState<AllianceRank | 'ALL'>('ALL')
   const [query, setQuery] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
   const [adminOpen, setAdminOpen] = useState(false)
+  const [historyOpen, setHistoryOpen] = useState(false)
+  const [clock, setClock] = useState(initialClock)
   const [notice, setNotice] = useState('')
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({})
   const portal = usePortal()
   const copy = getCopy(language)
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setClock(Date.now()), 60_000)
+    return () => window.clearInterval(timer)
+  }, [])
+
+  useEffect(() => {
+    document.documentElement.lang = language
+    document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr'
+  }, [language])
 
   const members = portal.configured ? portal.members : demoMembers
   const roster = useMemo(() => members
@@ -37,8 +61,6 @@ function App() {
   const changeLanguage = (value: Language) => {
     setLanguage(value)
     localStorage.setItem('fff-language', value)
-    document.documentElement.lang = value
-    document.documentElement.dir = value === 'ar' ? 'rtl' : 'ltr'
   }
 
   const flash = (message: string) => {
@@ -51,6 +73,10 @@ function App() {
     { id: 'training', question: copy.pollTraining, active: true, closes_at: null, poll_options: [copy.rallyCoordination, copy.defensiveFormations, copy.resourceEfficiency].map((label, index) => ({ id: `training-${index}`, label, position: index + 1, voteCount: [18, 10, 7][index] })) },
   ]
   const visiblePolls = portal.configured ? portal.polls : demoPolls
+  const news = portal.boardNews.map((item) => ({ ...item, translation: getNewsTranslation(item, language) }))
+  const currentNews = news.filter((item) => !item.archived_at && (!item.expires_at || Date.parse(item.expires_at) > clock))
+  const historicalNews = news.filter((item) => item.archived_at || (item.expires_at && Date.parse(item.expires_at) <= clock))
+  const formatNewsDate = (value: string) => new Intl.DateTimeFormat(language, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
 
   const submitVote = async (pollId: string) => {
     const optionId = selectedOptions[pollId]
@@ -90,7 +116,7 @@ function App() {
         </a>
         <button className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Menu">{menuOpen ? <X /> : <Menu />}</button>
         <nav className={menuOpen ? 'nav open' : 'nav'} onClick={() => setMenuOpen(false)}>
-          <a href="#command">{copy.navHome}</a><a href="#roster">{copy.navRanks}</a><a href="#polls">{copy.navPolls}</a>
+          <a href="#command">{copy.navHome}</a><a href="#news">{copy.navNews}</a><a href="#roster">{copy.navRanks}</a><a href="#polls">{copy.navPolls}</a>
           <a href="#application">{copy.navR4}</a><a href="#code">{copy.navRules}</a>
           <a href="https://fff113.efferp.net/" target="_blank" rel="noreferrer"><Radio size={14} />RADIO-BUNKER</a>
         </nav>
@@ -121,6 +147,22 @@ function App() {
 
         <section className="values-strip" aria-label={`${copy.strength}, ${copy.unity}, ${copy.discipline}`}>
           <div><Swords /><b>{copy.strength}</b><small>01</small></div><div><Users /><b>{copy.unity}</b><small>02</small></div><div><Shield /><b>{copy.discipline}</b><small>03</small></div>
+        </section>
+
+        <section className="section board-news-section" id="news">
+          <header className="section-header"><div><p className="eyebrow">{copy.newsLabel}</p><h2>{copy.newsTitle}</h2><p>{copy.newsIntro}</p></div><Megaphone size={48} /></header>
+          <div className="board-news-grid">
+            {currentNews.map((item, index) => <article className={`board-news-card ${index === 0 ? 'featured' : ''}`} data-priority={item.priority} key={item.id}>
+              <div className="board-news-meta"><span>{copy[item.priority]}</span><time><CalendarDays size={14} />{copy.createdOn}: {formatNewsDate(item.created_at)}</time></div>
+              <h3>{item.translation.title}</h3><p>{item.translation.body}</p>
+              {item.expires_at && <div className="board-news-deadline"><span>{copy.expiresOn}</span><time>{formatNewsDate(item.expires_at)}</time></div>}
+            </article>)}
+            {!portal.loading && currentNews.length === 0 && <p className="board-news-empty">{copy.noNews}</p>}
+          </div>
+          {historicalNews.length > 0 && <div className="board-news-history">
+            <button type="button" aria-expanded={historyOpen} onClick={() => setHistoryOpen((current) => !current)}><Archive size={17} />{copy.newsHistory}<span>{historicalNews.length}</span></button>
+            {historyOpen && <div className="history-list">{historicalNews.map((item) => <article key={item.id}><div><strong>{item.translation.title}</strong><small>{copy.createdOn}: {formatNewsDate(item.created_at)}</small></div><p>{item.translation.body}</p><time>{copy.expiresOn}: {formatNewsDate(item.archived_at ?? item.expires_at!)}</time></article>)}</div>}
+          </div>}
         </section>
 
         <section className="section roster-section" id="roster">
@@ -165,7 +207,7 @@ function App() {
 
       <footer><div className="brand"><span className="brand-mark"><Shield size={20} /></span><span><b>FFF</b><strong>SPARTAN</strong></span></div><p>{copy.footer}<br /><small>{copy.fanNotice}</small></p><img src={asset('dark-war-logo.png')} alt="Dark War: Survival" /></footer>
       {notice && <div className="toast" role="status">{notice}</div>}
-      <AdminPortal open={adminOpen || portal.passwordRecovery} copy={copy} user={portal.user} profile={portal.profile} availableMembers={portal.availableMembers} members={portal.members} onClose={() => { setAdminOpen(false); if (portal.passwordRecovery) void portal.signOut() }} onSignIn={portal.signIn} onSignUp={portal.signUp} onRequestPasswordReset={portal.requestPasswordReset} onUpdatePassword={async (password) => { const result = await portal.updatePassword(password); if (result.ok) setAdminOpen(true); return result }} passwordRecovery={portal.passwordRecovery} onSignOut={portal.signOut} onRefreshPolls={portal.refreshPolls} onRefreshMembers={portal.refreshMembers} />
+      <AdminPortal open={adminOpen || portal.passwordRecovery} copy={copy} language={language} user={portal.user} profile={portal.profile} availableMembers={portal.availableMembers} members={portal.members} onClose={() => { setAdminOpen(false); if (portal.passwordRecovery) void portal.signOut() }} onSignIn={portal.signIn} onSignUp={portal.signUp} onRequestPasswordReset={portal.requestPasswordReset} onUpdatePassword={async (password) => { const result = await portal.updatePassword(password); if (result.ok) setAdminOpen(true); return result }} passwordRecovery={portal.passwordRecovery} onSignOut={portal.signOut} onRefreshPolls={portal.refreshPolls} onRefreshBoardNews={portal.refreshBoardNews} onRefreshMembers={portal.refreshMembers} />
     </div>
   )
 }

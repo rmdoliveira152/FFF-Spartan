@@ -6,6 +6,8 @@ Centro comunitário não oficial da aliança FFF-Spartan em **Dark War: Survival
 
 - Classificação de membros R1-R5 por Poder de Combate, Abates e Contribuição Semanal
 - Votações internas da aliança
+- Board News em destaque, com prioridade, validade configurável e histórico permanente
+- Conteúdo de anúncios por idioma, com fallback para o idioma original
 - Formulário de candidatura a R4
 - Código operacional da liderança
 - Interface responsiva com suporte RTL
@@ -15,6 +17,7 @@ Centro comunitário não oficial da aliança FFF-Spartan em **Dark War: Survival
 - Recuperação segura de palavra-passe por email através do Supabase Auth
 - Voto único por membro verificado e resultados persistentes
 - Portal administrativo para gerir todas as estatísticas, aprovar cadastros, criar votações e analisar candidaturas R4
+- Gestão administrativa de anúncios: rascunho, publicação, edição, arquivo e restauro
 
 ## Executar localmente
 
@@ -42,9 +45,9 @@ A chave `service_role` e a palavra-passe da base de dados nunca devem ser coloca
 
 ## Estado do projeto
 
-O frontend usa dados de demonstração apenas quando as variáveis Supabase não estão configuradas. Com o backend configurado, membros, estatísticas, votações, votos, candidaturas e permissões são lidos da base de dados com Row Level Security.
+O frontend usa dados de demonstração apenas quando as variáveis Supabase não estão configuradas. Com o backend configurado, membros, estatísticas, votações, votos, candidaturas, anúncios e permissões são lidos da base de dados com Row Level Security.
 
-Português e inglês têm tradução integral. Os restantes idiomas usam tradução parcial com fallback para inglês enquanto a revisão por falantes nativos não estiver concluída.
+O idioma padrão é inglês. Português e inglês têm tradução integral. Os restantes idiomas usam tradução parcial com fallback para inglês enquanto a revisão por falantes nativos não estiver concluída; os controlos do Board News estão traduzidos nos 17 idiomas.
 
 ## Publicação
 

@@ -1,12 +1,13 @@
 import { useEffect, useEffectEvent, useState, type FormEvent } from 'react'
 import type { User } from '@supabase/supabase-js'
-import { Check, LogOut, Pencil, Plus, Shield, Trash2, X } from 'lucide-react'
-import type { Copy } from './i18n'
-import { supabase, type AllianceMember, type AvailableMember, type PortalPoll, type Profile, type R4Application } from './supabase'
+import { Archive, Check, Languages, LogOut, Megaphone, Pencil, Plus, RotateCcw, Shield, Trash2, X } from 'lucide-react'
+import { languages, type Copy, type Language } from './i18n'
+import { supabase, type AllianceMember, type AvailableMember, type BoardNews, type BoardNewsTranslation, type PortalPoll, type Profile, type R4Application } from './supabase'
 
 type Props = {
   open: boolean
   copy: Copy
+  language: Language
   user: User | null
   profile: Profile | null
   availableMembers: AvailableMember[]
@@ -19,16 +20,30 @@ type Props = {
   passwordRecovery: boolean
   onSignOut: () => Promise<void>
   onRefreshPolls: () => Promise<void>
+  onRefreshBoardNews: () => Promise<void>
   onRefreshMembers: () => Promise<void>
 }
 
-export function AdminPortal({ open, copy, user, profile, availableMembers, members: initialMembers, onClose, onSignIn, onSignUp, onRequestPasswordReset, onUpdatePassword, passwordRecovery, onSignOut, onRefreshPolls, onRefreshMembers }: Props) {
+const emptyNewsTranslation: BoardNewsTranslation = { title: '', body: '' }
+
+const toDateTimeInput = (value: string | null) => {
+  if (!value) return ''
+  const date = new Date(value)
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16)
+}
+
+export function AdminPortal({ open, copy, language, user, profile, availableMembers, members: initialMembers, onClose, onSignIn, onSignUp, onRequestPasswordReset, onUpdatePassword, passwordRecovery, onSignOut, onRefreshPolls, onRefreshBoardNews, onRefreshMembers }: Props) {
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
   const [registering, setRegistering] = useState(false)
   const [requestingRecovery, setRequestingRecovery] = useState(false)
   const [editingMember, setEditingMember] = useState<AllianceMember | null>(null)
+  const [editingNews, setEditingNews] = useState<BoardNews | null>(null)
+  const [newsItems, setNewsItems] = useState<BoardNews[]>([])
+  const [newsLanguage, setNewsLanguage] = useState<Language>(language)
+  const [newsDefaultLanguage, setNewsDefaultLanguage] = useState<Language>(language)
+  const [newsTranslations, setNewsTranslations] = useState<Partial<Record<Language, BoardNewsTranslation>>>({})
   const [polls, setPolls] = useState<PortalPoll[]>([])
   const [applications, setApplications] = useState<R4Application[]>([])
   const [profiles, setProfiles] = useState<Profile[]>([])
@@ -37,13 +52,15 @@ export function AdminPortal({ open, copy, user, profile, availableMembers, membe
   const loadAdminData = async () => {
     const client = supabase
     if (!client || profile?.role !== 'admin') return
-    const [pollResponse, applicationResponse, profileResponse, memberResponse] = await Promise.all([
+    const [pollResponse, newsResponse, applicationResponse, profileResponse, memberResponse] = await Promise.all([
       client.from('polls').select('id, question, active, closes_at, poll_options(id, label, position)').order('created_at', { ascending: false }),
+      client.from('board_news').select('id, translations, default_language, priority, published, published_at, expires_at, archived_at, created_at, updated_at').order('created_at', { ascending: false }),
       client.from('r4_applications').select('id, user_id, reason, experience, availability, status, created_at').order('created_at', { ascending: false }),
       client.from('profiles').select('id, member_name, role, active, alliance_member_id, registration_status').order('member_name'),
       client.from('alliance_members').select('id, member_name, rank, player_level, combat_power, kills, weekly_contribution, active').order('member_name'),
     ])
     if (pollResponse.error) throw pollResponse.error
+    if (newsResponse.error) throw newsResponse.error
     if (applicationResponse.error) throw applicationResponse.error
     if (profileResponse.error) throw profileResponse.error
     if (memberResponse.error) throw memberResponse.error
@@ -61,6 +78,7 @@ export function AdminPortal({ open, copy, user, profile, availableMembers, membe
       } satisfies PortalPoll
     }))
     setPolls(enrichedPolls)
+    setNewsItems((newsResponse.data ?? []) as BoardNews[])
     setApplications((applicationResponse.data ?? []).map((application) => ({
       ...application,
       profiles: { member_name: names.get(application.user_id) ?? application.user_id },
@@ -160,6 +178,90 @@ export function AdminPortal({ open, copy, user, profile, availableMembers, membe
     else await Promise.all([loadAdminData(), onRefreshPolls()])
   }
 
+  const resetNewsEditor = () => {
+    setEditingNews(null)
+    setNewsLanguage(language)
+    setNewsDefaultLanguage(language)
+    setNewsTranslations({})
+  }
+
+  const editNews = (news: BoardNews) => {
+    const defaultLanguage = news.default_language as Language
+    setEditingNews(news)
+    setNewsDefaultLanguage(defaultLanguage)
+    setNewsLanguage((news.translations[language] ? language : defaultLanguage) as Language)
+    setNewsTranslations(news.translations as Partial<Record<Language, BoardNewsTranslation>>)
+  }
+
+  const updateNewsTranslation = (field: keyof BoardNewsTranslation, value: string) => {
+    setNewsTranslations((current) => ({
+      ...current,
+      [newsLanguage]: { ...(current[newsLanguage] ?? emptyNewsTranslation), [field]: value },
+    }))
+  }
+
+  const saveNews = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!supabase || !user) return
+    setBusy(true)
+    setError('')
+    const formElement = event.currentTarget
+    const form = new FormData(formElement)
+    const translations: Partial<Record<Language, BoardNewsTranslation>> = {}
+    for (const [code, translation] of Object.entries(newsTranslations) as [Language, BoardNewsTranslation][]) {
+      const cleanTranslation = { title: translation.title.trim(), body: translation.body.trim() }
+      if (cleanTranslation.title && cleanTranslation.body) translations[code] = cleanTranslation
+    }
+    if (!translations[newsDefaultLanguage]) {
+      setError(copy.translationHint)
+      setBusy(false)
+      return
+    }
+    const expiresAt = String(form.get('expiresAt'))
+    const published = form.get('published') === 'on'
+    const values = {
+      translations,
+      default_language: newsDefaultLanguage,
+      priority: String(form.get('priority')),
+      published,
+      published_at: editingNews?.published || !published ? editingNews?.published_at ?? new Date().toISOString() : new Date().toISOString(),
+      expires_at: expiresAt ? new Date(expiresAt).toISOString() : null,
+      archived_at: editingNews?.archived_at ?? null,
+    }
+    const response = editingNews
+      ? await supabase.from('board_news').update(values).eq('id', editingNews.id)
+      : await supabase.from('board_news').insert({ ...values, created_by: user.id })
+    if (response.error) setError(response.error.message)
+    else {
+      resetNewsEditor()
+      formElement.reset()
+      await Promise.all([loadAdminData(), onRefreshBoardNews()])
+    }
+    setBusy(false)
+  }
+
+  const toggleNewsArchive = async (news: BoardNews) => {
+    if (!supabase) return
+    setError('')
+    const { error: updateError } = await supabase.from('board_news').update({
+      archived_at: news.archived_at ? null : new Date().toISOString(),
+      expires_at: news.archived_at ? null : news.expires_at,
+    }).eq('id', news.id)
+    if (updateError) setError(updateError.message)
+    else await Promise.all([loadAdminData(), onRefreshBoardNews()])
+  }
+
+  const deleteNewsDraft = async (news: BoardNews) => {
+    if (!supabase || news.published || !window.confirm(copy.confirmDeleteNews)) return
+    setError('')
+    const { error: deleteError } = await supabase.from('board_news').delete().eq('id', news.id)
+    if (deleteError) setError(deleteError.message)
+    else {
+      if (editingNews?.id === news.id) resetNewsEditor()
+      await loadAdminData()
+    }
+  }
+
   const updateApplication = async (application: R4Application, status: 'approved' | 'rejected') => {
     if (!supabase || !user) return
     const { error: updateError } = await supabase.from('r4_applications').update({ status, reviewed_by: user.id, reviewed_at: new Date().toISOString() }).eq('id', application.id)
@@ -219,6 +321,8 @@ export function AdminPortal({ open, copy, user, profile, availableMembers, membe
     else await Promise.all([onRefreshMembers(), loadAdminData()])
   }
 
+  const selectedNewsTranslation = newsTranslations[newsLanguage] ?? emptyNewsTranslation
+
   return <div className="modal-backdrop" onMouseDown={onClose}>
     <section className={`login-modal ${profile?.role === 'admin' ? 'admin-portal' : ''}`} role="dialog" aria-modal="true" onMouseDown={(event) => event.stopPropagation()}>
       <button className="close-button" onClick={onClose} aria-label={copy.close}><X /></button>
@@ -257,6 +361,30 @@ export function AdminPortal({ open, copy, user, profile, availableMembers, membe
       {!passwordRecovery && profile?.role === 'admin' && <div className="admin-content">
         <div className="admin-heading"><span>{copy.signedInAs}: <strong>{profile.member_name}</strong></span><button className="ghost-button" onClick={onSignOut}><LogOut size={16} />{copy.signOut}</button></div>
         {error && <p className="form-error" role="alert">{error}</p>}
+
+        <section className="admin-block news-admin-block">
+          <h3><Megaphone size={18} />{copy.manageNews}</h3>
+          <form className="admin-form news-admin-form" key={editingNews?.id ?? 'new-news'} onSubmit={saveNews}>
+            <label>{copy.sourceLanguage}<select value={newsDefaultLanguage} onChange={(event) => { const value = event.target.value as Language; setNewsDefaultLanguage(value); setNewsLanguage(value) }}>{languages.map(([code, name]) => <option value={code} key={code}>{name}</option>)}</select></label>
+            <label><Languages size={14} />{copy.language}<select value={newsLanguage} onChange={(event) => setNewsLanguage(event.target.value as Language)}>{languages.map(([code, name]) => <option value={code} key={code}>{name}{newsTranslations[code]?.title && newsTranslations[code]?.body ? ' ✓' : ''}</option>)}</select></label>
+            <p className="admin-form-hint">{copy.translationHint}</p>
+            <label>{copy.newsHeadline}<input required={newsLanguage === newsDefaultLanguage} maxLength={120} value={selectedNewsTranslation.title} onChange={(event) => updateNewsTranslation('title', event.target.value)} /></label>
+            <label className="news-body-field">{copy.newsBody}<textarea required={newsLanguage === newsDefaultLanguage} rows={5} maxLength={2000} value={selectedNewsTranslation.body} onChange={(event) => updateNewsTranslation('body', event.target.value)} /></label>
+            <label>{copy.priority}<select name="priority" defaultValue={editingNews?.priority ?? 'standard'}><option value="standard">{copy.standard}</option><option value="important">{copy.important}</option><option value="critical">{copy.critical}</option></select></label>
+            <label>{copy.expiresOn}<input name="expiresAt" type="datetime-local" defaultValue={toDateTimeInput(editingNews?.expires_at ?? null)} /></label>
+            <label className="check-field"><input name="published" type="checkbox" defaultChecked={editingNews?.published ?? true} />{copy.publishNow}</label>
+            <div className="row-actions"><button className="primary-button" type="submit" disabled={busy}>{editingNews ? copy.save : copy.createNews}</button>{editingNews && <button className="ghost-button" type="button" onClick={resetNewsEditor}>{copy.cancel}</button>}</div>
+          </form>
+
+          <div className="admin-list news-admin-list">{newsItems.map((news) => {
+            const translation = news.translations[language] ?? news.translations[news.default_language] ?? Object.values(news.translations)[0]
+            const endedAt = news.archived_at ?? news.expires_at
+            return <article data-priority={news.priority} key={news.id}><div><strong>{translation?.title}</strong><small>{news.archived_at ? copy.archive : news.published ? copy.publishedOn : copy.draft}</small></div>
+              <p>{translation?.body}</p><small>{copy.createdOn}: {new Date(news.created_at).toLocaleString(language)}</small>{endedAt && <small>{copy.expiresOn}: {new Date(endedAt).toLocaleString(language)}</small>}
+              <div className="row-actions"><button className="compact-button" type="button" onClick={() => editNews(news)}><Pencil size={14} />{copy.editNews}</button>{news.published && <button className="compact-button" type="button" onClick={() => toggleNewsArchive(news)}>{news.archived_at ? <RotateCcw size={14} /> : <Archive size={14} />}{news.archived_at ? copy.restore : copy.archive}</button>}{!news.published && <button className="compact-button danger" type="button" onClick={() => deleteNewsDraft(news)}><Trash2 size={14} />{copy.delete}</button>}</div>
+            </article>
+          })}</div>
+        </section>
 
         <section className="admin-block">
           <h3><Plus size={18} />{copy.createPoll}</h3>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
-import { isSupabaseConfigured, supabase, type AllianceMember, type AvailableMember, type PortalPoll, type Profile } from './supabase'
+import { isSupabaseConfigured, supabase, type AllianceMember, type AvailableMember, type BoardNews, type PortalPoll, type Profile } from './supabase'
 
 type ActionResult = { ok: true } | { ok: false; message: string }
 
@@ -9,6 +9,7 @@ export function usePortal() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [polls, setPolls] = useState<PortalPoll[]>([])
   const [members, setMembers] = useState<AllianceMember[]>([])
+  const [boardNews, setBoardNews] = useState<BoardNews[]>([])
   const [availableMembers, setAvailableMembers] = useState<AvailableMember[]>([])
   const [passwordRecovery, setPasswordRecovery] = useState(false)
   const [loading, setLoading] = useState(isSupabaseConfigured)
@@ -52,6 +53,19 @@ export function usePortal() {
     setPolls(enriched)
   }
 
+  const loadBoardNews = async () => {
+    const client = supabase
+    if (!client) return
+    const { data, error } = await client
+      .from('board_news')
+      .select('id, translations, default_language, priority, published, published_at, expires_at, archived_at, created_at, updated_at')
+      .eq('published', true)
+      .lte('published_at', new Date().toISOString())
+      .order('published_at', { ascending: false })
+    if (error) throw error
+    setBoardNews((data ?? []) as BoardNews[])
+  }
+
   const loadProfile = async (userId: string) => {
     const client = supabase
     if (!client) return
@@ -69,7 +83,7 @@ export function usePortal() {
         if (!mounted) return
         setUser(data.session?.user ?? null)
         if (data.session?.user) await loadProfile(data.session.user.id)
-        await Promise.all([loadPolls(), loadMembers(), loadAvailableMembers()])
+        await Promise.all([loadPolls(), loadMembers(), loadAvailableMembers(), loadBoardNews()])
       } finally {
         if (mounted) setLoading(false)
       }
@@ -146,6 +160,7 @@ export function usePortal() {
     user,
     profile,
     polls,
+    boardNews,
     members,
     availableMembers,
     passwordRecovery,
@@ -157,6 +172,7 @@ export function usePortal() {
     vote,
     submitApplication,
     refreshPolls: loadPolls,
+    refreshBoardNews: loadBoardNews,
     refreshMembers: loadMembers,
     refreshAvailableMembers: loadAvailableMembers,
   }

@@ -48,6 +48,24 @@ export type PortalPoll = {
   poll_options: PollOption[]
 }
 
+export type BoardNewsTranslation = {
+  title: string
+  body: string
+}
+
+export type BoardNews = {
+  id: string
+  translations: Partial<Record<string, BoardNewsTranslation>>
+  default_language: string
+  priority: 'standard' | 'important' | 'critical'
+  published: boolean
+  published_at: string
+  expires_at: string | null
+  archived_at: string | null
+  created_at: string
+  updated_at: string
+}
+
 export type R4Application = {
   id: string
   user_id: string
