@@ -1,5 +1,5 @@
 import { useMemo, useState, type FormEvent } from 'react'
-import { ChevronRight, ExternalLink, Globe2, LogIn, Menu, Search, Shield, Swords, Users, Vote, X } from 'lucide-react'
+import { ChevronRight, ExternalLink, Globe2, LogIn, Menu, MessagesSquare, Radio, Search, Shield, Swords, Users, Vote, X } from 'lucide-react'
 import { getCopy, languages, type Language } from './i18n'
 import { AdminPortal } from './AdminPortal'
 import { usePortal } from './usePortal'
@@ -92,6 +92,7 @@ function App() {
         <nav className={menuOpen ? 'nav open' : 'nav'} onClick={() => setMenuOpen(false)}>
           <a href="#command">{copy.navHome}</a><a href="#roster">{copy.navRanks}</a><a href="#polls">{copy.navPolls}</a>
           <a href="#application">{copy.navR4}</a><a href="#code">{copy.navRules}</a>
+          <a href="https://fff113.efferp.net/" target="_blank" rel="noreferrer"><Radio size={14} />RADIO-BUNKER</a>
         </nav>
         <div className="top-actions">
           <label className="language-picker"><Globe2 size={16} /><span className="sr-only">{copy.language}</span>
@@ -110,6 +111,7 @@ function App() {
             <p className="eyebrow"><span />{copy.eyebrow}</p><h1>FFF<span>SPARTAN</span></h1><h2>{copy.heroTitle}</h2>
             <p className="hero-copy">{copy.heroText}</p>
             <div className="hero-buttons"><a className="primary-button" href="#roster">{copy.enterRanks}<ChevronRight size={18} /></a>
+              <a className="ghost-button" href="https://discord.gg/V9QqspXxx" target="_blank" rel="noreferrer"><MessagesSquare size={16} />Discord</a>
               <a className="ghost-button" href="https://darkwar-survival.com/#/en/home" target="_blank" rel="noreferrer">{copy.officialGame}<ExternalLink size={16} /></a></div>
           </div>
           <div className="directive"><span>{copy.alertLabel}</span><p>{copy.alertText}</p></div>
