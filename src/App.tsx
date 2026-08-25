@@ -79,11 +79,12 @@ function App() {
       setAdminOpen(true)
       return flash(copy.loginRequired)
     }
-    const form = new FormData(event.currentTarget)
+    const formElement = event.currentTarget
+    const form = new FormData(formElement)
     const result = await portal.submitApplication(String(form.get('reason')), String(form.get('experience')), String(form.get('availability')))
     if (result.ok) {
       flash(copy.successApply)
-      event.currentTarget.reset()
+      formElement.reset()
     } else flash(result.message)
   }
 
