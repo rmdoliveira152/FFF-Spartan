@@ -25,6 +25,9 @@ export type Copy = {
   adminDashboard: string; createPoll: string; question: string; options: string; closingDate: string; publish: string
   applications: string; approve: string; reject: string; memberAccess: string; activate: string; deactivate: string
   noPolls: string; selectOption: string; duplicateVote: string
+  register: string; createAccount: string; backToLogin: string; registrationSent: string; pendingApproval: string; rejectedRegistration: string
+  manageRoster: string; addMember: string; editMember: string; save: string; cancel: string; delete: string; playerLevel: string
+  memberName: string; registrationRequests: string; noRegistrations: string; confirmDelete: string
 }
 
 const en: Copy = {
@@ -53,6 +56,10 @@ const en: Copy = {
   createPoll: 'Create poll', question: 'Question', options: 'Options, one per line', closingDate: 'Closing date (optional)', publish: 'Publish',
   applications: 'R4 applications', approve: 'Approve', reject: 'Reject', memberAccess: 'Member access', activate: 'Activate', deactivate: 'Deactivate',
   noPolls: 'There are no active polls.', selectOption: 'Select an option before voting.', duplicateVote: 'You have already voted in this poll.',
+  register: 'Register', createAccount: 'Create account', backToLogin: 'Back to sign in', registrationSent: 'Registration sent for administrator approval.',
+  pendingApproval: 'Your registration is pending administrator approval.', rejectedRegistration: 'Your registration was rejected. Contact alliance leadership.',
+  manageRoster: 'Manage roster statistics', addMember: 'Add member', editMember: 'Edit member', save: 'Save', cancel: 'Cancel', delete: 'Delete', playerLevel: 'Player level',
+  memberName: 'Member name', registrationRequests: 'Registration requests', noRegistrations: 'There are no pending registrations.', confirmDelete: 'Delete this member and their statistics?',
 }
 
 const pt: Copy = {
@@ -81,6 +88,10 @@ const pt: Copy = {
   createPoll: 'Criar votação', question: 'Pergunta', options: 'Opções, uma por linha', closingDate: 'Data de fecho (opcional)', publish: 'Publicar',
   applications: 'Candidaturas R4', approve: 'Aprovar', reject: 'Rejeitar', memberAccess: 'Acesso dos membros', activate: 'Ativar', deactivate: 'Desativar',
   noPolls: 'Não existem votações ativas.', selectOption: 'Selecione uma opção antes de votar.', duplicateVote: 'Já votou nesta votação.',
+  register: 'Cadastrar', createAccount: 'Criar conta', backToLogin: 'Voltar ao login', registrationSent: 'Cadastro enviado para aprovação da administração.',
+  pendingApproval: 'O seu cadastro aguarda aprovação da administração.', rejectedRegistration: 'O seu cadastro foi recusado. Contacte a liderança da aliança.',
+  manageRoster: 'Gerir estatísticas dos membros', addMember: 'Adicionar membro', editMember: 'Editar membro', save: 'Guardar', cancel: 'Cancelar', delete: 'Excluir', playerLevel: 'Nível do jogador',
+  memberName: 'Nome do membro', registrationRequests: 'Pedidos de cadastro', noRegistrations: 'Não existem cadastros pendentes.', confirmDelete: 'Excluir este membro e as respetivas estatísticas?',
 }
 
 const translated: Record<Exclude<Language, 'en' | 'pt'>, Partial<Copy>> = {

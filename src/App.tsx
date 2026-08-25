@@ -5,20 +5,12 @@ import { AdminPortal } from './AdminPortal'
 import { usePortal } from './usePortal'
 import './App.css'
 
-type Metric = 'combatPower' | 'kills' | 'weeklyContribution'
+type Metric = 'combat_power' | 'kills' | 'weekly_contribution'
 type AllianceRank = 'R5' | 'R4' | 'R3' | 'R2' | 'R1'
 
-const members = [
-  { name: 'SPARTAN ONE', rank: 'R5' as AllianceRank, combatPower: 184_600_000, kills: 9_420_300, weeklyContribution: 92_500 },
-  { name: 'Valquíria', rank: 'R4' as AllianceRank, combatPower: 171_200_000, kills: 8_890_100, weeklyContribution: 96_800 },
-  { name: 'ARES', rank: 'R4' as AllianceRank, combatPower: 165_900_000, kills: 8_110_400, weeklyContribution: 88_400 },
-  { name: 'IronWolf', rank: 'R4' as AllianceRank, combatPower: 159_800_000, kills: 7_780_900, weeklyContribution: 84_700 },
-  { name: 'Fenix', rank: 'R3' as AllianceRank, combatPower: 148_300_000, kills: 7_210_500, weeklyContribution: 79_200 },
-  { name: 'MadMax', rank: 'R3' as AllianceRank, combatPower: 142_750_000, kills: 6_890_200, weeklyContribution: 76_100 },
-  { name: 'Nyx', rank: 'R3' as AllianceRank, combatPower: 137_100_000, kills: 6_430_000, weeklyContribution: 81_900 },
-  { name: 'GhostBR', rank: 'R2' as AllianceRank, combatPower: 126_400_000, kills: 5_720_300, weeklyContribution: 68_600 },
-  { name: 'Ragnar', rank: 'R2' as AllianceRank, combatPower: 119_900_000, kills: 5_180_700, weeklyContribution: 64_300 },
-  { name: 'Maverick', rank: 'R1' as AllianceRank, combatPower: 104_200_000, kills: 4_610_800, weeklyContribution: 55_200 },
+const demoMembers = [
+  { id: 'demo-1', member_name: 'SPARTAN ONE', rank: 'R5' as AllianceRank, player_level: 10, combat_power: 184_600_000, kills: 9_420_300, weekly_contribution: 92_500, active: true },
+  { id: 'demo-2', member_name: 'Valquíria', rank: 'R4' as AllianceRank, player_level: 9, combat_power: 171_200_000, kills: 8_890_100, weekly_contribution: 96_800, active: true },
 ]
 
 const rankOrder: AllianceRank[] = ['R5', 'R4', 'R3', 'R2', 'R1']
@@ -26,7 +18,7 @@ const rankOrder: AllianceRank[] = ['R5', 'R4', 'R3', 'R2', 'R1']
 function App() {
   const asset = (name: string) => `${import.meta.env.BASE_URL}${name}`
   const [language, setLanguage] = useState<Language>(() => (localStorage.getItem('fff-language') as Language) || 'pt')
-  const [metric, setMetric] = useState<Metric>('combatPower')
+  const [metric, setMetric] = useState<Metric>('combat_power')
   const [rankFilter, setRankFilter] = useState<AllianceRank | 'ALL'>('ALL')
   const [query, setQuery] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
@@ -36,10 +28,11 @@ function App() {
   const portal = usePortal()
   const copy = getCopy(language)
 
+  const members = portal.configured ? portal.members : demoMembers
   const roster = useMemo(() => members
     .filter((item) => rankFilter === 'ALL' || item.rank === rankFilter)
-    .filter((item) => item.name.toLowerCase().includes(query.toLowerCase()))
-    .sort((first, second) => second[metric] - first[metric]), [metric, query, rankFilter])
+    .filter((item) => item.member_name.toLowerCase().includes(query.toLowerCase()))
+    .sort((first, second) => second[metric] - first[metric]), [members, metric, query, rankFilter])
 
   const changeLanguage = (value: Language) => {
     setLanguage(value)
@@ -63,7 +56,7 @@ function App() {
     const optionId = selectedOptions[pollId]
     if (!optionId) return flash(copy.selectOption)
     if (!portal.configured) return flash(copy.portalUnavailable)
-    if (!portal.user || !portal.profile?.active) {
+    if (!portal.user || !portal.profile?.active || portal.profile.registration_status !== 'approved') {
       setAdminOpen(true)
       return flash(copy.loginRequired)
     }
@@ -75,7 +68,7 @@ function App() {
   const submitApplication = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!portal.configured) return flash(copy.portalUnavailable)
-    if (!portal.user || !portal.profile?.active) {
+    if (!portal.user || !portal.profile?.active || portal.profile.registration_status !== 'approved') {
       setAdminOpen(true)
       return flash(copy.loginRequired)
     }
@@ -131,12 +124,12 @@ function App() {
             <div className="section-stat"><strong>{members.length}</strong><span>{copy.members}<br />{copy.updated}</span></div></header>
           <div className="rank-filters" role="tablist"><button className={rankFilter === 'ALL' ? 'active' : ''} onClick={() => setRankFilter('ALL')}>ALL</button>
             {rankOrder.map((rank) => <button className={rankFilter === rank ? 'active' : ''} onClick={() => setRankFilter(rank)} key={rank}>{rank}</button>)}</div>
-          <div className="data-toolbar"><div className="metric-tabs">{(['combatPower', 'kills', 'weeklyContribution'] as Metric[]).map((item) =>
-            <button className={metric === item ? 'active' : ''} onClick={() => setMetric(item)} key={item}>{copy[item]}</button>)}</div>
+          <div className="data-toolbar"><div className="metric-tabs">{(['combat_power', 'kills', 'weekly_contribution'] as Metric[]).map((item) =>
+            <button className={metric === item ? 'active' : ''} onClick={() => setMetric(item)} key={item}>{copy[item === 'combat_power' ? 'combatPower' : item === 'weekly_contribution' ? 'weeklyContribution' : 'kills']}</button>)}</div>
             <label className="search"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={copy.search} /></label></div>
-          <div className="ranking-table"><div className="table-head"><span>#</span><span>{copy.member}</span><span>{copy.role}</span><span>{copy[metric]}</span></div>
-            {roster.map((item, index) => <div className="member-row" key={item.name}><span className="position">{String(index + 1).padStart(2, '0')}</span>
-              <span className="member-name"><i>{item.name.slice(0, 2)}</i><b>{item.name}</b></span><span><em className={`rank rank-${item.rank.toLowerCase()}`}>{item.rank}</em></span>
+          <div className="ranking-table"><div className="table-head"><span>#</span><span>{copy.member}</span><span>{copy.role}</span><span>{copy[metric === 'combat_power' ? 'combatPower' : metric === 'weekly_contribution' ? 'weeklyContribution' : 'kills']}</span></div>
+            {roster.map((item, index) => <div className="member-row" key={item.id}><span className="position">{String(index + 1).padStart(2, '0')}</span>
+              <span className="member-name"><i>{item.player_level}</i><b>{item.member_name}</b></span><span><em className={`rank rank-${item.rank.toLowerCase()}`}>{item.rank}</em></span>
               <strong>{item[metric].toLocaleString(language)}</strong></div>)}</div>
         </section>
 
@@ -168,7 +161,7 @@ function App() {
 
       <footer><div className="brand"><span className="brand-mark"><Shield size={20} /></span><span><b>FFF</b><strong>SPARTAN</strong></span></div><p>{copy.footer}<br /><small>{copy.fanNotice}{!portal.configured && ' · Preview data only.'}</small></p><img src={asset('dark-war-logo.png')} alt="Dark War: Survival" /></footer>
       {notice && <div className="toast" role="status">{notice}</div>}
-      <AdminPortal open={adminOpen} copy={copy} user={portal.user} profile={portal.profile} onClose={() => setAdminOpen(false)} onSignIn={portal.signIn} onSignOut={portal.signOut} onRefreshPolls={portal.refreshPolls} />
+      <AdminPortal open={adminOpen} copy={copy} user={portal.user} profile={portal.profile} availableMembers={portal.availableMembers} members={portal.members} onClose={() => setAdminOpen(false)} onSignIn={portal.signIn} onSignUp={portal.signUp} onSignOut={portal.signOut} onRefreshPolls={portal.refreshPolls} onRefreshMembers={portal.refreshMembers} />
     </div>
   )
 }

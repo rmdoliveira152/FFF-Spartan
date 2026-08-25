@@ -1,38 +1,48 @@
 import { useEffect, useEffectEvent, useState, type FormEvent } from 'react'
 import type { User } from '@supabase/supabase-js'
-import { Check, LogOut, Plus, Shield, X } from 'lucide-react'
+import { Check, LogOut, Pencil, Plus, Shield, Trash2, X } from 'lucide-react'
 import type { Copy } from './i18n'
-import { supabase, type PortalPoll, type Profile, type R4Application } from './supabase'
+import { supabase, type AllianceMember, type AvailableMember, type PortalPoll, type Profile, type R4Application } from './supabase'
 
 type Props = {
   open: boolean
   copy: Copy
   user: User | null
   profile: Profile | null
+  availableMembers: AvailableMember[]
+  members: AllianceMember[]
   onClose: () => void
   onSignIn: (email: string, password: string) => Promise<{ ok: boolean; message?: string }>
+  onSignUp: (email: string, password: string, allianceMemberId: string) => Promise<{ ok: boolean; message?: string }>
   onSignOut: () => Promise<void>
   onRefreshPolls: () => Promise<void>
+  onRefreshMembers: () => Promise<void>
 }
 
-export function AdminPortal({ open, copy, user, profile, onClose, onSignIn, onSignOut, onRefreshPolls }: Props) {
+export function AdminPortal({ open, copy, user, profile, availableMembers, members: initialMembers, onClose, onSignIn, onSignUp, onSignOut, onRefreshPolls, onRefreshMembers }: Props) {
   const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
+  const [registering, setRegistering] = useState(false)
+  const [editingMember, setEditingMember] = useState<AllianceMember | null>(null)
   const [polls, setPolls] = useState<PortalPoll[]>([])
   const [applications, setApplications] = useState<R4Application[]>([])
   const [profiles, setProfiles] = useState<Profile[]>([])
+  const [adminMembers, setAdminMembers] = useState<AllianceMember[]>(initialMembers)
 
   const loadAdminData = async () => {
     const client = supabase
     if (!client || profile?.role !== 'admin') return
-    const [pollResponse, applicationResponse, profileResponse] = await Promise.all([
+    const [pollResponse, applicationResponse, profileResponse, memberResponse] = await Promise.all([
       client.from('polls').select('id, question, active, closes_at, poll_options(id, label, position)').order('created_at', { ascending: false }),
       client.from('r4_applications').select('id, user_id, reason, experience, availability, status, created_at').order('created_at', { ascending: false }),
-      client.from('profiles').select('id, member_name, role, active').order('member_name'),
+      client.from('profiles').select('id, member_name, role, active, alliance_member_id, registration_status').order('member_name'),
+      client.from('alliance_members').select('id, member_name, rank, player_level, combat_power, kills, weekly_contribution, active').order('member_name'),
     ])
     if (pollResponse.error) throw pollResponse.error
     if (applicationResponse.error) throw applicationResponse.error
     if (profileResponse.error) throw profileResponse.error
+    if (memberResponse.error) throw memberResponse.error
 
     const memberProfiles = profileResponse.data as Profile[]
     const names = new Map(memberProfiles.map((item) => [item.id, item.member_name]))
@@ -52,6 +62,7 @@ export function AdminPortal({ open, copy, user, profile, onClose, onSignIn, onSi
       profiles: { member_name: names.get(application.user_id) ?? application.user_id },
     })) as R4Application[])
     setProfiles(memberProfiles)
+    setAdminMembers((memberResponse.data ?? []) as AllianceMember[])
   }
 
   const loadAdminDataEvent = useEffectEvent(loadAdminData)
@@ -72,6 +83,18 @@ export function AdminPortal({ open, copy, user, profile, onClose, onSignIn, onSi
     const form = new FormData(event.currentTarget)
     const result = await onSignIn(String(form.get('email')), String(form.get('password')))
     if (!result.ok) setError(result.message ?? 'Unable to sign in.')
+    setBusy(false)
+  }
+
+  const handleRegistration = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setBusy(true)
+    setError('')
+    setMessage('')
+    const form = new FormData(event.currentTarget)
+    const result = await onSignUp(String(form.get('email')), String(form.get('password')), String(form.get('allianceMemberId')))
+    if (!result.ok) setError(result.message ?? 'Unable to register.')
+    else setMessage(copy.registrationSent)
     setBusy(false)
   }
 
@@ -118,24 +141,74 @@ export function AdminPortal({ open, copy, user, profile, onClose, onSignIn, onSi
     else await loadAdminData()
   }
 
+  const reviewRegistration = async (member: Profile, decision: 'approved' | 'rejected') => {
+    if (!supabase) return
+    setError('')
+    const { error: reviewError } = await supabase.rpc('review_registration', { requested_profile: member.id, decision })
+    if (reviewError) setError(reviewError.message)
+    else await loadAdminData()
+  }
+
+  const saveMember = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!supabase) return
+    setBusy(true)
+    setError('')
+    const formElement = event.currentTarget
+    const form = new FormData(formElement)
+    const values = {
+      member_name: String(form.get('memberName')).trim(),
+      rank: String(form.get('rank')),
+      player_level: Number(form.get('playerLevel')),
+      combat_power: Number(form.get('combatPower')),
+      kills: Number(form.get('kills')),
+      weekly_contribution: Number(form.get('weeklyContribution')),
+      active: form.get('active') === 'on',
+      updated_at: new Date().toISOString(),
+    }
+    const response = editingMember
+      ? await supabase.from('alliance_members').update(values).eq('id', editingMember.id)
+      : await supabase.from('alliance_members').insert(values)
+    if (response.error) setError(response.error.message)
+    else {
+      setEditingMember(null)
+      formElement.reset()
+      await Promise.all([onRefreshMembers(), loadAdminData()])
+    }
+    setBusy(false)
+  }
+
+  const deleteMember = async (member: AllianceMember) => {
+    if (!supabase || !window.confirm(copy.confirmDelete)) return
+    setError('')
+    const { error: deleteError } = await supabase.from('alliance_members').delete().eq('id', member.id)
+    if (deleteError) setError(deleteError.message)
+    else await Promise.all([onRefreshMembers(), loadAdminData()])
+  }
+
   return <div className="modal-backdrop" onMouseDown={onClose}>
     <section className={`login-modal ${profile?.role === 'admin' ? 'admin-portal' : ''}`} role="dialog" aria-modal="true" onMouseDown={(event) => event.stopPropagation()}>
       <button className="close-button" onClick={onClose} aria-label={copy.close}><X /></button>
       <Shield size={36} />
-      <h2>{profile?.role === 'admin' ? copy.adminDashboard : copy.adminTitle}</h2>
+      <h2>{profile?.role === 'admin' ? copy.adminDashboard : registering ? copy.createAccount : copy.adminTitle}</h2>
 
       {!user && <>
         <p>{copy.loginRequired}</p>
-        <form onSubmit={handleLogin}>
+        <div className="auth-switch"><button className={!registering ? 'active' : ''} onClick={() => setRegistering(false)}>{copy.login}</button><button className={registering ? 'active' : ''} onClick={() => setRegistering(true)}>{copy.register}</button></div>
+        <form onSubmit={registering ? handleRegistration : handleLogin}>
           <label>{copy.email}<input name="email" type="email" required autoComplete="email" /></label>
-          <label>{copy.password}<input name="password" type="password" required autoComplete="current-password" /></label>
-          <button className="primary-button" type="submit" disabled={busy}>{copy.login}</button>
+          <label>{copy.password}<input name="password" type="password" required minLength={8} autoComplete={registering ? 'new-password' : 'current-password'} /></label>
+          {registering && <label>{copy.selectMember}<select name="allianceMemberId" required defaultValue=""><option value="" disabled>{copy.choose}</option>{availableMembers.map((member) => <option value={member.id} key={member.id}>{member.member_name} · {member.rank}</option>)}</select></label>}
+          <button className="primary-button" type="submit" disabled={busy}>{registering ? copy.createAccount : copy.login}</button>
         </form>
+        {message && <p className="form-success" role="status">{message}</p>}
       </>}
 
       {user && profile?.role !== 'admin' && <div className="account-state">
         <p><strong>{copy.signedInAs}:</strong> {profile?.member_name ?? user.email}</p>
-        {!profile?.active && <p>{copy.inactiveMember}</p>}
+        {profile?.registration_status === 'pending' && <p>{copy.pendingApproval}</p>}
+        {profile?.registration_status === 'rejected' && <p>{copy.rejectedRegistration}</p>}
+        {!profile?.active && profile?.registration_status === 'approved' && <p>{copy.inactiveMember}</p>}
         <button className="ghost-button" onClick={onSignOut}><LogOut size={16} />{copy.signOut}</button>
       </div>}
 
@@ -165,7 +238,25 @@ export function AdminPortal({ open, copy, user, profile, onClose, onSignIn, onSi
         </section>
 
         <section className="admin-block"><h3>{copy.memberAccess}</h3>
-          <div className="member-access-list">{profiles.map((member) => <div key={member.id}><span><strong>{member.member_name}</strong><small>{member.role}</small></span><button className="compact-button" disabled={member.id === profile.id} onClick={() => toggleMember(member)}>{member.active ? copy.deactivate : copy.activate}</button></div>)}</div>
+          <h4>{copy.registrationRequests}</h4>
+          <div className="member-access-list">{profiles.filter((member) => member.registration_status === 'pending').map((member) => <div key={member.id}><span><strong>{member.member_name}</strong><small>{member.registration_status}</small></span><span className="row-actions"><button className="compact-button" onClick={() => reviewRegistration(member, 'approved')}><Check size={14} />{copy.approve}</button><button className="compact-button danger" onClick={() => reviewRegistration(member, 'rejected')}><X size={14} />{copy.reject}</button></span></div>)}
+            {!profiles.some((member) => member.registration_status === 'pending') && <p>{copy.noRegistrations}</p>}
+          </div>
+          <div className="member-access-list">{profiles.filter((member) => member.registration_status !== 'pending').map((member) => <div key={member.id}><span><strong>{member.member_name}</strong><small>{member.role} · {member.registration_status}</small></span><button className="compact-button" disabled={member.id === profile.id} onClick={() => toggleMember(member)}>{member.active ? copy.deactivate : copy.activate}</button></div>)}</div>
+        </section>
+
+        <section className="admin-block"><h3>{copy.manageRoster}</h3>
+          <form className="admin-form roster-form" key={editingMember?.id ?? 'new'} onSubmit={saveMember}>
+            <label>{copy.memberName}<input name="memberName" required maxLength={60} defaultValue={editingMember?.member_name} /></label>
+            <label>{copy.rank}<select name="rank" required defaultValue={editingMember?.rank ?? 'R3'}>{['R1', 'R2', 'R3', 'R4', 'R5'].map((rank) => <option key={rank}>{rank}</option>)}</select></label>
+            <label>{copy.playerLevel}<input name="playerLevel" type="number" required min={1} max={10} defaultValue={editingMember?.player_level ?? 1} /></label>
+            <label>{copy.combatPower}<input name="combatPower" type="number" required min={0} defaultValue={editingMember?.combat_power ?? 0} /></label>
+            <label>{copy.kills}<input name="kills" type="number" required min={0} defaultValue={editingMember?.kills ?? 0} /></label>
+            <label>{copy.weeklyContribution}<input name="weeklyContribution" type="number" required min={0} defaultValue={editingMember?.weekly_contribution ?? 0} /></label>
+            <label className="check-field"><input name="active" type="checkbox" defaultChecked={editingMember?.active ?? true} />{copy.active}</label>
+            <div className="row-actions"><button className="primary-button" type="submit" disabled={busy}>{editingMember ? copy.save : copy.addMember}</button>{editingMember && <button className="ghost-button" type="button" onClick={() => setEditingMember(null)}>{copy.cancel}</button>}</div>
+          </form>
+          <div className="member-access-list roster-admin-list">{adminMembers.map((member) => <div key={member.id}><span><strong>{member.member_name}</strong><small>{member.rank} · Lv. {member.player_level} · {member.combat_power.toLocaleString()} · {member.active ? copy.active : copy.deactivate}</small></span><span className="row-actions"><button className="icon-button" title={copy.editMember} onClick={() => setEditingMember(member)}><Pencil size={15} /></button><button className="icon-button danger" title={copy.delete} onClick={() => deleteMember(member)}><Trash2 size={15} /></button></span></div>)}</div>
         </section>
       </div>}
       {error && profile?.role !== 'admin' && <p className="form-error" role="alert">{error}</p>}

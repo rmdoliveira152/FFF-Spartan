@@ -16,7 +16,22 @@ export type Profile = {
   member_name: string
   role: 'member' | 'admin'
   active: boolean
+  alliance_member_id: string | null
+  registration_status: 'pending' | 'approved' | 'rejected'
 }
+
+export type AllianceMember = {
+  id: string
+  member_name: string
+  rank: 'R1' | 'R2' | 'R3' | 'R4' | 'R5'
+  player_level: number
+  combat_power: number
+  kills: number
+  weekly_contribution: number
+  active: boolean
+}
+
+export type AvailableMember = Pick<AllianceMember, 'id' | 'member_name' | 'rank'>
 
 export type PollOption = {
   id: string

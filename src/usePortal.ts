@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
-import { isSupabaseConfigured, supabase, type PortalPoll, type Profile } from './supabase'
+import { isSupabaseConfigured, supabase, type AllianceMember, type AvailableMember, type PortalPoll, type Profile } from './supabase'
 
 type ActionResult = { ok: true } | { ok: false; message: string }
 
@@ -8,7 +8,25 @@ export function usePortal() {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [polls, setPolls] = useState<PortalPoll[]>([])
+  const [members, setMembers] = useState<AllianceMember[]>([])
+  const [availableMembers, setAvailableMembers] = useState<AvailableMember[]>([])
   const [loading, setLoading] = useState(isSupabaseConfigured)
+
+  const loadMembers = async () => {
+    const client = supabase
+    if (!client) return
+    const { data, error } = await client.from('alliance_members').select('id, member_name, rank, player_level, combat_power, kills, weekly_contribution, active').eq('active', true)
+    if (error) throw error
+    setMembers((data ?? []) as AllianceMember[])
+  }
+
+  const loadAvailableMembers = async () => {
+    const client = supabase
+    if (!client) return
+    const { data, error } = await client.rpc('available_alliance_members')
+    if (error) throw error
+    setAvailableMembers((data ?? []) as AvailableMember[])
+  }
 
   const loadPolls = async () => {
     const client = supabase
@@ -36,7 +54,7 @@ export function usePortal() {
   const loadProfile = async (userId: string) => {
     const client = supabase
     if (!client) return
-    const { data } = await client.from('profiles').select('id, member_name, role, active').eq('id', userId).maybeSingle()
+    const { data } = await client.from('profiles').select('id, member_name, role, active, alliance_member_id, registration_status').eq('id', userId).maybeSingle()
     setProfile(data as Profile | null)
   }
 
@@ -50,7 +68,7 @@ export function usePortal() {
         if (!mounted) return
         setUser(data.session?.user ?? null)
         if (data.session?.user) await loadProfile(data.session.user.id)
-        await loadPolls()
+        await Promise.all([loadPolls(), loadMembers(), loadAvailableMembers()])
       } finally {
         if (mounted) setLoading(false)
       }
@@ -73,13 +91,25 @@ export function usePortal() {
     return error ? { ok: false, message: error.message } : { ok: true }
   }
 
+  const signUp = async (email: string, password: string, allianceMemberId: string): Promise<ActionResult> => {
+    if (!supabase) return { ok: false, message: 'Supabase is not configured.' }
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { alliance_member_id: allianceMemberId } },
+    })
+    if (error) return { ok: false, message: error.message }
+    await loadAvailableMembers()
+    return { ok: true }
+  }
+
   const signOut = async () => {
     await supabase?.auth.signOut()
     setProfile(null)
   }
 
   const vote = async (pollId: string, optionId: string): Promise<ActionResult> => {
-    if (!supabase || !user || !profile?.active) return { ok: false, message: 'LOGIN_REQUIRED' }
+    if (!supabase || !user || !profile?.active || profile.registration_status !== 'approved') return { ok: false, message: 'LOGIN_REQUIRED' }
     const { error } = await supabase.from('votes').insert({ poll_id: pollId, option_id: optionId, user_id: user.id })
     if (error?.code === '23505') return { ok: false, message: 'DUPLICATE_VOTE' }
     if (error) return { ok: false, message: error.message }
@@ -88,7 +118,7 @@ export function usePortal() {
   }
 
   const submitApplication = async (reason: string, experience: string, availability: string): Promise<ActionResult> => {
-    if (!supabase || !user || !profile?.active) return { ok: false, message: 'LOGIN_REQUIRED' }
+    if (!supabase || !user || !profile?.active || profile.registration_status !== 'approved') return { ok: false, message: 'LOGIN_REQUIRED' }
     const { error } = await supabase.from('r4_applications').insert({ user_id: user.id, reason, experience, availability })
     return error ? { ok: false, message: error.message } : { ok: true }
   }
@@ -99,10 +129,15 @@ export function usePortal() {
     user,
     profile,
     polls,
+    members,
+    availableMembers,
     signIn,
+    signUp,
     signOut,
     vote,
     submitApplication,
     refreshPolls: loadPolls,
+    refreshMembers: loadMembers,
+    refreshAvailableMembers: loadAvailableMembers,
   }
 }
