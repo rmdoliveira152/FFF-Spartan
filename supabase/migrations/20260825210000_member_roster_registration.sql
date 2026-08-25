@@ -125,6 +125,24 @@ create unique index profiles_reserved_alliance_member_idx
 on public.profiles (alliance_member_id)
 where alliance_member_id is not null and registration_status in ('pending', 'approved');
 
+create or replace function public.revoke_deleted_member_access()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  update public.profiles
+  set active = false, registration_status = 'rejected', alliance_member_id = null
+  where alliance_member_id = old.id;
+  return old;
+end;
+$$;
+
+create trigger before_alliance_member_delete
+before delete on public.alliance_members
+for each row execute procedure public.revoke_deleted_member_access();
+
 alter table public.alliance_members enable row level security;
 
 create policy "alliance_members_active_read"
