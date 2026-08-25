@@ -100,7 +100,9 @@ function App() {
               {languages.map(([code, name]) => <option value={code} key={code}>{name}</option>)}
             </select>
           </label>
-          <button className="admin-button" onClick={() => setAdminOpen(true)}><LogIn size={16} />{copy.admin}</button>
+          <button className="admin-button" onClick={() => setAdminOpen(true)}>
+            <LogIn size={16} />{!portal.user ? copy.login : portal.profile?.role === 'admin' ? copy.admin : copy.member}
+          </button>
         </div>
       </header>
 

@@ -223,7 +223,7 @@ export function AdminPortal({ open, copy, user, profile, availableMembers, membe
     <section className={`login-modal ${profile?.role === 'admin' ? 'admin-portal' : ''}`} role="dialog" aria-modal="true" onMouseDown={(event) => event.stopPropagation()}>
       <button className="close-button" onClick={onClose} aria-label={copy.close}><X /></button>
       <Shield size={36} />
-      <h2>{passwordRecovery || requestingRecovery ? copy.resetPasswordTitle : profile?.role === 'admin' ? copy.adminDashboard : registering ? copy.createAccount : copy.adminTitle}</h2>
+      <h2>{passwordRecovery || requestingRecovery ? copy.resetPasswordTitle : profile?.role === 'admin' ? copy.adminDashboard : registering ? copy.createAccount : copy.memberAccess}</h2>
 
       {passwordRecovery && <form onSubmit={handlePasswordUpdate}>
         <p>{copy.recoveryInstructions}</p>
