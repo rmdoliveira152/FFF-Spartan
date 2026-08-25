@@ -115,7 +115,7 @@ function App() {
           <div className="directive"><span>{copy.alertLabel}</span><p>{copy.alertText}</p></div>
         </section>
 
-        <section className="values-strip" aria-label="Alliance values">
+        <section className="values-strip" aria-label={`${copy.strength}, ${copy.unity}, ${copy.discipline}`}>
           <div><Swords /><b>{copy.strength}</b><small>01</small></div><div><Users /><b>{copy.unity}</b><small>02</small></div><div><Shield /><b>{copy.discipline}</b><small>03</small></div>
         </section>
 
@@ -159,7 +159,7 @@ function App() {
         </section>
       </main>
 
-      <footer><div className="brand"><span className="brand-mark"><Shield size={20} /></span><span><b>FFF</b><strong>SPARTAN</strong></span></div><p>{copy.footer}<br /><small>{copy.fanNotice}{!portal.configured && ' · Preview data only.'}</small></p><img src={asset('dark-war-logo.png')} alt="Dark War: Survival" /></footer>
+      <footer><div className="brand"><span className="brand-mark"><Shield size={20} /></span><span><b>FFF</b><strong>SPARTAN</strong></span></div><p>{copy.footer}<br /><small>{copy.fanNotice}</small></p><img src={asset('dark-war-logo.png')} alt="Dark War: Survival" /></footer>
       {notice && <div className="toast" role="status">{notice}</div>}
       <AdminPortal open={adminOpen} copy={copy} user={portal.user} profile={portal.profile} availableMembers={portal.availableMembers} members={portal.members} onClose={() => setAdminOpen(false)} onSignIn={portal.signIn} onSignUp={portal.signUp} onSignOut={portal.signOut} onRefreshPolls={portal.refreshPolls} onRefreshMembers={portal.refreshMembers} />
     </div>
