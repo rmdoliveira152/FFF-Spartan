@@ -1,6 +1,8 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import { ChevronRight, ExternalLink, Globe2, LogIn, Menu, Search, Shield, Swords, Users, Vote, X } from 'lucide-react'
 import { getCopy, languages, type Language } from './i18n'
+import { AdminPortal } from './AdminPortal'
+import { usePortal } from './usePortal'
 import './App.css'
 
 type Metric = 'combatPower' | 'kills' | 'weeklyContribution'
@@ -30,6 +32,8 @@ function App() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [adminOpen, setAdminOpen] = useState(false)
   const [notice, setNotice] = useState('')
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({})
+  const portal = usePortal()
   const copy = getCopy(language)
 
   const roster = useMemo(() => members
@@ -47,6 +51,40 @@ function App() {
   const flash = (message: string) => {
     setNotice(message)
     window.setTimeout(() => setNotice(''), 2800)
+  }
+
+  const demoPolls = [
+    { id: 'operation', question: copy.pollOperation, active: true, closes_at: null, poll_options: ['18:00 UTC', '20:00 UTC', '22:00 UTC'].map((label, index) => ({ id: `operation-${index}`, label, position: index + 1, voteCount: [15, 22, 11][index] })) },
+    { id: 'training', question: copy.pollTraining, active: true, closes_at: null, poll_options: [copy.rallyCoordination, copy.defensiveFormations, copy.resourceEfficiency].map((label, index) => ({ id: `training-${index}`, label, position: index + 1, voteCount: [18, 10, 7][index] })) },
+  ]
+  const visiblePolls = portal.configured ? portal.polls : demoPolls
+
+  const submitVote = async (pollId: string) => {
+    const optionId = selectedOptions[pollId]
+    if (!optionId) return flash(copy.selectOption)
+    if (!portal.configured) return flash(copy.portalUnavailable)
+    if (!portal.user || !portal.profile?.active) {
+      setAdminOpen(true)
+      return flash(copy.loginRequired)
+    }
+    const result = await portal.vote(pollId, optionId)
+    if (result.ok) flash(copy.successVote)
+    else flash(result.message === 'DUPLICATE_VOTE' ? copy.duplicateVote : result.message)
+  }
+
+  const submitApplication = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!portal.configured) return flash(copy.portalUnavailable)
+    if (!portal.user || !portal.profile?.active) {
+      setAdminOpen(true)
+      return flash(copy.loginRequired)
+    }
+    const form = new FormData(event.currentTarget)
+    const result = await portal.submitApplication(String(form.get('reason')), String(form.get('experience')), String(form.get('availability')))
+    if (result.ok) {
+      flash(copy.successApply)
+      event.currentTarget.reset()
+    } else flash(result.message)
   }
 
   return (
@@ -103,20 +141,21 @@ function App() {
 
         <section className="section polls-section" id="polls">
           <header className="section-header light"><div><p className="eyebrow">{copy.pollsLabel}</p><h2>{copy.pollsTitle}</h2><p>{copy.pollsText}</p></div><Vote size={46} /></header>
-          <div className="poll-grid">{[
-            { title: copy.pollOperation, options: ['18:00 UTC', '20:00 UTC', '22:00 UTC'], values: [32, 46, 22], count: 48 },
-            { title: copy.pollTraining, options: [copy.rallyCoordination, copy.defensiveFormations, copy.resourceEfficiency], values: [51, 29, 20], count: 35 },
-          ].map((poll, pollIndex) => <article className="poll-card" key={poll.title}><div className="poll-meta"><span>{copy.active}</span><small>{poll.count} {copy.votes}</small></div><h3>{poll.title}</h3>
-            {poll.options.map((option, index) => <label className="poll-option" key={option}><input type="radio" name={`poll-${pollIndex}`} /><span>{option}</span><b>{poll.values[index]}%</b></label>)}
-            <button className="primary-button" onClick={() => flash(copy.successVote)}>{copy.vote}</button></article>)}</div>
+          {!portal.loading && visiblePolls.length === 0 && <p className="empty-state">{copy.noPolls}</p>}
+          <div className="poll-grid">{visiblePolls.map((poll) => {
+            const totalVotes = poll.poll_options.reduce((total, option) => total + option.voteCount, 0)
+            return <article className="poll-card" key={poll.id}><div className="poll-meta"><span>{copy.active}</span><small>{totalVotes} {copy.votes}</small></div><h3>{poll.question}</h3>
+              {poll.poll_options.map((option) => <label className="poll-option" key={option.id}><input type="radio" name={`poll-${poll.id}`} checked={selectedOptions[poll.id] === option.id} onChange={() => setSelectedOptions((current) => ({ ...current, [poll.id]: option.id }))} /><span>{option.label}</span><b>{totalVotes ? Math.round(option.voteCount / totalVotes * 100) : 0}%</b></label>)}
+              <button className="primary-button" onClick={() => void submitVote(poll.id)}>{copy.vote}</button></article>
+          })}</div>
         </section>
 
         <section className="section application-section" id="application">
           <div className="application-copy"><p className="eyebrow">{copy.applyLabel}</p><h2>{copy.applyTitle}</h2><p>{copy.applyText}</p><div className="spartan-number">R4</div></div>
-          <form className="application-form" onSubmit={(event) => { event.preventDefault(); flash(copy.successApply); event.currentTarget.reset() }}>
-            <label>{copy.selectMember}<select required defaultValue=""><option value="" disabled>{copy.choose}</option>{members.map((member) => <option key={member.name}>{member.name}</option>)}</select></label>
-            <label>{copy.reason}<textarea required placeholder={copy.reasonHint} rows={4} /></label><label>{copy.experience}<textarea required placeholder={copy.experienceHint} rows={3} /></label>
-            <label>{copy.availability}<input required placeholder="18:00–23:00 UTC" /></label><button className="primary-button" type="submit">{copy.submit}<ChevronRight size={18} /></button>
+          <form className="application-form" onSubmit={submitApplication}>
+            <div className="signed-member"><span>{copy.selectMember}</span><strong>{portal.profile?.member_name ?? copy.loginRequired}</strong></div>
+            <label>{copy.reason}<textarea name="reason" required minLength={10} placeholder={copy.reasonHint} rows={4} /></label><label>{copy.experience}<textarea name="experience" required minLength={10} placeholder={copy.experienceHint} rows={3} /></label>
+            <label>{copy.availability}<input name="availability" required placeholder="18:00–23:00 UTC" /></label><button className="primary-button" type="submit">{copy.submit}<ChevronRight size={18} /></button>
           </form>
         </section>
 
@@ -126,12 +165,9 @@ function App() {
         </section>
       </main>
 
-      <footer><div className="brand"><span className="brand-mark"><Shield size={20} /></span><span><b>FFF</b><strong>SPARTAN</strong></span></div><p>{copy.footer}<br /><small>{copy.fanNotice} · Preview data only.</small></p><img src={asset('dark-war-logo.png')} alt="Dark War: Survival" /></footer>
+      <footer><div className="brand"><span className="brand-mark"><Shield size={20} /></span><span><b>FFF</b><strong>SPARTAN</strong></span></div><p>{copy.footer}<br /><small>{copy.fanNotice}{!portal.configured && ' · Preview data only.'}</small></p><img src={asset('dark-war-logo.png')} alt="Dark War: Survival" /></footer>
       {notice && <div className="toast" role="status">{notice}</div>}
-      {adminOpen && <div className="modal-backdrop" onMouseDown={() => setAdminOpen(false)}><section className="login-modal" role="dialog" aria-modal="true" onMouseDown={(event) => event.stopPropagation()}>
-        <button className="close-button" onClick={() => setAdminOpen(false)} aria-label={copy.close}><X /></button><Shield size={36} /><h2>{copy.adminTitle}</h2><p>{copy.adminText}</p>
-        <form onSubmit={(event) => event.preventDefault()}><label>{copy.email}<input type="email" /></label><label>{copy.password}<input type="password" /></label><button className="primary-button" type="submit">{copy.login}</button></form>
-      </section></div>}
+      <AdminPortal open={adminOpen} copy={copy} user={portal.user} profile={portal.profile} onClose={() => setAdminOpen(false)} onSignIn={portal.signIn} onSignOut={portal.signOut} onRefreshPolls={portal.refreshPolls} />
     </div>
   )
 }

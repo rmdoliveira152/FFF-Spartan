@@ -8,7 +8,7 @@ export const languages = [
 
 export type Language = (typeof languages)[number][0]
 
-type Copy = {
+export type Copy = {
   navHome: string; navRanks: string; navPolls: string; navR4: string; navRules: string; admin: string
   eyebrow: string; heroTitle: string; heroText: string; enterRanks: string; officialGame: string
   alertLabel: string; alertText: string; strength: string; unity: string; discipline: string
@@ -21,6 +21,10 @@ type Copy = {
   rulesLabel: string; rulesTitle: string; rulesText: string; ruleItems: string[]
   adminTitle: string; adminText: string; email: string; password: string; login: string; close: string
   footer: string; fanNotice: string; successVote: string; successApply: string; language: string
+  portalUnavailable: string; loginRequired: string; inactiveMember: string; signOut: string; signedInAs: string
+  adminDashboard: string; createPoll: string; question: string; options: string; closingDate: string; publish: string
+  applications: string; approve: string; reject: string; memberAccess: string; activate: string; deactivate: string
+  noPolls: string; selectOption: string; duplicateVote: string
 }
 
 const en: Copy = {
@@ -44,6 +48,11 @@ const en: Copy = {
   adminTitle: 'Administration access', adminText: 'Poll creation, roster changes and application review require a protected backend. This screen is the interface preview.',
   email: 'Email', password: 'Password', login: 'Sign in', close: 'Close', footer: 'FFF-Spartan · Alliance community hub',
   fanNotice: 'Unofficial fan community. Not affiliated with or endorsed by Dark War: Survival.', successVote: 'Your vote was recorded in this preview.', successApply: 'Application saved in this preview.', language: 'Language',
+  portalUnavailable: 'The secure portal is not configured in this deployment.', loginRequired: 'Sign in as a verified alliance member to continue.',
+  inactiveMember: 'Your account is waiting for alliance verification.', signOut: 'Sign out', signedInAs: 'Signed in as', adminDashboard: 'Administration portal',
+  createPoll: 'Create poll', question: 'Question', options: 'Options, one per line', closingDate: 'Closing date (optional)', publish: 'Publish',
+  applications: 'R4 applications', approve: 'Approve', reject: 'Reject', memberAccess: 'Member access', activate: 'Activate', deactivate: 'Deactivate',
+  noPolls: 'There are no active polls.', selectOption: 'Select an option before voting.', duplicateVote: 'You have already voted in this poll.',
 }
 
 const pt: Copy = {
@@ -67,6 +76,11 @@ const pt: Copy = {
   adminTitle: 'Acesso de administração', adminText: 'A criação de votações, alterações aos membros e análise de candidaturas exigem um backend protegido. Este ecrã é a pré-visualização da interface.',
   email: 'Email', password: 'Palavra-passe', login: 'Entrar', close: 'Fechar', footer: 'FFF-Spartan · Centro da comunidade da aliança',
   fanNotice: 'Comunidade não oficial de fãs, sem afiliação ou aprovação de Dark War: Survival.', successVote: 'O seu voto foi registado nesta demonstração.', successApply: 'Candidatura guardada nesta demonstração.', language: 'Idioma',
+  portalUnavailable: 'O portal seguro ainda não está configurado nesta publicação.', loginRequired: 'Entre como membro verificado da aliança para continuar.',
+  inactiveMember: 'A sua conta aguarda validação pela liderança.', signOut: 'Terminar sessão', signedInAs: 'Sessão iniciada como', adminDashboard: 'Portal de administração',
+  createPoll: 'Criar votação', question: 'Pergunta', options: 'Opções, uma por linha', closingDate: 'Data de fecho (opcional)', publish: 'Publicar',
+  applications: 'Candidaturas R4', approve: 'Aprovar', reject: 'Rejeitar', memberAccess: 'Acesso dos membros', activate: 'Ativar', deactivate: 'Desativar',
+  noPolls: 'Não existem votações ativas.', selectOption: 'Selecione uma opção antes de votar.', duplicateVote: 'Já votou nesta votação.',
 }
 
 const translated: Record<Exclude<Language, 'en' | 'pt'>, Partial<Copy>> = {
