@@ -80,7 +80,8 @@ export function AdminPortal({ open, copy, user, profile, onClose, onSignIn, onSi
     if (!supabase) return
     setBusy(true)
     setError('')
-    const form = new FormData(event.currentTarget)
+    const formElement = event.currentTarget
+    const form = new FormData(formElement)
     const labels = String(form.get('options')).split('\n').map((option) => option.trim()).filter(Boolean)
     const closesAt = String(form.get('closesAt'))
     const { error: createError } = await supabase.rpc('create_poll', {
@@ -90,7 +91,7 @@ export function AdminPortal({ open, copy, user, profile, onClose, onSignIn, onSi
     })
     if (createError) setError(createError.message)
     else {
-      event.currentTarget.reset()
+      formElement.reset()
       await Promise.all([loadAdminData(), onRefreshPolls()])
     }
     setBusy(false)
