@@ -12,8 +12,9 @@
 .nav a:hover::after { content:''; position:absolute; inset:auto 15px 0; height:3px; background:var(--red); }
 .top-actions { display:flex; align-items:center; gap:8px; margin-left:18px; }
 .language-picker,.admin-button { height:38px; display:flex; align-items:center; gap:7px; padding:0 11px; color:#ddd; border:1px solid var(--line); background:#171d1b; }
-.language-picker select { max-width:110px; color:inherit; border:0; outline:0; background:transparent; cursor:pointer; }
-.language-picker option { color:#111; }
+.language-picker select { max-width:110px; color:inherit; border:0; outline:0; background:transparent; color-scheme:dark; cursor:pointer; }
+.language-picker option { color:#f3f4ef; background:#171d1b; }
+.language-picker option:checked { color:#fff; background:#8f2c27; }
 .admin-button { cursor:pointer; font-weight:700; text-transform:uppercase; }
 .admin-button:hover { color:#fff; border-color:var(--red); }
 .menu-button { display:none; color:#fff; border:0; background:transparent; }
@@ -119,11 +120,10 @@
 .application-form label,.login-modal label { display:grid; gap:7px; color:#b7bdb7; font-size:.8rem; font-weight:700; text-transform:uppercase; }
 .application-form input,.application-form select,.application-form textarea,.login-modal input,.login-modal select { width:100%; padding:13px 14px; color:#fff; border:1px solid #303834; outline:0; background:#1b221f; resize:vertical; }
 .application-form input:focus,.application-form select:focus,.application-form textarea:focus,.login-modal input:focus,.login-modal select:focus { border-color:var(--red); }
-.login-modal select { color-scheme:dark; }
-.login-modal select option { color:#f3f4ef; background:#1b221f; }
+.application-form select,.login-modal select,.admin-form select { color-scheme:dark; }
+.application-form select option,.login-modal select option,.admin-form select option { color:#f3f4ef; background:#1b221f; }
 .login-modal select option:disabled { color:#9aa19b; }
-.login-modal select option:checked { color:#fff; background:#275fae; }
-.application-form select option { color:#111; }
+.application-form select option:checked,.login-modal select option:checked,.admin-form select option:checked { color:#fff; background:#8f2c27; }
 .application-form .primary-button { justify-self:start; }
 .signed-member { display:grid; gap:7px; padding:13px 14px; color:#b7bdb7; border:1px solid #303834; background:#1b221f; }
 .signed-member span { font-size:.72rem; font-weight:700; text-transform:uppercase; }
@@ -165,7 +165,6 @@ footer img { width:110px; opacity:.65; }
 .admin-form label:nth-child(2) { grid-row:span 2; }
 .admin-form input,.admin-form select,.admin-form textarea { width:100%; padding:12px 13px; color:#fff; border:1px solid #303834; outline:0; background:#1b221f; resize:vertical; }
 .admin-form input:focus,.admin-form select:focus,.admin-form textarea:focus { border-color:var(--red); }
-.admin-form select option { color:#111; }
 .admin-form .primary-button { justify-self:start; }
 .news-admin-form { margin-bottom:22px; }
 .news-admin-form label:nth-child(2) { grid-row:auto; }
