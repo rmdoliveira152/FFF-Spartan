@@ -65,6 +65,30 @@ type MemberAccessCopy = {
   currentAccount: string; searchAccounts: string; noAccessResults: string
 }
 
+type AdminRoleCopy = {
+  promoteToAdmin: string; demoteToMember: string; confirmPromoteAdmin: string; confirmDemoteAdmin: string
+}
+
+const adminRoleCopy: Record<Language, AdminRoleCopy> = {
+  en:{promoteToAdmin:'Make admin',demoteToMember:'Make member',confirmPromoteAdmin:'Give this account administrator access?',confirmDemoteAdmin:'Remove administrator access from this account?'},
+  pt:{promoteToAdmin:'Tornar administrador',demoteToMember:'Tornar membro',confirmPromoteAdmin:'Dar acesso de administrador a esta conta?',confirmDemoteAdmin:'Remover o acesso de administrador desta conta?'},
+  es:{promoteToAdmin:'Hacer administrador',demoteToMember:'Hacer miembro',confirmPromoteAdmin:'¿Dar acceso de administrador a esta cuenta?',confirmDemoteAdmin:'¿Quitar el acceso de administrador a esta cuenta?'},
+  fr:{promoteToAdmin:'Nommer administrateur',demoteToMember:'Rendre membre',confirmPromoteAdmin:'Donner un accès administrateur à ce compte ?',confirmDemoteAdmin:'Retirer l’accès administrateur de ce compte ?'},
+  de:{promoteToAdmin:'Zum Admin machen',demoteToMember:'Zum Mitglied machen',confirmPromoteAdmin:'Diesem Konto Administratorzugriff geben?',confirmDemoteAdmin:'Administratorzugriff von diesem Konto entfernen?'},
+  it:{promoteToAdmin:'Rendi amministratore',demoteToMember:'Rendi membro',confirmPromoteAdmin:'Dare a questo account l’accesso amministratore?',confirmDemoteAdmin:'Rimuovere l’accesso amministratore da questo account?'},
+  pl:{promoteToAdmin:'Nadaj administratora',demoteToMember:'Ustaw jako członka',confirmPromoteAdmin:'Przyznać temu kontu dostęp administratora?',confirmDemoteAdmin:'Odebrać temu kontu dostęp administratora?'},
+  ru:{promoteToAdmin:'Сделать администратором',demoteToMember:'Сделать участником',confirmPromoteAdmin:'Предоставить этой учётной записи права администратора?',confirmDemoteAdmin:'Удалить права администратора у этой учётной записи?'},
+  tr:{promoteToAdmin:'Yönetici yap',demoteToMember:'Üye yap',confirmPromoteAdmin:'Bu hesaba yönetici erişimi verilsin mi?',confirmDemoteAdmin:'Bu hesabın yönetici erişimi kaldırılsın mı?'},
+  id:{promoteToAdmin:'Jadikan admin',demoteToMember:'Jadikan anggota',confirmPromoteAdmin:'Berikan akses administrator ke akun ini?',confirmDemoteAdmin:'Hapus akses administrator dari akun ini?'},
+  vi:{promoteToAdmin:'Đặt làm quản trị viên',demoteToMember:'Đặt làm thành viên',confirmPromoteAdmin:'Cấp quyền quản trị viên cho tài khoản này?',confirmDemoteAdmin:'Gỡ quyền quản trị viên khỏi tài khoản này?'},
+  th:{promoteToAdmin:'ตั้งเป็นผู้ดูแล',demoteToMember:'ตั้งเป็นสมาชิก',confirmPromoteAdmin:'ให้สิทธิ์ผู้ดูแลแก่บัญชีนี้หรือไม่',confirmDemoteAdmin:'ลบสิทธิ์ผู้ดูแลออกจากบัญชีนี้หรือไม่'},
+  ja:{promoteToAdmin:'管理者にする',demoteToMember:'メンバーにする',confirmPromoteAdmin:'このアカウントに管理者権限を付与しますか？',confirmDemoteAdmin:'このアカウントから管理者権限を削除しますか？'},
+  ko:{promoteToAdmin:'관리자로 지정',demoteToMember:'회원으로 지정',confirmPromoteAdmin:'이 계정에 관리자 권한을 부여하시겠습니까?',confirmDemoteAdmin:'이 계정의 관리자 권한을 제거하시겠습니까?'},
+  ar:{promoteToAdmin:'تعيين كمسؤول',demoteToMember:'تعيين كعضو',confirmPromoteAdmin:'هل تريد منح هذا الحساب صلاحية المسؤول؟',confirmDemoteAdmin:'هل تريد إزالة صلاحية المسؤول من هذا الحساب؟'},
+  'zh-CN':{promoteToAdmin:'设为管理员',demoteToMember:'设为成员',confirmPromoteAdmin:'授予此账户管理员权限？',confirmDemoteAdmin:'移除此账户的管理员权限？'},
+  'zh-TW':{promoteToAdmin:'設為管理員',demoteToMember:'設為成員',confirmPromoteAdmin:'授予此帳戶管理員權限？',confirmDemoteAdmin:'移除此帳戶的管理員權限？'},
+}
+
 type NotificationCopy = {
   notifyMembers: string; membersNotified: string; notificationFailed: string
   emailPreferences: string; notifyPollEmails: string; notifyNewsEmails: string
@@ -142,7 +166,7 @@ const allianceCodeCopy: Record<Language, AllianceCodeCopy> = {
   'zh-TW':{ codeLabel:'聯盟標準',codeTitle:'行動準則',codePlayers:'其他玩家',codeAdmins:'R4 · 管理',codeCourtesy:'友善並有禮貌地對待其他玩家。' },
 }
 
-export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy & DynamicTranslationCopy & MemberAccessCopy & NotificationCopy & PollAdminCopy & ExportCopy & PerformanceCopy & AllianceCodeCopy & EventGuideCopy & { codeAgreement: string }
+export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy & DynamicTranslationCopy & MemberAccessCopy & AdminRoleCopy & NotificationCopy & PollAdminCopy & ExportCopy & PerformanceCopy & AllianceCodeCopy & EventGuideCopy & { codeAgreement: string }
 
 const en: BaseCopy = {
   navHome: 'Command', navRanks: 'Roster', navPolls: 'Polls', navR4: 'R4 application', navRules: 'Code', admin: 'Admin',
@@ -672,5 +696,5 @@ const automaticTranslationHint: Record<Language, string> = {
 
 export function getCopy(language: Language): Copy {
   const base = language === 'pt' ? pt : language === 'en' ? en : { ...en, ...translated[language] }
-  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...notificationCopy[language], ...pollAdminCopy[language], ...exportCopy[language], ...performanceEnglish, ...performanceCopy[language], ...dailyPerformanceCopy[language], ...allianceCodeCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language], gameServerTime: gameServerTimeCopy[language], codeAgreement: codeAgreementCopy[language] }
+  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...adminRoleCopy[language], ...notificationCopy[language], ...pollAdminCopy[language], ...exportCopy[language], ...performanceEnglish, ...performanceCopy[language], ...dailyPerformanceCopy[language], ...allianceCodeCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language], gameServerTime: gameServerTimeCopy[language], codeAgreement: codeAgreementCopy[language] }
 }

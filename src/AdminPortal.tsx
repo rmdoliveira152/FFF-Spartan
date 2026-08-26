@@ -463,7 +463,18 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
 
   const toggleMember = async (member: Profile) => {
     if (!supabase) return
-    const { error: updateError } = await supabase.from('profiles').update({ active: !member.active }).eq('id', member.id)
+    const { error: updateError } = await supabase.rpc('set_profile_active', { requested_profile: member.id, requested_active: !member.active })
+    if (updateError) setError(updateError.message)
+    else await loadAdminData()
+  }
+
+  const updateMemberRole = async (member: Profile) => {
+    if (!supabase) return
+    const requestedRole = member.role === 'admin' ? 'member' : 'admin'
+    const confirmation = requestedRole === 'admin' ? copy.confirmPromoteAdmin : copy.confirmDemoteAdmin
+    if (!window.confirm(`${member.member_name}: ${confirmation}`)) return
+    setError('')
+    const { error: updateError } = await supabase.rpc('set_profile_role', { requested_profile: member.id, requested_role: requestedRole })
     if (updateError) setError(updateError.message)
     else await loadAdminData()
   }
@@ -595,7 +606,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
         wrap: true,
       }
       const sheetData = [
-        [copy.memberName, copy.rank, copy.playerLevel, copy.combatPower, copy.kills, copy.weeklyContribution, ...[1, 2, 3, 4].map((number) => `${copy.formation} ${number} · ${copy.combatPower}`)]
+        [copy.memberName, copy.rank, copy.playerLevel, copy.combatPower, copy.kills, copy.weeklyContribution, copy.lastUpdate, ...[1, 2, 3, 4].map((number) => `${copy.formation} ${number} · ${copy.combatPower}`)]
           .map((value) => ({ value, ...headerStyle })),
         ...adminMembers.map((member, memberIndex) => {
           const formations = latestFormations.get(member.id)
@@ -612,11 +623,13 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
             member.combat_power,
             member.kills,
             member.weekly_contribution,
+            member.performance_updated_at ? new Date(member.performance_updated_at) : null,
             ...[1, 2, 3, 4].map((number) => formations?.get(number) ?? null),
           ] as const).map((value, columnIndex) => ({
             value: value ?? undefined,
             ...rowStyle,
-            align: columnIndex === 0 ? 'left' as const : 'right' as const,
+            align: columnIndex === 0 ? 'left' as const : columnIndex === 6 ? 'center' as const : 'right' as const,
+            ...(columnIndex === 6 && value ? { format: 'yyyy-mm-dd' } : {}),
           }))
         }),
       ]
@@ -624,7 +637,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
       await writeXlsxFile(sheetData, {
         sheet: copy.rosterSheet,
         stickyRowsCount: 1,
-        columns: [{ width: 24 }, { width: 8 }, { width: 12 }, { width: 16 }, { width: 16 }, { width: 20 }, ...[1, 2, 3, 4].map(() => ({ width: 23 }))],
+        columns: [{ width: 24 }, { width: 8 }, { width: 12 }, { width: 16 }, { width: 16 }, { width: 20 }, { width: 14 }, ...[1, 2, 3, 4].map(() => ({ width: 23 }))],
       }).toFile(`FFF-Spartan-roster-${todayUtc()}.xlsx`)
     } catch (exportError) {
       setError(exportError instanceof Error ? exportError.message : copy.exportFailed)
@@ -783,7 +796,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
                 ? <><button className="compact-button" onClick={() => reviewRegistration(member, 'approved')}><Check size={14} />{copy.approve}</button><button className="compact-button danger" onClick={() => reviewRegistration(member, 'rejected')}><X size={14} />{copy.reject}</button></>
                 : <>{member.registration_status === 'rejected'
                   ? <button className="compact-button" onClick={() => reviewRegistration(member, 'approved')}><Check size={14} />{copy.approve}</button>
-                  : <button className="compact-button" onClick={() => toggleMember(member)}>{member.active ? copy.deactivate : copy.activate}</button>}
+                  : <>{(member.role === 'admin' || member.active) && <button className="compact-button" type="button" onClick={() => void updateMemberRole(member)}><Shield size={14} />{member.role === 'admin' ? copy.demoteToMember : copy.promoteToAdmin}</button>}<button className="compact-button" onClick={() => toggleMember(member)}>{member.active ? copy.deactivate : copy.activate}</button></>}
                   {!member.active && member.role === 'member' && <button className="compact-button danger" type="button" onClick={() => void deleteInactiveAccount(member)}><Trash2 size={14} />{copy.delete}</button>}</>}
               </span>}
           </div>)}
