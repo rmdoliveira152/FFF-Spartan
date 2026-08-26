@@ -1,6 +1,6 @@
 import { useEffect, useEffectEvent, useState, type FormEvent } from 'react'
 import type { User } from '@supabase/supabase-js'
-import { Archive, Check, LogOut, Megaphone, Pencil, Plus, RotateCcw, Shield, Trash2, X } from 'lucide-react'
+import { Archive, Check, LogOut, Megaphone, Pencil, Plus, RotateCcw, Search, Shield, Trash2, X } from 'lucide-react'
 import { type Copy, type Language } from './i18n'
 import { supabase, type AllianceMember, type AvailableMember, type BoardNews, type BoardNewsTranslation, type PortalPoll, type Profile, type R4Application } from './supabase'
 
@@ -46,6 +46,11 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
   const [applications, setApplications] = useState<R4Application[]>([])
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [adminMembers, setAdminMembers] = useState<AllianceMember[]>(initialMembers)
+  const [memberQuery, setMemberQuery] = useState('')
+
+  const filteredAdminMembers = adminMembers.filter((member) =>
+    member.member_name.toLocaleLowerCase(language).includes(memberQuery.trim().toLocaleLowerCase(language)),
+  )
 
   const loadAdminData = async () => {
     const client = supabase
@@ -412,7 +417,8 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
             <label className="check-field"><input name="active" type="checkbox" defaultChecked={editingMember?.active ?? true} />{copy.active}</label>
             <div className="row-actions"><button className="primary-button" type="submit" disabled={busy}>{editingMember ? copy.save : copy.addMember}</button>{editingMember && <button className="ghost-button" type="button" onClick={() => setEditingMember(null)}>{copy.cancel}</button>}</div>
           </form>
-          <div className="member-access-list roster-admin-list">{adminMembers.map((member) => <div key={member.id}><span><strong>{member.member_name}</strong><small>{member.rank} · Lv. {member.player_level} · {member.combat_power.toLocaleString()} · {member.active ? copy.active : copy.deactivate}</small></span><span className="row-actions"><button className="icon-button" title={copy.editMember} onClick={() => setEditingMember(member)}><Pencil size={15} /></button><button className="icon-button danger" title={copy.delete} onClick={() => deleteMember(member)}><Trash2 size={15} /></button></span></div>)}</div>
+          <label className="roster-admin-search"><Search size={17} /><input type="search" value={memberQuery} onChange={(event) => setMemberQuery(event.target.value)} placeholder={copy.search} /></label>
+          <div className="member-access-list roster-admin-list">{filteredAdminMembers.map((member) => <div key={member.id}><span><strong>{member.member_name}</strong><small>{member.rank} · Lv. {member.player_level} · {member.combat_power.toLocaleString()} · {member.active ? copy.active : copy.deactivate}</small></span><span className="row-actions"><button className="icon-button" title={copy.editMember} onClick={() => setEditingMember(member)}><Pencil size={15} /></button><button className="icon-button danger" title={copy.delete} onClick={() => deleteMember(member)}><Trash2 size={15} /></button></span></div>)}</div>
         </section>
       </div>}
       {error && profile?.role !== 'admin' && <p className="form-error" role="alert">{error}</p>}
