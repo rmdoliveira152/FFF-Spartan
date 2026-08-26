@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useState, type FormEvent } from 'react'
-import { Archive, CalendarDays, CalendarRange, ChevronRight, ExternalLink, Globe2, Languages, LogIn, Megaphone, Menu, MessagesSquare, Radio, Search, Shield, Swords, TrendingUp, Users, Vote, X } from 'lucide-react'
+import { Archive, Bell, CalendarDays, CalendarRange, CheckCheck, ChevronRight, ExternalLink, Globe2, Languages, LogIn, Megaphone, Menu, MessagesSquare, Radio, Search, Shield, Swords, TrendingUp, Users, Vote, X } from 'lucide-react'
 import { getCopy, languages, type Language } from './i18n'
 import { getDiscussionCopy } from './discussionCopy'
 import { AdminPortal } from './AdminPortal'
@@ -25,6 +25,9 @@ const codeRuleIndexes: Record<CodeAudience, number[]> = {
   r4: [0, 1, 2, 3, 4, 5, 6, 7],
 }
 const initialClock = Date.now()
+const notificationHeadings: Record<Language, [string, string]> = {
+  en:['Notifications','Mark all read'],pt:['Notificações','Marcar tudo como lido'],es:['Notificaciones','Marcar todo como leído'],fr:['Notifications','Tout marquer comme lu'],de:['Benachrichtigungen','Alle als gelesen markieren'],it:['Notifiche','Segna tutto come letto'],pl:['Powiadomienia','Oznacz wszystkie jako przeczytane'],ru:['Уведомления','Отметить все прочитанными'],tr:['Bildirimler','Tümünü okundu işaretle'],id:['Notifikasi','Tandai semua sudah dibaca'],vi:['Thông báo','Đánh dấu tất cả đã đọc'],th:['การแจ้งเตือน','ทำเครื่องหมายว่าอ่านแล้วทั้งหมด'],ja:['通知','すべて既読にする'],ko:['알림','모두 읽음으로 표시'],ar:['الإشعارات','تحديد الكل كمقروء'],'zh-CN':['通知','全部标为已读'],'zh-TW':['通知','全部標示為已讀'],
+}
 const MemberPerformanceModal = lazy(() => import('./MemberPerformanceModal').then((module) => ({ default: module.MemberPerformanceModal })))
 
 const getOriginalNews = (news: BoardNews): BoardNewsTranslation => {
@@ -44,6 +47,7 @@ function App() {
   const [codeAudience, setCodeAudience] = useState<CodeAudience>('players')
   const [query, setQuery] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [adminOpen, setAdminOpen] = useState(false)
   const [performanceMember, setPerformanceMember] = useState<AllianceMember | null>(null)
   const [historyOpen, setHistoryOpen] = useState(false)
@@ -64,6 +68,16 @@ function App() {
   const portal = usePortal()
   const copy = getCopy(language)
   const discussionCopy = getDiscussionCopy(language)
+  const unreadNotifications = portal.notifications.filter((notification) => !notification.read_at).length
+  const notificationLabel = (kind: string) => {
+    if (kind === 'poll_created') return copy.createPoll
+    if (kind === 'news_published') return copy.newsTitle
+    if (kind === 'comment_posted') return discussionCopy.discussion
+    if (kind === 'r4_approved') return `${copy.applications}: ${copy.approve}`
+    if (kind === 'r4_rejected') return `${copy.applications}: ${copy.reject}`
+    if (kind === 'registration_approved') return copy.registrationSent
+    return copy.memberAccess
+  }
 
   useEffect(() => {
     const timer = window.setInterval(() => setClock(Date.now()), 60_000)
@@ -241,6 +255,13 @@ function App() {
               {languages.map(([code, name]) => <option value={code} key={code}>{name}</option>)}
             </select>
           </label>
+          {portal.user && <div className="notification-menu">
+            <button className="notification-button" type="button" aria-label={notificationHeadings[language][0]} aria-expanded={notificationsOpen} onClick={() => setNotificationsOpen((current) => !current)}><Bell size={17} />{unreadNotifications > 0 && <span>{unreadNotifications}</span>}</button>
+            {notificationsOpen && <div className="notification-panel">
+              <div><strong>{notificationHeadings[language][0]}</strong><button type="button" title={notificationHeadings[language][1]} onClick={() => void portal.markNotificationsRead()}><CheckCheck size={16} /></button></div>
+              {portal.notifications.length === 0 ? <small>{copy.noAccessResults}</small> : portal.notifications.map((notification) => <a className={notification.read_at ? '' : 'unread'} href={notification.resource_kind === 'poll' || notification.resource_kind === 'polls' ? '#polls' : notification.resource_kind === 'board_news' ? '#news' : '#application'} onClick={() => setNotificationsOpen(false)} key={notification.id}><span>{notificationLabel(notification.event_kind)}</span><small>{new Intl.DateTimeFormat(language, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(notification.created_at))}</small></a>)}
+            </div>}
+          </div>}
           <button className="admin-button" onClick={() => setAdminOpen(true)}>
             <LogIn size={16} />{!portal.user ? copy.login : portal.profile?.role === 'admin' ? copy.admin : copy.member}
           </button>

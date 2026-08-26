@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
-import { isSupabaseConfigured, supabase, type AllianceMember, type AvailableMember, type BoardNews, type PortalPoll, type Profile } from './supabase'
+import { isSupabaseConfigured, supabase, type AllianceMember, type AvailableMember, type BoardNews, type MemberNotification, type PortalPoll, type Profile } from './supabase'
 
 type ActionResult = { ok: true } | { ok: false; message: string }
 
@@ -11,6 +11,7 @@ export function usePortal() {
   const [members, setMembers] = useState<AllianceMember[]>([])
   const [boardNews, setBoardNews] = useState<BoardNews[]>([])
   const [availableMembers, setAvailableMembers] = useState<AvailableMember[]>([])
+  const [notifications, setNotifications] = useState<MemberNotification[]>([])
   const [passwordRecovery, setPasswordRecovery] = useState(false)
   const [loading, setLoading] = useState(isSupabaseConfigured)
 
@@ -75,6 +76,14 @@ export function usePortal() {
     setProfile(data as Profile | null)
   }
 
+  const loadNotifications = async (userId = user?.id) => {
+    const client = supabase
+    if (!client || !userId) return
+    const { data, error } = await client.from('member_notifications').select('id, event_kind, resource_kind, resource_id, created_at, read_at').eq('recipient_id', userId).order('created_at', { ascending: false }).limit(40)
+    if (error) throw error
+    setNotifications((data ?? []) as MemberNotification[])
+  }
+
   useEffect(() => {
     const client = supabase
     if (!client) return
@@ -107,6 +116,28 @@ export function usePortal() {
       listener.subscription.unsubscribe()
     }
   }, [])
+
+  useEffect(() => {
+    const client = supabase
+    if (!client) return
+    const voteChannel = client.channel('portal-votes').on('postgres_changes', { event: '*', schema: 'public', table: 'votes' }, () => void loadPolls()).subscribe()
+    return () => { void client.removeChannel(voteChannel) }
+  }, [])
+
+  const notificationUserId = user?.id
+  useEffect(() => {
+    const client = supabase
+    if (!client || !notificationUserId) {
+      // oxlint-disable-next-line react/set-state-in-effect -- Clears recipient-scoped external data after sign-out.
+      setNotifications([])
+      return
+    }
+    void loadNotifications(notificationUserId)
+    const channel = client.channel(`member-notifications-${notificationUserId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'member_notifications', filter: `recipient_id=eq.${notificationUserId}` }, () => void loadNotifications(notificationUserId))
+      .subscribe()
+    return () => { void client.removeChannel(channel) }
+  }, [notificationUserId])
 
   const signIn = async (email: string, password: string): Promise<ActionResult> => {
     if (!supabase) return { ok: false, message: 'Supabase is not configured.' }
@@ -171,6 +202,15 @@ export function usePortal() {
     return error ? { ok: false, message: data?.error ?? error.message } : { ok: true }
   }
 
+  const markNotificationsRead = async () => {
+    if (!supabase || !user) return
+    const unreadIds = notifications.filter((notification) => !notification.read_at).map((notification) => notification.id)
+    if (!unreadIds.length) return
+    const readAt = new Date().toISOString()
+    const { error } = await supabase.rpc('mark_member_notifications_read')
+    if (!error) setNotifications((current) => current.map((notification) => notification.read_at ? notification : { ...notification, read_at: readAt }))
+  }
+
   return {
     configured: isSupabaseConfigured,
     loading,
@@ -178,6 +218,7 @@ export function usePortal() {
     profile,
     polls,
     boardNews,
+    notifications,
     members,
     availableMembers,
     passwordRecovery,
@@ -189,6 +230,7 @@ export function usePortal() {
     updateEmailPreferences,
     vote,
     submitApplication,
+    markNotificationsRead,
     refreshPolls: loadPolls,
     refreshBoardNews: loadBoardNews,
     refreshMembers: loadMembers,

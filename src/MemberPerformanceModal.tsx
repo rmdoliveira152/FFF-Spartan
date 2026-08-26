@@ -1,8 +1,9 @@
-import { useEffect, useEffectEvent, useState } from 'react'
+import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { Activity, LogIn, TrendingUp, X } from 'lucide-react'
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { type Copy, type Language } from './i18n'
 import { supabase, type AllianceMember, type MemberPerformanceSnapshot } from './supabase'
+import { useDialogFocus } from './useDialogFocus'
 
 type Props = {
   member: AllianceMember | null
@@ -14,11 +15,15 @@ type Props = {
 }
 
 const compactPower = (value: number) => new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(value)
+type TrendPeriod = 7 | 30 | 90 | 'all'
 
 export function MemberPerformanceModal({ member, copy, language, canView, onClose, onSignIn }: Props) {
   const [history, setHistory] = useState<MemberPerformanceSnapshot[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [period, setPeriod] = useState<TrendPeriod>(30)
+  const dialogRef = useRef<HTMLElement>(null)
+  useDialogFocus(dialogRef, Boolean(member))
 
   const loadHistory = async () => {
     if (!member || !canView || !supabase) return
@@ -37,17 +42,24 @@ export function MemberPerformanceModal({ member, copy, language, canView, onClos
   }, [member, canView])
 
   if (!member) return null
-  const first = history[0]
-  const latest = history.at(-1)
+  const latestHistoryDate = history.at(-1)?.snapshot_date
+  const periodStart = latestHistoryDate && period !== 'all'
+    ? Date.parse(`${latestHistoryDate}T12:00:00Z`) - (period - 1) * 86_400_000
+    : null
+  const visibleHistory = periodStart === null
+    ? history
+    : history.filter((snapshot) => Date.parse(`${snapshot.snapshot_date}T12:00:00Z`) >= periodStart)
+  const first = visibleHistory[0]
+  const latest = visibleHistory.at(-1)
   const growth = first && latest ? latest.combat_power - first.combat_power : 0
   const growthPercent = first?.combat_power ? growth / first.combat_power * 100 : 0
-  const chartData = history.map((snapshot) => ({
+  const chartData = visibleHistory.map((snapshot) => ({
     ...snapshot,
     date: new Intl.DateTimeFormat(language, { day: '2-digit', month: 'short' }).format(new Date(`${snapshot.snapshot_date}T12:00:00`)),
   }))
 
   return <div className="modal-backdrop performance-backdrop" onMouseDown={onClose}>
-    <section className="performance-modal" role="dialog" aria-modal="true" aria-labelledby="performance-title" onMouseDown={(event) => event.stopPropagation()}>
+    <section className="performance-modal" ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="performance-title" onKeyDown={(event) => { if (event.key === 'Escape') onClose() }} onMouseDown={(event) => event.stopPropagation()}>
       <button className="close-button" type="button" onClick={onClose} aria-label={copy.close}><X /></button>
       <header><Activity size={30} /><div><small>{copy.performanceHistory}</small><h2 id="performance-title">{member.member_name}</h2><p>{member.rank} · Lv. {member.player_level}</p></div></header>
       {!canView ? <div className="performance-gate"><LogIn size={30} /><p>{copy.signInForHistory}</p><button className="primary-button" type="button" onClick={onSignIn}>{copy.login}</button></div> : <>
@@ -55,6 +67,9 @@ export function MemberPerformanceModal({ member, copy, language, canView, onClos
           <div><span>{copy.currentPower}</span><strong>{(latest?.combat_power ?? member.combat_power).toLocaleString(language)}</strong></div>
           <div><span>{copy.growthPeriod}</span><strong className={growth < 0 ? 'negative' : ''}><TrendingUp size={18} />{growth >= 0 ? '+' : ''}{compactPower(growth)} <small>({growthPercent >= 0 ? '+' : ''}{growthPercent.toFixed(1)}%)</small></strong></div>
           <div><span>{copy.lastUpdate}</span><strong>{member.performance_updated_at ? new Intl.DateTimeFormat(language, { dateStyle: 'medium' }).format(new Date(member.performance_updated_at)) : copy.neverUpdated}</strong></div>
+        </div>
+        <div className="performance-periods" role="group" aria-label={copy.performanceHistory}>
+          {([7, 30, 90, 'all'] as const).map((option) => <button type="button" className={period === option ? 'active' : ''} aria-pressed={period === option} onClick={() => setPeriod(option)} key={option}>{option === 'all' ? copy.performanceHistory : `${option}d`}</button>)}
         </div>
         {loading && <p className="performance-empty">...</p>}
         {error && <p className="form-error" role="alert">{error}</p>}
@@ -68,6 +83,19 @@ export function MemberPerformanceModal({ member, copy, language, canView, onClos
                 <YAxis stroke="#879088" fontSize={11} tickFormatter={compactPower} width={58} />
                 <Tooltip formatter={(value) => Number(value).toLocaleString(language)} contentStyle={{ background: '#171d1b', border: '1px solid #3a4540' }} />
                 <Line type="monotone" dataKey="combat_power" name={copy.combatPower} stroke="#ed3833" strokeWidth={3} dot={{ r: 3 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="performance-chart" aria-label={`${copy.kills} · ${copy.weeklyContribution}`}>
+            <ResponsiveContainer width="100%" height={250}>
+              <LineChart data={chartData} margin={{ top: 10, right: 12, left: 4, bottom: 0 }}>
+                <CartesianGrid stroke="#2c3531" strokeDasharray="3 3" />
+                <XAxis dataKey="date" stroke="#879088" fontSize={11} />
+                <YAxis stroke="#879088" fontSize={11} tickFormatter={compactPower} width={58} />
+                <Tooltip formatter={(value) => Number(value).toLocaleString(language)} contentStyle={{ background: '#171d1b', border: '1px solid #3a4540' }} />
+                <Legend />
+                <Line type="monotone" dataKey="kills" name={copy.kills} stroke="#59a6d8" strokeWidth={2} dot={{ r: 2 }} />
+                <Line type="monotone" dataKey="weekly_contribution" name={copy.weeklyContribution} stroke="#f1b84b" strokeWidth={2} dot={{ r: 2 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>

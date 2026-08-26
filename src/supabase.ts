@@ -110,3 +110,34 @@ export type R4Application = {
   created_at: string
   profiles?: { member_name: string } | null
 }
+
+export type MemberNotification = {
+  id: number
+  event_kind: string
+  resource_kind: string | null
+  resource_id: string | null
+  created_at: string
+  read_at: string | null
+}
+
+export type AdminAuditEvent = {
+  id: number
+  actor_id: string | null
+  action: string
+  resource_kind: string
+  resource_id: string | null
+  changes: Record<string, unknown>
+  created_at: string
+}
+
+export type PerformanceIndicator = {
+  member_id: string
+  member_name: string
+  latest_date: string | null
+  previous_date: string | null
+  combat_power: number
+  combat_power_change: number
+  kills_change: number
+  contribution_change: number
+  days_since_update: number
+}
