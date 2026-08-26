@@ -212,6 +212,12 @@ footer img { width:110px; opacity:.65; }
 .admin-form input,.admin-form select,.admin-form textarea { width:100%; padding:12px 13px; color:#fff; border:1px solid #303834; outline:0; background:#1b221f; resize:vertical; }
 .admin-form input:focus,.admin-form select:focus,.admin-form textarea:focus { border-color:var(--red); }
 .admin-form .primary-button { justify-self:start; }
+.admin-form .check-field { display:flex; align-items:center; flex-direction:row; }
+.admin-form .check-field input { width:auto; accent-color:var(--red); }
+.email-preferences { display:flex; align-items:center; flex-wrap:wrap; gap:10px 20px; margin:0; padding:14px 16px; border:1px solid var(--line); }
+.email-preferences legend { padding:0 7px; color:var(--muted); font-size:.72rem; font-weight:700; text-transform:uppercase; }
+.email-preferences .check-field { display:flex; align-items:center; gap:7px; color:#d7ddd8; font-size:.8rem; font-weight:700; }
+.email-preferences input { accent-color:var(--red); }
 .news-admin-form { margin-bottom:22px; }
 .news-admin-form label:nth-child(2) { grid-row:auto; }
 .news-admin-form label:has(svg) { display:flex; align-items:center; flex-direction:row; flex-wrap:wrap; }

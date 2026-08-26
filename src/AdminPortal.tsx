@@ -17,6 +17,7 @@ type Props = {
   onSignUp: (email: string, password: string, allianceMemberId: string) => Promise<{ ok: boolean; message?: string }>
   onRequestPasswordReset: (email: string) => Promise<{ ok: boolean; message?: string }>
   onUpdatePassword: (password: string) => Promise<{ ok: boolean; message?: string }>
+  onUpdateEmailPreferences: (pollEmails: boolean, newsEmails: boolean) => Promise<{ ok: boolean; message?: string }>
   passwordRecovery: boolean
   onSignOut: () => Promise<void>
   onRefreshPolls: () => Promise<void>
@@ -46,7 +47,7 @@ const toDateTimeInput = (value: string | null) => {
   return new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16)
 }
 
-export function AdminPortal({ open, copy, language, user, profile, availableMembers, members: initialMembers, onClose, onSignIn, onSignUp, onRequestPasswordReset, onUpdatePassword, passwordRecovery, onSignOut, onRefreshPolls, onRefreshBoardNews, onRefreshMembers }: Props) {
+export function AdminPortal({ open, copy, language, user, profile, availableMembers, members: initialMembers, onClose, onSignIn, onSignUp, onRequestPasswordReset, onUpdatePassword, onUpdateEmailPreferences, passwordRecovery, onSignOut, onRefreshPolls, onRefreshBoardNews, onRefreshMembers }: Props) {
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
@@ -85,7 +86,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
       client.from('polls').select('id, question, active, closes_at, created_at, poll_options(id, label, position)').order('created_at', { ascending: false }),
       client.from('board_news').select('id, translations, image_paths, default_language, priority, published, published_at, expires_at, archived_at, created_at, updated_at').order('created_at', { ascending: false }),
       client.from('r4_applications').select('id, user_id, reason, experience, availability, status, created_at').order('created_at', { ascending: false }),
-      client.from('profiles').select('id, member_name, role, active, alliance_member_id, registration_status').order('member_name'),
+      client.from('profiles').select('id, member_name, role, active, alliance_member_id, registration_status, notify_poll_emails, notify_news_emails').order('member_name'),
       client.from('alliance_members').select('id, member_name, rank, player_level, combat_power, kills, weekly_contribution, active').order('member_name'),
     ])
     if (pollResponse.error) throw pollResponse.error
@@ -178,6 +179,19 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     setBusy(false)
   }
 
+  const saveEmailPreferences = async (pollEmails: boolean, newsEmails: boolean) => {
+    setError('')
+    const result = await onUpdateEmailPreferences(pollEmails, newsEmails)
+    if (!result.ok) setError(result.message ?? copy.notificationFailed)
+  }
+
+  const notifyMembers = async (kind: 'poll' | 'board_news', resourceId: string) => {
+    if (!supabase) return
+    const { error: notificationError } = await supabase.functions.invoke('notify-members', { body: { kind, resourceId } })
+    if (notificationError) setError(copy.notificationFailed)
+    else setMessage(copy.membersNotified)
+  }
+
   const createPoll = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!supabase) return
@@ -187,7 +201,8 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     const form = new FormData(formElement)
     const labels = String(form.get('options')).split('\n').map((option) => option.trim()).filter(Boolean)
     const closesAt = String(form.get('closesAt'))
-    const { error: createError } = await supabase.rpc('create_poll', {
+    const shouldNotify = form.get('notifyMembers') === 'on'
+    const { data: pollId, error: createError } = await supabase.rpc('create_poll', {
       poll_question: String(form.get('question')),
       option_labels: labels,
       poll_closes_at: closesAt ? new Date(closesAt).toISOString() : null,
@@ -196,6 +211,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     else {
       formElement.reset()
       await Promise.all([loadAdminData(), onRefreshPolls()])
+      if (shouldNotify && pollId) await notifyMembers('poll', String(pollId))
     }
     setBusy(false)
   }
@@ -259,6 +275,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     }
     const expiresAt = String(form.get('expiresAt'))
     const published = form.get('published') === 'on'
+    const shouldNotify = !editingNews && published && form.get('notifyMembers') === 'on'
     const uploadedPaths: string[] = []
     for (const selectedImage of newsImageFiles) {
       const file = selectedImage.file
@@ -283,12 +300,19 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
       expires_at: expiresAt ? new Date(expiresAt).toISOString() : null,
       archived_at: editingNews?.archived_at ?? null,
     }
-    const response = editingNews
-      ? await supabase.from('board_news').update(values).eq('id', editingNews.id)
-      : await supabase.from('board_news').insert({ ...values, created_by: user.id })
-    if (response.error) {
+    let responseError: { message: string } | null = null
+    let createdNewsId: string | null = null
+    if (editingNews) {
+      const { error: updateError } = await supabase.from('board_news').update(values).eq('id', editingNews.id)
+      responseError = updateError
+    } else {
+      const { data: createdNews, error: insertError } = await supabase.from('board_news').insert({ ...values, created_by: user.id }).select('id').single()
+      responseError = insertError
+      createdNewsId = createdNews?.id ?? null
+    }
+    if (responseError) {
       if (uploadedPaths.length) await supabase.storage.from('board-news').remove(uploadedPaths)
-      setError(response.error.message)
+      setError(responseError.message)
     }
     else {
       const removedPaths = editingNews?.image_paths.filter((path) => !newsImagePaths.includes(path)) ?? []
@@ -296,6 +320,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
       resetNewsEditor()
       formElement.reset()
       await Promise.all([loadAdminData(), onRefreshBoardNews()])
+      if (shouldNotify && createdNewsId) await notifyMembers('board_news', createdNewsId)
     }
     setBusy(false)
   }
@@ -426,11 +451,13 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
         {profile?.registration_status === 'pending' && <p>{copy.pendingApproval}</p>}
         {profile?.registration_status === 'rejected' && <p>{copy.rejectedRegistration}</p>}
         {!profile?.active && profile?.registration_status === 'approved' && <p>{copy.inactiveMember}</p>}
+        {profile && <fieldset className="email-preferences"><legend>{copy.emailPreferences}</legend><label className="check-field"><input type="checkbox" checked={profile.notify_poll_emails} onChange={(event) => void saveEmailPreferences(event.target.checked, profile.notify_news_emails)} />{copy.notifyPollEmails}</label><label className="check-field"><input type="checkbox" checked={profile.notify_news_emails} onChange={(event) => void saveEmailPreferences(profile.notify_poll_emails, event.target.checked)} />{copy.notifyNewsEmails}</label></fieldset>}
         <button className="ghost-button" onClick={onSignOut}><LogOut size={16} />{copy.signOut}</button>
       </div>}
 
       {!passwordRecovery && profile?.role === 'admin' && <div className="admin-content">
         <div className="admin-heading"><span>{copy.signedInAs}: <strong>{profile.member_name}</strong></span><button className="ghost-button" onClick={onSignOut}><LogOut size={16} />{copy.signOut}</button></div>
+        <fieldset className="email-preferences"><legend>{copy.emailPreferences}</legend><label className="check-field"><input type="checkbox" checked={profile.notify_poll_emails} onChange={(event) => void saveEmailPreferences(event.target.checked, profile.notify_news_emails)} />{copy.notifyPollEmails}</label><label className="check-field"><input type="checkbox" checked={profile.notify_news_emails} onChange={(event) => void saveEmailPreferences(profile.notify_poll_emails, event.target.checked)} />{copy.notifyNewsEmails}</label></fieldset>
         <nav className="admin-section-nav" aria-label={copy.adminDashboard}>
           <button type="button" onClick={() => scrollToAdminSection('admin-news')}><Megaphone size={16} />{copy.manageNews}</button>
           <button type="button" onClick={() => scrollToAdminSection('admin-create-poll')}><Plus size={16} />{copy.createPoll}</button>
@@ -455,6 +482,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
             <label>{copy.priority}<select name="priority" defaultValue={editingNews?.priority ?? 'standard'}><option value="standard">{copy.standard}</option><option value="important">{copy.important}</option><option value="critical">{copy.critical}</option></select></label>
             <label>{copy.expiresOn}<input name="expiresAt" type="datetime-local" defaultValue={toDateTimeInput(editingNews?.expires_at ?? null)} /></label>
             <label className="check-field"><input name="published" type="checkbox" defaultChecked={editingNews?.published ?? true} />{copy.publishNow}</label>
+            {!editingNews && <label className="check-field"><input name="notifyMembers" type="checkbox" />{copy.notifyMembers}</label>}
             <div className="row-actions"><button className="primary-button" type="submit" disabled={busy}>{editingNews ? copy.save : copy.createNews}</button>{editingNews && <button className="ghost-button" type="button" onClick={resetNewsEditor}>{copy.cancel}</button>}</div>
           </form>
 
@@ -474,6 +502,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
             <label>{copy.question}<input name="question" required minLength={5} maxLength={240} /></label>
             <label>{copy.options}<textarea name="options" required rows={4} placeholder={'Option 1\nOption 2'} /></label>
             <label>{copy.closingDate}<input name="closesAt" type="datetime-local" /></label>
+            <label className="check-field"><input name="notifyMembers" type="checkbox" />{copy.notifyMembers}</label>
             <button className="primary-button" type="submit" disabled={busy}>{copy.publish}</button>
           </form>
         </section>

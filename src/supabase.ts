@@ -18,6 +18,8 @@ export type Profile = {
   active: boolean
   alliance_member_id: string | null
   registration_status: 'pending' | 'approved' | 'rejected'
+  notify_poll_emails: boolean
+  notify_news_emails: boolean
 }
 
 export type AllianceMember = {

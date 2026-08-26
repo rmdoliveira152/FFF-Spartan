@@ -69,7 +69,7 @@ export function usePortal() {
   const loadProfile = async (userId: string) => {
     const client = supabase
     if (!client) return
-    const { data } = await client.from('profiles').select('id, member_name, role, active, alliance_member_id, registration_status').eq('id', userId).maybeSingle()
+    const { data } = await client.from('profiles').select('id, member_name, role, active, alliance_member_id, registration_status, notify_poll_emails, notify_news_emails').eq('id', userId).maybeSingle()
     setProfile(data as Profile | null)
   }
 
@@ -139,6 +139,14 @@ export function usePortal() {
     setPasswordRecovery(false)
   }
 
+  const updateEmailPreferences = async (pollEmails: boolean, newsEmails: boolean): Promise<ActionResult> => {
+    if (!supabase || !user) return { ok: false, message: 'LOGIN_REQUIRED' }
+    const { error } = await supabase.rpc('update_email_preferences', { poll_emails: pollEmails, news_emails: newsEmails })
+    if (error) return { ok: false, message: error.message }
+    setProfile((current) => current ? { ...current, notify_poll_emails: pollEmails, notify_news_emails: newsEmails } : current)
+    return { ok: true }
+  }
+
   const vote = async (pollId: string, optionId: string): Promise<ActionResult> => {
     if (!supabase || !user || !profile?.active || profile.registration_status !== 'approved') return { ok: false, message: 'LOGIN_REQUIRED' }
     const { error } = await supabase.from('votes').insert({ poll_id: pollId, option_id: optionId, user_id: user.id })
@@ -171,6 +179,7 @@ export function usePortal() {
     requestPasswordReset,
     updatePassword,
     signOut,
+    updateEmailPreferences,
     vote,
     submitApplication,
     refreshPolls: loadPolls,

@@ -60,6 +60,11 @@ type MemberAccessCopy = {
   currentAccount: string; searchAccounts: string; noAccessResults: string
 }
 
+type NotificationCopy = {
+  notifyMembers: string; membersNotified: string; notificationFailed: string
+  emailPreferences: string; notifyPollEmails: string; notifyNewsEmails: string
+}
+
 type AllianceCodeCopy = { codeLabel: string; codeTitle: string; codePlayers: string; codeAdmins: string; codeCourtesy: string }
 
 const codeAgreementCopy: Record<Language, string> = {
@@ -81,7 +86,7 @@ const allianceCodeCopy: Record<Language, AllianceCodeCopy> = {
   'zh-TW':{ codeLabel:'聯盟標準',codeTitle:'行動準則',codePlayers:'其他玩家',codeAdmins:'R4 · 管理',codeCourtesy:'友善並有禮貌地對待其他玩家。' },
 }
 
-export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy & DynamicTranslationCopy & MemberAccessCopy & AllianceCodeCopy & EventGuideCopy & { codeAgreement: string }
+export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy & DynamicTranslationCopy & MemberAccessCopy & NotificationCopy & AllianceCodeCopy & EventGuideCopy & { codeAgreement: string }
 
 const en: BaseCopy = {
   navHome: 'Command', navRanks: 'Roster', navPolls: 'Polls', navR4: 'R4 application', navRules: 'Code', admin: 'Admin',
@@ -499,6 +504,26 @@ const memberAccessCopy: Record<Language, MemberAccessCopy> = {
   'zh-TW': { accessPending:'待處理',accessApproved:'已核准',accessInactive:'未啟用',currentAccount:'目前帳號',searchAccounts:'搜尋帳號',noAccessResults:'找不到帳號。' },
 }
 
+const notificationCopy: Record<Language, NotificationCopy> = {
+  en:{notifyMembers:'Notify active members by email',membersNotified:'Members notified by email.',notificationFailed:'Content saved, but email notification failed.',emailPreferences:'Email notifications',notifyPollEmails:'New polls',notifyNewsEmails:'Board News'},
+  pt:{notifyMembers:'Notificar membros ativos por email',membersNotified:'Membros notificados por email.',notificationFailed:'Conteúdo guardado, mas a notificação por email falhou.',emailPreferences:'Notificações por email',notifyPollEmails:'Novas votações',notifyNewsEmails:'Board News'},
+  es:{notifyMembers:'Notificar por correo a los miembros activos',membersNotified:'Miembros notificados por correo.',notificationFailed:'Contenido guardado, pero falló la notificación.',emailPreferences:'Notificaciones por correo',notifyPollEmails:'Nuevas votaciones',notifyNewsEmails:'Board News'},
+  fr:{notifyMembers:'Notifier les membres actifs par e-mail',membersNotified:'Membres notifiés par e-mail.',notificationFailed:'Contenu enregistré, mais la notification a échoué.',emailPreferences:'Notifications par e-mail',notifyPollEmails:'Nouveaux sondages',notifyNewsEmails:'Board News'},
+  de:{notifyMembers:'Aktive Mitglieder per E-Mail benachrichtigen',membersNotified:'Mitglieder per E-Mail benachrichtigt.',notificationFailed:'Inhalt gespeichert, E-Mail-Benachrichtigung fehlgeschlagen.',emailPreferences:'E-Mail-Benachrichtigungen',notifyPollEmails:'Neue Umfragen',notifyNewsEmails:'Board News'},
+  it:{notifyMembers:'Avvisa via email i membri attivi',membersNotified:'Membri avvisati via email.',notificationFailed:'Contenuto salvato, ma la notifica non è riuscita.',emailPreferences:'Notifiche email',notifyPollEmails:'Nuovi sondaggi',notifyNewsEmails:'Board News'},
+  pl:{notifyMembers:'Powiadom aktywnych członków e-mailem',membersNotified:'Członkowie zostali powiadomieni.',notificationFailed:'Treść zapisana, ale powiadomienie nie powiodło się.',emailPreferences:'Powiadomienia e-mail',notifyPollEmails:'Nowe ankiety',notifyNewsEmails:'Board News'},
+  ru:{notifyMembers:'Уведомить активных участников по почте',membersNotified:'Участники уведомлены по почте.',notificationFailed:'Материал сохранён, но уведомление не отправлено.',emailPreferences:'Уведомления по почте',notifyPollEmails:'Новые опросы',notifyNewsEmails:'Board News'},
+  tr:{notifyMembers:'Aktif üyelere e-posta gönder',membersNotified:'Üyelere e-posta gönderildi.',notificationFailed:'İçerik kaydedildi ancak bildirim gönderilemedi.',emailPreferences:'E-posta bildirimleri',notifyPollEmails:'Yeni anketler',notifyNewsEmails:'Board News'},
+  id:{notifyMembers:'Beri tahu anggota aktif melalui email',membersNotified:'Anggota diberi tahu melalui email.',notificationFailed:'Konten disimpan, tetapi notifikasi gagal.',emailPreferences:'Notifikasi email',notifyPollEmails:'Polling baru',notifyNewsEmails:'Board News'},
+  vi:{notifyMembers:'Thông báo thành viên hoạt động qua email',membersNotified:'Đã thông báo thành viên qua email.',notificationFailed:'Đã lưu nội dung nhưng gửi thông báo thất bại.',emailPreferences:'Thông báo email',notifyPollEmails:'Cuộc thăm dò mới',notifyNewsEmails:'Board News'},
+  th:{notifyMembers:'แจ้งสมาชิกที่ใช้งานทางอีเมล',membersNotified:'แจ้งสมาชิกทางอีเมลแล้ว',notificationFailed:'บันทึกเนื้อหาแล้ว แต่ส่งการแจ้งเตือนไม่สำเร็จ',emailPreferences:'การแจ้งเตือนทางอีเมล',notifyPollEmails:'แบบสำรวจใหม่',notifyNewsEmails:'Board News'},
+  ja:{notifyMembers:'有効なメンバーにメールで通知',membersNotified:'メンバーにメールで通知しました。',notificationFailed:'内容は保存されましたが、通知に失敗しました。',emailPreferences:'メール通知',notifyPollEmails:'新しい投票',notifyNewsEmails:'Board News'},
+  ko:{notifyMembers:'활성 회원에게 이메일 알림',membersNotified:'회원에게 이메일을 보냈습니다.',notificationFailed:'콘텐츠는 저장됐지만 알림 전송에 실패했습니다.',emailPreferences:'이메일 알림',notifyPollEmails:'새 투표',notifyNewsEmails:'Board News'},
+  ar:{notifyMembers:'إخطار الأعضاء النشطين بالبريد',membersNotified:'تم إخطار الأعضاء بالبريد.',notificationFailed:'تم حفظ المحتوى لكن تعذر إرسال الإشعار.',emailPreferences:'إشعارات البريد',notifyPollEmails:'استطلاعات جديدة',notifyNewsEmails:'Board News'},
+  'zh-CN':{notifyMembers:'通过邮件通知活跃成员',membersNotified:'已通过邮件通知成员。',notificationFailed:'内容已保存，但邮件通知失败。',emailPreferences:'邮件通知',notifyPollEmails:'新投票',notifyNewsEmails:'Board News'},
+  'zh-TW':{notifyMembers:'透過電子郵件通知活躍成員',membersNotified:'已透過電子郵件通知成員。',notificationFailed:'內容已儲存，但郵件通知失敗。',emailPreferences:'電子郵件通知',notifyPollEmails:'新投票',notifyNewsEmails:'Board News'},
+}
+
 const dynamicTranslationCopy: Record<Language, DynamicTranslationCopy> = {
   en: { translateNews:'Translate',translatingNews:'Translating…',viewOriginal:'View original',translationFailed:'Translation is temporarily unavailable.' },
   pt: { translateNews:'Traduzir',translatingNews:'A traduzir…',viewOriginal:'Ver original',translationFailed:'A tradução está temporariamente indisponível.' },
@@ -541,5 +566,5 @@ const automaticTranslationHint: Record<Language, string> = {
 
 export function getCopy(language: Language): Copy {
   const base = language === 'pt' ? pt : language === 'en' ? en : { ...en, ...translated[language] }
-  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...allianceCodeCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language], codeAgreement: codeAgreementCopy[language] }
+  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...notificationCopy[language], ...allianceCodeCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language], codeAgreement: codeAgreementCopy[language] }
 }
