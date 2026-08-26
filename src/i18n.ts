@@ -50,7 +50,12 @@ type DynamicTranslationCopy = {
   translateNews: string; translatingNews: string; viewOriginal: string; translationFailed: string
 }
 
-export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy & DynamicTranslationCopy & EventGuideCopy
+type MemberAccessCopy = {
+  accessPending: string; accessApproved: string; accessInactive: string
+  currentAccount: string; searchAccounts: string; noAccessResults: string
+}
+
+export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy & DynamicTranslationCopy & MemberAccessCopy & EventGuideCopy
 
 const en: BaseCopy = {
   navHome: 'Command', navRanks: 'Roster', navPolls: 'Polls', navR4: 'R4 application', navRules: 'Code', admin: 'Admin',
@@ -448,6 +453,26 @@ const createdOnCopy: Record<Language, string> = {
   id:'Dibuat', vi:'Đã tạo', th:'สร้างเมื่อ', ja:'作成日', ko:'작성일', ar:'تاريخ الإنشاء', 'zh-CN':'创建时间', 'zh-TW':'建立時間',
 }
 
+const memberAccessCopy: Record<Language, MemberAccessCopy> = {
+  en: { accessPending:'Pending',accessApproved:'Approved',accessInactive:'Inactive',currentAccount:'Current account',searchAccounts:'Search accounts',noAccessResults:'No accounts found.' },
+  pt: { accessPending:'Pendentes',accessApproved:'Aprovados',accessInactive:'Inativos',currentAccount:'Conta atual',searchAccounts:'Pesquisar acessos',noAccessResults:'Nenhuma conta encontrada.' },
+  es: { accessPending:'Pendientes',accessApproved:'Aprobados',accessInactive:'Inactivos',currentAccount:'Cuenta actual',searchAccounts:'Buscar cuentas',noAccessResults:'No se encontraron cuentas.' },
+  fr: { accessPending:'En attente',accessApproved:'Approuvés',accessInactive:'Inactifs',currentAccount:'Compte actuel',searchAccounts:'Rechercher des comptes',noAccessResults:'Aucun compte trouvé.' },
+  de: { accessPending:'Ausstehend',accessApproved:'Freigegeben',accessInactive:'Inaktiv',currentAccount:'Aktuelles Konto',searchAccounts:'Konten suchen',noAccessResults:'Keine Konten gefunden.' },
+  it: { accessPending:'In attesa',accessApproved:'Approvati',accessInactive:'Inattivi',currentAccount:'Account attuale',searchAccounts:'Cerca account',noAccessResults:'Nessun account trovato.' },
+  pl: { accessPending:'Oczekujące',accessApproved:'Zatwierdzone',accessInactive:'Nieaktywne',currentAccount:'Bieżące konto',searchAccounts:'Szukaj kont',noAccessResults:'Nie znaleziono kont.' },
+  ru: { accessPending:'Ожидают',accessApproved:'Одобрены',accessInactive:'Неактивны',currentAccount:'Текущая учётная запись',searchAccounts:'Поиск учётных записей',noAccessResults:'Учётные записи не найдены.' },
+  tr: { accessPending:'Bekleyen',accessApproved:'Onaylı',accessInactive:'Etkin değil',currentAccount:'Mevcut hesap',searchAccounts:'Hesap ara',noAccessResults:'Hesap bulunamadı.' },
+  id: { accessPending:'Menunggu',accessApproved:'Disetujui',accessInactive:'Nonaktif',currentAccount:'Akun saat ini',searchAccounts:'Cari akun',noAccessResults:'Tidak ada akun ditemukan.' },
+  vi: { accessPending:'Chờ duyệt',accessApproved:'Đã duyệt',accessInactive:'Không hoạt động',currentAccount:'Tài khoản hiện tại',searchAccounts:'Tìm tài khoản',noAccessResults:'Không tìm thấy tài khoản.' },
+  th: { accessPending:'รอดำเนินการ',accessApproved:'อนุมัติแล้ว',accessInactive:'ไม่ใช้งาน',currentAccount:'บัญชีปัจจุบัน',searchAccounts:'ค้นหาบัญชี',noAccessResults:'ไม่พบบัญชี' },
+  ja: { accessPending:'保留中',accessApproved:'承認済み',accessInactive:'無効',currentAccount:'現在のアカウント',searchAccounts:'アカウントを検索',noAccessResults:'アカウントが見つかりません。' },
+  ko: { accessPending:'대기',accessApproved:'승인됨',accessInactive:'비활성',currentAccount:'현재 계정',searchAccounts:'계정 검색',noAccessResults:'계정을 찾을 수 없습니다.' },
+  ar: { accessPending:'قيد الانتظار',accessApproved:'مقبول',accessInactive:'غير نشط',currentAccount:'الحساب الحالي',searchAccounts:'البحث عن حسابات',noAccessResults:'لم يتم العثور على حسابات.' },
+  'zh-CN': { accessPending:'待处理',accessApproved:'已批准',accessInactive:'未启用',currentAccount:'当前账号',searchAccounts:'搜索账号',noAccessResults:'未找到账号。' },
+  'zh-TW': { accessPending:'待處理',accessApproved:'已核准',accessInactive:'未啟用',currentAccount:'目前帳號',searchAccounts:'搜尋帳號',noAccessResults:'找不到帳號。' },
+}
+
 const dynamicTranslationCopy: Record<Language, DynamicTranslationCopy> = {
   en: { translateNews:'Translate',translatingNews:'Translating…',viewOriginal:'View original',translationFailed:'Translation is temporarily unavailable.' },
   pt: { translateNews:'Traduzir',translatingNews:'A traduzir…',viewOriginal:'Ver original',translationFailed:'A tradução está temporariamente indisponível.' },
@@ -490,5 +515,5 @@ const automaticTranslationHint: Record<Language, string> = {
 
 export function getCopy(language: Language): Copy {
   const base = language === 'pt' ? pt : language === 'en' ? en : { ...en, ...translated[language] }
-  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language] }
+  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language] }
 }

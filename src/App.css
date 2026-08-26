@@ -238,6 +238,18 @@ footer img { width:110px; opacity:.65; }
 .member-access-list > div { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 12px; border:1px solid var(--line); }
 .member-access-list span { display:grid; gap:3px; }
 .member-access-list small { color:var(--muted); text-transform:uppercase; }
+.access-tabs { display:flex; overflow-x:auto; margin-bottom:12px; border-bottom:1px solid var(--line); }
+.access-tabs button { min-height:42px; display:flex; align-items:center; gap:8px; padding:0 15px; color:#858d87; border:0; border-bottom:3px solid transparent; background:transparent; cursor:pointer; font-weight:700; text-transform:uppercase; white-space:nowrap; }
+.access-tabs button.active { color:#fff; border-bottom-color:var(--red); }
+.access-tabs button span { min-width:23px; height:21px; display:grid; place-items:center; padding:0 6px; color:#c8cdc8; background:#29312d; font-size:.7rem; }
+.access-tabs button.active span { color:#fff; background:var(--red-dark); }
+.login-modal .member-access-search { margin-bottom:10px; }
+.member-access-scroll { max-height:360px; grid-template-columns:1fr; overflow-y:auto; border:1px solid var(--line); }
+.member-access-scroll > div { min-height:52px; padding:8px 11px; border:0; border-bottom:1px solid var(--line); background:#171d1b; }
+.member-access-scroll > div:last-of-type { border-bottom:0; }
+.member-access-scroll .row-actions { display:flex; align-items:center; flex-direction:row; margin:0; }
+.current-account { padding:5px 8px; color:#d8ddd7; border:1px solid #3b453f; background:#202723; white-space:nowrap; }
+.access-empty { margin:0; padding:18px; color:var(--muted); }
 .form-error { padding:11px 13px; color:#ffb2ac; border-left:3px solid var(--red); background:rgba(227,58,47,.1); }
 .form-success { padding:11px 13px; color:#b9dfc4; border-left:3px solid #4caa68; background:rgba(76,170,104,.1); }
 [dir='rtl'] .hero-content,[dir='rtl'] .section-header,[dir='rtl'] .application-copy { text-align:right; }
@@ -303,4 +315,5 @@ footer img { width:110px; opacity:.65; }
   .roster-form { grid-template-columns:1fr; }
   .admin-form label:nth-child(2) { grid-row:auto; }
   .admin-heading { align-items:flex-start; flex-direction:column; }
+  .member-access-scroll > div { align-items:flex-start; flex-direction:column; }
 }

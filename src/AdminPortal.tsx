@@ -25,6 +25,7 @@ type Props = {
 }
 
 const emptyNewsTranslation: BoardNewsTranslation = { title: '', body: '' }
+type AccessFilter = 'pending' | 'approved' | 'inactive'
 
 const toDateTimeInput = (value: string | null) => {
   if (!value) return ''
@@ -47,9 +48,19 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [adminMembers, setAdminMembers] = useState<AllianceMember[]>(initialMembers)
   const [memberQuery, setMemberQuery] = useState('')
+  const [accessFilter, setAccessFilter] = useState<AccessFilter>('pending')
+  const [accessQuery, setAccessQuery] = useState('')
 
   const filteredAdminMembers = adminMembers.filter((member) =>
     member.member_name.toLocaleLowerCase(language).includes(memberQuery.trim().toLocaleLowerCase(language)),
+  )
+  const accessProfiles: Record<AccessFilter, Profile[]> = {
+    pending: profiles.filter((member) => member.registration_status === 'pending'),
+    approved: profiles.filter((member) => member.registration_status === 'approved' && member.active),
+    inactive: profiles.filter((member) => member.registration_status !== 'pending' && (member.registration_status !== 'approved' || !member.active)),
+  }
+  const filteredAccessProfiles = accessProfiles[accessFilter].filter((member) =>
+    member.member_name.toLocaleLowerCase(language).includes(accessQuery.trim().toLocaleLowerCase(language)),
   )
 
   const loadAdminData = async () => {
@@ -406,12 +417,26 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
             <div className="row-actions">{application.status === 'pending' && <><button className="compact-button" onClick={() => updateApplication(application, 'approved')}><Check size={14} />{copy.approve}</button><button className="compact-button danger" onClick={() => updateApplication(application, 'rejected')}><X size={14} />{copy.reject}</button></>}<button className="compact-button danger" onClick={() => void deleteApplication(application)}><Trash2 size={14} />{copy.delete}</button></div></article>)}</div>
         </section>
 
-        <section className="admin-block"><h3>{copy.memberAccess}</h3>
-          <h4>{copy.registrationRequests}</h4>
-          <div className="member-access-list">{profiles.filter((member) => member.registration_status === 'pending').map((member) => <div key={member.id}><span><strong>{member.member_name}</strong><small>{member.registration_status}</small></span><span className="row-actions"><button className="compact-button" onClick={() => reviewRegistration(member, 'approved')}><Check size={14} />{copy.approve}</button><button className="compact-button danger" onClick={() => reviewRegistration(member, 'rejected')}><X size={14} />{copy.reject}</button></span></div>)}
-            {!profiles.some((member) => member.registration_status === 'pending') && <p>{copy.noRegistrations}</p>}
+        <section className="admin-block member-access-admin"><h3>{copy.memberAccess}</h3>
+          <div className="access-tabs" role="tablist" aria-label={copy.memberAccess}>
+            {(['pending', 'approved', 'inactive'] as const).map((filter) => <button type="button" role="tab" aria-selected={accessFilter === filter} className={accessFilter === filter ? 'active' : ''} onClick={() => setAccessFilter(filter)} key={filter}>
+              {filter === 'pending' ? copy.accessPending : filter === 'approved' ? copy.accessApproved : copy.accessInactive}<span>{accessProfiles[filter].length}</span>
+            </button>)}
           </div>
-          <div className="member-access-list">{profiles.filter((member) => member.registration_status !== 'pending').map((member) => <div key={member.id}><span><strong>{member.member_name}</strong><small>{member.role} · {member.registration_status}</small></span><button className="compact-button" disabled={member.id === profile.id} onClick={() => toggleMember(member)}>{member.active ? copy.deactivate : copy.activate}</button></div>)}</div>
+          <label className="roster-admin-search member-access-search"><Search size={17} /><input type="search" value={accessQuery} onChange={(event) => setAccessQuery(event.target.value)} placeholder={copy.searchAccounts} /></label>
+          <div className="member-access-list member-access-scroll" role="list">{filteredAccessProfiles.map((member) => <div role="listitem" key={member.id}>
+            <span><strong>{member.member_name}</strong><small>{member.role} · {accessFilter === 'pending' ? copy.accessPending : accessFilter === 'approved' ? copy.accessApproved : copy.accessInactive}</small></span>
+            {member.id === profile.id
+              ? <small className="current-account">{copy.currentAccount}</small>
+              : <span className="row-actions">{accessFilter === 'pending'
+                ? <><button className="compact-button" onClick={() => reviewRegistration(member, 'approved')}><Check size={14} />{copy.approve}</button><button className="compact-button danger" onClick={() => reviewRegistration(member, 'rejected')}><X size={14} />{copy.reject}</button></>
+                : member.registration_status === 'rejected'
+                  ? <button className="compact-button" onClick={() => reviewRegistration(member, 'approved')}><Check size={14} />{copy.approve}</button>
+                  : <button className="compact-button" onClick={() => toggleMember(member)}>{member.active ? copy.deactivate : copy.activate}</button>}
+              </span>}
+          </div>)}
+            {filteredAccessProfiles.length === 0 && <p className="access-empty">{accessQuery ? copy.noAccessResults : accessFilter === 'pending' ? copy.noRegistrations : copy.noAccessResults}</p>}
+          </div>
         </section>
 
         <section className="admin-block"><h3>{copy.manageRoster}</h3>
