@@ -444,7 +444,15 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     setError('')
     const { error: reviewError } = await supabase.rpc('review_registration', { requested_profile: member.id, decision })
     if (reviewError) setError(reviewError.message)
-    else await loadAdminData()
+    else {
+      if (decision === 'approved') {
+        const { error: notificationError } = await supabase.functions.invoke('notify-registration-approved', {
+          body: { profileId: member.id },
+        })
+        if (notificationError) setError(copy.notificationFailed)
+      }
+      await loadAdminData()
+    }
   }
 
   const deleteInactiveAccount = async (member: Profile) => {
