@@ -60,7 +60,21 @@ type MemberAccessCopy = {
   currentAccount: string; searchAccounts: string; noAccessResults: string
 }
 
-export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy & DynamicTranslationCopy & MemberAccessCopy & EventGuideCopy
+type AllianceCodeCopy = { codeLabel: string; codeTitle: string }
+
+const allianceCodeCopy: Record<Language, AllianceCodeCopy> = {
+  en:{ codeLabel:'Alliance standard',codeTitle:'Operational code' }, pt:{ codeLabel:'Padrão da aliança',codeTitle:'Código operacional' },
+  es:{ codeLabel:'Estándar de la alianza',codeTitle:'Código operativo' }, fr:{ codeLabel:'Standard de l’alliance',codeTitle:'Code opérationnel' },
+  de:{ codeLabel:'Allianzstandard',codeTitle:'Einsatzkodex' }, it:{ codeLabel:'Standard dell’alleanza',codeTitle:'Codice operativo' },
+  pl:{ codeLabel:'Standard sojuszu',codeTitle:'Kodeks operacyjny' }, ru:{ codeLabel:'Стандарт альянса',codeTitle:'Оперативный кодекс' },
+  tr:{ codeLabel:'İttifak standardı',codeTitle:'Operasyon kuralları' }, id:{ codeLabel:'Standar aliansi',codeTitle:'Kode operasional' },
+  vi:{ codeLabel:'Tiêu chuẩn liên minh',codeTitle:'Quy tắc hoạt động' }, th:{ codeLabel:'มาตรฐานพันธมิตร',codeTitle:'หลักปฏิบัติการ' },
+  ja:{ codeLabel:'同盟基準',codeTitle:'運用規範' }, ko:{ codeLabel:'동맹 기준',codeTitle:'운영 규정' },
+  ar:{ codeLabel:'معيار التحالف',codeTitle:'قواعد العمليات' }, 'zh-CN':{ codeLabel:'联盟标准',codeTitle:'行动准则' },
+  'zh-TW':{ codeLabel:'聯盟標準',codeTitle:'行動準則' },
+}
+
+export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy & DynamicTranslationCopy & MemberAccessCopy & AllianceCodeCopy & EventGuideCopy
 
 const en: BaseCopy = {
   navHome: 'Command', navRanks: 'Roster', navPolls: 'Polls', navR4: 'R4 application', navRules: 'Code', admin: 'Admin',
@@ -520,5 +534,5 @@ const automaticTranslationHint: Record<Language, string> = {
 
 export function getCopy(language: Language): Copy {
   const base = language === 'pt' ? pt : language === 'en' ? en : { ...en, ...translated[language] }
-  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language] }
+  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...allianceCodeCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language] }
 }
