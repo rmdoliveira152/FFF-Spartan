@@ -257,10 +257,10 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     else await Promise.all([loadAdminData(), onRefreshBoardNews()])
   }
 
-  const deleteNewsDraft = async (news: BoardNews) => {
-    if (!supabase || news.published || !window.confirm(copy.confirmDeleteNews)) return
+  const deleteArchivedNews = async (news: BoardNews) => {
+    if (!supabase || !news.archived_at || !window.confirm(copy.confirmDeleteNews)) return
     setError('')
-    const { error: deleteError } = await supabase.from('board_news').delete().eq('id', news.id)
+    const { error: deleteError } = await supabase.from('board_news').delete().eq('id', news.id).not('archived_at', 'is', null)
     if (deleteError) setError(deleteError.message)
     else {
       if (editingNews?.id === news.id) resetNewsEditor()
@@ -391,7 +391,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
             const endedAt = news.archived_at ?? news.expires_at
             return <article data-priority={news.priority} key={news.id}><div><strong>{translation?.title}</strong><small>{news.archived_at ? copy.archive : news.published ? copy.publishedOn : copy.draft}</small></div>
               <p>{translation?.body}</p><small>{copy.createdOn}: {new Date(news.created_at).toLocaleString(language)}</small>{endedAt && <small>{copy.expiresOn}: {new Date(endedAt).toLocaleString(language)}</small>}
-              <div className="row-actions"><button className="compact-button" type="button" onClick={() => editNews(news)}><Pencil size={14} />{copy.editNews}</button>{news.published && <button className="compact-button" type="button" onClick={() => toggleNewsArchive(news)}>{news.archived_at ? <RotateCcw size={14} /> : <Archive size={14} />}{news.archived_at ? copy.restore : copy.archive}</button>}{!news.published && <button className="compact-button danger" type="button" onClick={() => deleteNewsDraft(news)}><Trash2 size={14} />{copy.delete}</button>}</div>
+              <div className="row-actions"><button className="compact-button" type="button" onClick={() => editNews(news)}><Pencil size={14} />{copy.editNews}</button>{news.published && <button className="compact-button" type="button" onClick={() => toggleNewsArchive(news)}>{news.archived_at ? <RotateCcw size={14} /> : <Archive size={14} />}{news.archived_at ? copy.restore : copy.archive}</button>}{news.archived_at && <button className="compact-button danger" type="button" onClick={() => void deleteArchivedNews(news)}><Trash2 size={14} />{copy.delete}</button>}</div>
             </article>
           })}</div>
         </section>
