@@ -43,12 +43,17 @@ type BoardNewsCopy = {
   publishedOn: string; createdOn: string; expiresOn: string; manageNews: string; createNews: string; editNews: string
   newsHeadline: string; newsBody: string; sourceLanguage: string; priority: string; standard: string
   important: string; critical: string; publishNow: string; archive: string; restore: string; draft: string
-  translationHint: string; confirmDeleteNews: string; newsImages: string
+  translationHint: string; confirmDeleteNews: string; newsImages: string; gameServerTime: string
 }
 
 const newsImagesCopy: Record<Language, string> = {
   en:'Screenshots', pt:'Capturas de ecrã', es:'Capturas de pantalla', fr:'Captures d’écran', de:'Screenshots', it:'Screenshot', pl:'Zrzuty ekranu', ru:'Скриншоты', tr:'Ekran görüntüleri',
   id:'Tangkapan layar', vi:'Ảnh chụp màn hình', th:'ภาพหน้าจอ', ja:'スクリーンショット', ko:'스크린샷', ar:'لقطات الشاشة', 'zh-CN':'截图', 'zh-TW':'螢幕截圖',
+}
+
+const gameServerTimeCopy: Record<Language, string> = {
+  en:'Game server time (UTC)', pt:'Hora do servidor do jogo (UTC)', es:'Hora del servidor del juego (UTC)', fr:'Heure du serveur du jeu (UTC)', de:'Spielserverzeit (UTC)', it:'Ora del server di gioco (UTC)', pl:'Czas serwera gry (UTC)', ru:'Время игрового сервера (UTC)', tr:'Oyun sunucusu saati (UTC)',
+  id:'Waktu server game (UTC)', vi:'Giờ máy chủ trò chơi (UTC)', th:'เวลาเซิร์ฟเวอร์เกม (UTC)', ja:'ゲームサーバー時刻 (UTC)', ko:'게임 서버 시간 (UTC)', ar:'وقت خادم اللعبة (UTC)', 'zh-CN':'游戏服务器时间 (UTC)', 'zh-TW':'遊戲伺服器時間 (UTC)',
 }
 
 type DynamicTranslationCopy = {
@@ -488,7 +493,7 @@ const recoveryCopy: Record<Language, RecoveryCopy> = {
   'zh-TW': { forgotPassword:'忘記密碼？',resetPasswordTitle:'重設密碼',recoveryInstructions:'輸入電子郵件以接收安全的復原連結。',sendRecovery:'傳送復原郵件',recoverySent:'請檢查電子郵件並開啟復原連結。',newPassword:'新密碼',confirmPassword:'確認新密碼',updatePassword:'更新密碼',passwordUpdated:'密碼已成功更新。',passwordMismatch:'兩次輸入的密碼不一致。' },
 }
 
-const boardNewsCopy: Record<Language, Omit<BoardNewsCopy, 'createdOn' | 'newsImages'>> = {
+const boardNewsCopy: Record<Language, Omit<BoardNewsCopy, 'createdOn' | 'newsImages' | 'gameServerTime'>> = {
   en: { navNews:'News',newsLabel:'Command board',newsTitle:'Board News',newsIntro:'Official announcements and operational communications from alliance leadership.',newsHistory:'Announcement history',noNews:'There are no announcements yet.',publishedOn:'Published',expiresOn:'Valid until',manageNews:'Manage Board News',createNews:'Create announcement',editNews:'Edit announcement',newsHeadline:'Headline',newsBody:'Message',sourceLanguage:'Original language',priority:'Priority',standard:'Standard',important:'Important',critical:'Critical',publishNow:'Publish now',archive:'Archive',restore:'Restore',draft:'Draft',translationHint:'Select each language to add or review its translation. Empty languages use the original version.',confirmDeleteNews:'Permanently delete this archived announcement?' },
   pt: { navNews:'Notícias',newsLabel:'Quadro de comando',newsTitle:'Board News',newsIntro:'Anúncios oficiais e comunicações operacionais da liderança da aliança.',newsHistory:'Histórico de anúncios',noNews:'Ainda não existem anúncios.',publishedOn:'Publicado',expiresOn:'Válido até',manageNews:'Gerir Board News',createNews:'Criar anúncio',editNews:'Editar anúncio',newsHeadline:'Título',newsBody:'Mensagem',sourceLanguage:'Idioma original',priority:'Prioridade',standard:'Normal',important:'Importante',critical:'Crítica',publishNow:'Publicar agora',archive:'Arquivar',restore:'Restaurar',draft:'Rascunho',translationHint:'Selecione cada idioma para adicionar ou rever a tradução. Os idiomas vazios usam a versão original.',confirmDeleteNews:'Eliminar definitivamente este anúncio arquivado?' },
   es: { navNews:'Noticias',newsLabel:'Tablón de mando',newsTitle:'Board News',newsIntro:'Anuncios oficiales y comunicaciones operativas del liderazgo de la alianza.',newsHistory:'Historial de anuncios',noNews:'Todavía no hay anuncios.',publishedOn:'Publicado',expiresOn:'Válido hasta',manageNews:'Gestionar Board News',createNews:'Crear anuncio',editNews:'Editar anuncio',newsHeadline:'Título',newsBody:'Mensaje',sourceLanguage:'Idioma original',priority:'Prioridad',standard:'Normal',important:'Importante',critical:'Crítica',publishNow:'Publicar ahora',archive:'Archivar',restore:'Restaurar',draft:'Borrador',translationHint:'Selecciona cada idioma para añadir o revisar su traducción. Los idiomas vacíos usan la versión original.',confirmDeleteNews:'¿Eliminar definitivamente este anuncio archivado?' },
@@ -645,5 +650,5 @@ const automaticTranslationHint: Record<Language, string> = {
 
 export function getCopy(language: Language): Copy {
   const base = language === 'pt' ? pt : language === 'en' ? en : { ...en, ...translated[language] }
-  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...notificationCopy[language], ...exportCopy[language], ...performanceEnglish, ...performanceCopy[language], ...dailyPerformanceCopy[language], ...allianceCodeCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language], codeAgreement: codeAgreementCopy[language] }
+  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...notificationCopy[language], ...exportCopy[language], ...performanceEnglish, ...performanceCopy[language], ...dailyPerformanceCopy[language], ...allianceCodeCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language], gameServerTime: gameServerTimeCopy[language], codeAgreement: codeAgreementCopy[language] }
 }

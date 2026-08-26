@@ -44,9 +44,16 @@ function NewsImagePreview({ image, title, removeLabel, onRemove }: { image: Sele
 
 const toDateTimeInput = (value: string | null) => {
   if (!value) return ''
-  const date = new Date(value)
-  return new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16)
+  return new Date(value).toISOString().slice(0, 16)
 }
+
+const fromGameServerTime = (value: string) => new Date(`${value}:00Z`).toISOString()
+
+const formatGameServerTime = (value: string, language: Language) => new Intl.DateTimeFormat(language, {
+  dateStyle: 'medium',
+  timeStyle: 'short',
+  timeZone: 'UTC',
+}).format(new Date(value))
 
 const todayUtc = () => {
   const date = new Date()
@@ -359,7 +366,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
       priority: String(form.get('priority')),
       published,
       published_at: editingNews?.published || !published ? editingNews?.published_at ?? new Date().toISOString() : new Date().toISOString(),
-      expires_at: expiresAt ? new Date(expiresAt).toISOString() : null,
+      expires_at: expiresAt ? fromGameServerTime(expiresAt) : null,
       archived_at: editingNews?.archived_at ?? null,
     }
     let responseError: { message: string } | null = null
@@ -673,7 +680,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
               {newsImageFiles.map((image) => <NewsImagePreview image={image} title={newsOriginal.title} removeLabel={copy.delete} onRemove={() => setNewsImageFiles((current) => current.filter((item) => item.id !== image.id))} key={image.id} />)}
             </div>}
             <label>{copy.priority}<select name="priority" defaultValue={editingNews?.priority ?? 'standard'}><option value="standard">{copy.standard}</option><option value="important">{copy.important}</option><option value="critical">{copy.critical}</option></select></label>
-            <label>{copy.expiresOn}<input name="expiresAt" type="datetime-local" defaultValue={toDateTimeInput(editingNews?.expires_at ?? null)} /></label>
+            <label className="server-time-field"><span>{copy.expiresOn}</span><input name="expiresAt" type="datetime-local" defaultValue={toDateTimeInput(editingNews?.expires_at ?? null)} /><small>{copy.gameServerTime}</small></label>
             <label className="check-field"><input name="published" type="checkbox" defaultChecked={editingNews?.published ?? true} />{copy.publishNow}</label>
             {!editingNews && <label className="check-field"><input name="notifyMembers" type="checkbox" />{copy.notifyMembers}</label>}
             <div className="row-actions"><button className="primary-button" type="submit" disabled={busy}>{editingNews ? copy.save : copy.createNews}</button>{editingNews && <button className="ghost-button" type="button" onClick={resetNewsEditor}>{copy.cancel}</button>}</div>
@@ -683,7 +690,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
             const translation = news.translations[language] ?? news.translations[news.default_language] ?? Object.values(news.translations)[0]
             const endedAt = news.archived_at ?? news.expires_at
             return <article data-priority={news.priority} key={news.id}><div><strong>{translation?.title}</strong><small>{news.archived_at ? copy.archive : news.published ? copy.publishedOn : copy.draft}</small></div>
-              <p>{translation?.body}</p><small>{copy.createdOn}: {new Date(news.created_at).toLocaleString(language)}</small>{endedAt && <small>{copy.expiresOn}: {new Date(endedAt).toLocaleString(language)}</small>}
+              <p>{translation?.body}</p><small>{copy.createdOn}: {new Date(news.created_at).toLocaleString(language)}</small>{endedAt && <small>{copy.expiresOn} · {copy.gameServerTime}: {formatGameServerTime(endedAt, language)}</small>}
               <div className="row-actions"><button className="compact-button" type="button" onClick={() => editNews(news)}><Pencil size={14} />{copy.editNews}</button>{news.published && <button className="compact-button" type="button" onClick={() => toggleNewsArchive(news)}>{news.archived_at ? <RotateCcw size={14} /> : <Archive size={14} />}{news.archived_at ? copy.restore : copy.archive}</button>}{news.archived_at && <button className="compact-button danger" type="button" onClick={() => void deleteArchivedNews(news)}><Trash2 size={14} />{copy.delete}</button>}</div>
             </article>
           })}</div>

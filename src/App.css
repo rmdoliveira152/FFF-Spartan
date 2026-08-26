@@ -300,6 +300,7 @@ footer img { width:110px; opacity:.65; }
 .news-admin-form .admin-form-hint { grid-column:1/-1; margin:0; color:var(--muted); font-size:.78rem; line-height:1.5; }
 .news-admin-form .news-body-field { grid-column:1/-1; grid-row:auto; }
 .news-admin-form .news-images-field { grid-column:1/-1; }
+.news-admin-form .server-time-field small { color:var(--muted); font-size:.7rem; font-weight:500; text-transform:none; }
 .news-admin-form .news-images-field > span { display:flex; align-items:center; gap:7px; }
 .news-image-selection { grid-column:1/-1; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
 .news-image-selection > div { position:relative; min-height:82px; overflow:hidden; border:1px solid var(--line); background:#1b221f; }
