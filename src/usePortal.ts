@@ -42,12 +42,14 @@ export function usePortal() {
 
     const enriched = await Promise.all((data ?? []).map(async (poll) => {
       const { data: results } = await client.rpc('poll_results', { requested_poll: poll.id })
-      const counts = new Map<string, number>((results ?? []).map((result: { option_id: string; vote_count: number }) => [result.option_id, Number(result.vote_count)]))
+      const pollResults = (results ?? []) as { option_id: string; vote_count: number; voter_names?: string[] }[]
+      const counts = new Map<string, number>(pollResults.map((result) => [result.option_id, Number(result.vote_count)]))
+      const voters = new Map<string, string[]>(pollResults.map((result) => [result.option_id, result.voter_names ?? []]))
       return {
         ...poll,
         poll_options: [...poll.poll_options]
           .sort((first, second) => first.position - second.position)
-          .map((option) => ({ ...option, voteCount: counts.get(option.id) ?? 0 })),
+          .map((option) => ({ ...option, voteCount: counts.get(option.id) ?? 0, voterNames: voters.get(option.id) ?? [] })),
       } satisfies PortalPoll
     }))
     setPolls(enriched)
@@ -92,8 +94,13 @@ export function usePortal() {
     const { data: listener } = client.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') setPasswordRecovery(true)
       setUser(session?.user ?? null)
-      if (session?.user) void loadProfile(session.user.id)
-      else setProfile(null)
+      if (session?.user) {
+        void loadProfile(session.user.id)
+        void loadPolls()
+      } else {
+        setProfile(null)
+        void loadPolls()
+      }
     })
     return () => {
       mounted = false

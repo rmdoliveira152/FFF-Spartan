@@ -54,6 +54,7 @@ export type PollOption = {
   label: string
   position: number
   voteCount: number
+  voterNames?: string[]
 }
 
 export type PortalPoll = {

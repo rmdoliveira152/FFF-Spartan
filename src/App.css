@@ -176,9 +176,12 @@
 .poll-card h3 { min-height:58px; margin:18px 0 22px; font:700 1.35rem/1.2 'Barlow Condensed',sans-serif; text-transform:uppercase; }
 .poll-meta { display:flex; justify-content:space-between; color:#8e968f; font-size:.8rem; text-transform:uppercase; }
 .poll-meta span { color:var(--red); font-weight:700; }
-.poll-option { display:grid; grid-template-columns:auto 1fr auto; gap:11px; align-items:center; padding:13px 0; border-top:1px solid var(--line); cursor:pointer; }
+.poll-option { position:relative; display:grid; grid-template-columns:auto 1fr auto; gap:11px; align-items:center; padding:13px 0; border-top:1px solid var(--line); cursor:pointer; }
+.poll-option.has-voters { cursor:help; }
 .poll-option input { accent-color:var(--red); }
 .poll-option b { color:#8e968f; }
+.poll-voter-tooltip { position:absolute; z-index:4; left:28px; bottom:calc(100% - 5px); display:none; width:max-content; max-width:min(360px,calc(100vw - 80px)); max-height:130px; overflow-y:auto; padding:9px 11px; color:#eef2ee; border:1px solid #4b554f; background:#252d29; box-shadow:0 10px 24px rgba(0,0,0,.35); font-size:.72rem; line-height:1.45; pointer-events:none; }
+.poll-option:hover .poll-voter-tooltip,.poll-option:focus-within .poll-voter-tooltip { display:block; }
 .poll-card .primary-button { margin-top:20px; }
 .empty-state { padding:24px; color:#4f5752; border:1px solid rgba(12,16,15,.15); }
 .application-section { display:grid; grid-template-columns:.8fr 1.2fr; gap:80px; background:#111614; }

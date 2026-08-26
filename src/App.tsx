@@ -84,10 +84,11 @@ function App() {
   }
 
   const demoPolls = [
-    { id: 'operation', question: copy.pollOperation, active: true, closes_at: null, created_at: new Date(initialClock).toISOString(), poll_options: ['18:00 UTC', '20:00 UTC', '22:00 UTC'].map((label, index) => ({ id: `operation-${index}`, label, position: index + 1, voteCount: [15, 22, 11][index] })) },
-    { id: 'training', question: copy.pollTraining, active: true, closes_at: null, created_at: new Date(initialClock).toISOString(), poll_options: [copy.rallyCoordination, copy.defensiveFormations, copy.resourceEfficiency].map((label, index) => ({ id: `training-${index}`, label, position: index + 1, voteCount: [18, 10, 7][index] })) },
+    { id: 'operation', question: copy.pollOperation, active: true, closes_at: null, created_at: new Date(initialClock).toISOString(), poll_options: ['18:00 UTC', '20:00 UTC', '22:00 UTC'].map((label, index) => ({ id: `operation-${index}`, label, position: index + 1, voteCount: [15, 22, 11][index], voterNames: [] })) },
+    { id: 'training', question: copy.pollTraining, active: true, closes_at: null, created_at: new Date(initialClock).toISOString(), poll_options: [copy.rallyCoordination, copy.defensiveFormations, copy.resourceEfficiency].map((label, index) => ({ id: `training-${index}`, label, position: index + 1, voteCount: [18, 10, 7][index], voterNames: [] })) },
   ]
   const visiblePolls = portal.configured ? portal.polls : demoPolls
+  const canViewVoters = Boolean(portal.user && portal.profile?.active && portal.profile.registration_status === 'approved')
   const news = portal.boardNews.map((item) => {
     const translationKey = `${item.id}:${language}`
     const translated = newsTranslations[translationKey]
@@ -265,7 +266,12 @@ function App() {
           <div className="poll-grid">{visiblePolls.map((poll) => {
             const totalVotes = poll.poll_options.reduce((total, option) => total + option.voteCount, 0)
             return <article className="poll-card" key={poll.id}><div className="poll-meta"><span>{copy.active}</span><small>{totalVotes} {copy.votes}</small></div><h3>{poll.question}</h3>
-              {poll.poll_options.map((option) => <label className="poll-option" key={option.id}><input type="radio" name={`poll-${poll.id}`} checked={selectedOptions[poll.id] === option.id} onChange={() => setSelectedOptions((current) => ({ ...current, [poll.id]: option.id }))} /><span>{option.label}</span><b>{totalVotes ? Math.round(option.voteCount / totalVotes * 100) : 0}%</b></label>)}
+              {poll.poll_options.map((option) => {
+                const showVoters = canViewVoters && Boolean(option.voterNames?.length)
+                const tooltipId = `poll-voters-${option.id}`
+                return <label className={`poll-option${showVoters ? ' has-voters' : ''}`} key={option.id}><input type="radio" name={`poll-${poll.id}`} checked={selectedOptions[poll.id] === option.id} aria-describedby={showVoters ? tooltipId : undefined} onChange={() => setSelectedOptions((current) => ({ ...current, [poll.id]: option.id }))} /><span>{option.label}</span><b>{totalVotes ? Math.round(option.voteCount / totalVotes * 100) : 0}%</b>
+                  {showVoters && <span className="poll-voter-tooltip" id={tooltipId} role="tooltip">{option.voterNames?.join(', ')}</span>}</label>
+              })}
               <button className="primary-button" onClick={() => void submitVote(poll.id)}>{copy.vote}</button></article>
           })}</div>
         </section>
