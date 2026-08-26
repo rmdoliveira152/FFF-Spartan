@@ -181,6 +181,14 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     else await Promise.all([loadAdminData(), onRefreshPolls()])
   }
 
+  const deletePoll = async (poll: PortalPoll) => {
+    if (!supabase || poll.active || !window.confirm(`${copy.delete}: ${poll.question}?`)) return
+    setError('')
+    const { error: deleteError } = await supabase.from('polls').delete().eq('id', poll.id).eq('active', false)
+    if (deleteError) setError(deleteError.message)
+    else await Promise.all([loadAdminData(), onRefreshPolls()])
+  }
+
   const resetNewsEditor = () => {
     setEditingNews(null)
     setNewsOriginal(emptyNewsTranslation)
@@ -390,7 +398,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
         <section className="admin-block"><h3>{copy.pollsTitle}</h3>
           <div className="admin-list">{polls.map((poll) => <article key={poll.id}><div><strong>{poll.question}</strong><small>{poll.poll_options.reduce((total, option) => total + option.voteCount, 0)} {copy.votes}</small></div>
             <ul>{poll.poll_options.map((option) => <li key={option.id}>{option.label}<b>{option.voteCount}</b></li>)}</ul>
-            <button className="compact-button" onClick={() => togglePoll(poll)}>{poll.active ? copy.deactivate : copy.activate}</button></article>)}</div>
+            <div className="row-actions"><button className="compact-button" onClick={() => togglePoll(poll)}>{poll.active ? copy.deactivate : copy.activate}</button>{!poll.active && <button className="compact-button danger" onClick={() => void deletePoll(poll)}><Trash2 size={14} />{copy.delete}</button>}</div></article>)}</div>
         </section>
 
         <section className="admin-block"><h3>{copy.applications}</h3>
