@@ -163,7 +163,7 @@
 .signed-member strong { color:#fff; }
 .code-section { background:#0c100f; }
 .code-section .section-header > svg { color:var(--red); }
-.code-rank-tabs { display:grid; grid-template-columns:repeat(4,1fr); margin-bottom:16px; border:1px solid var(--line); }
+.code-rank-tabs { display:grid; grid-template-columns:repeat(2,1fr); margin-bottom:16px; border:1px solid var(--line); }
 .code-rank-tabs button { min-height:48px; color:#8f9790; border:0; border-right:1px solid var(--line); background:#111614; cursor:pointer; font:800 1rem/1 'Barlow Condensed',sans-serif; }
 .code-rank-tabs button:last-child { border-right:0; }
 .code-rank-tabs button:hover { color:#fff; background:#181f1c; }

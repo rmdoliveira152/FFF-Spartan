@@ -8,7 +8,7 @@ import './App.css'
 
 type Metric = 'combat_power' | 'kills' | 'weekly_contribution'
 type AllianceRank = 'R5' | 'R4' | 'R3' | 'R2' | 'R1'
-type CodeRank = Exclude<AllianceRank, 'R5'>
+type CodeAudience = 'players' | 'r4'
 
 const demoMembers = [
   { id: 'demo-1', member_name: 'SPARTAN ONE', rank: 'R5' as AllianceRank, player_level: 10, combat_power: 184_600_000, kills: 9_420_300, weekly_contribution: 92_500, active: true },
@@ -16,12 +16,10 @@ const demoMembers = [
 ]
 
 const rankOrder: AllianceRank[] = ['R5', 'R4', 'R3', 'R2', 'R1']
-const codeRanks: CodeRank[] = ['R1', 'R2', 'R3', 'R4']
-const codeRuleIndexes: Record<CodeRank, number[]> = {
-  R1: [0, 3, 6],
-  R2: [0, 3, 4, 6, 7],
-  R3: [0, 2, 3, 4, 5, 6, 7],
-  R4: [0, 1, 2, 3, 4, 5, 6, 7],
+const codeAudiences: CodeAudience[] = ['players', 'r4']
+const codeRuleIndexes: Record<CodeAudience, number[]> = {
+  players: [0, 3, 4, 6, 7],
+  r4: [0, 1, 2, 3, 4, 5, 6, 7],
 }
 const initialClock = Date.now()
 
@@ -39,7 +37,7 @@ function App() {
   const [language, setLanguage] = useState<Language>(() => (localStorage.getItem('fff-language') as Language) || 'en')
   const [metric, setMetric] = useState<Metric>('combat_power')
   const [rankFilter, setRankFilter] = useState<AllianceRank | 'ALL'>('ALL')
-  const [codeRank, setCodeRank] = useState<CodeRank>('R1')
+  const [codeAudience, setCodeAudience] = useState<CodeAudience>('players')
   const [query, setQuery] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
   const [adminOpen, setAdminOpen] = useState(false)
@@ -280,9 +278,9 @@ function App() {
         </section>
 
         <section className="section code-section" id="code">
-          <header className="section-header"><div><p className="eyebrow">{copy.codeLabel}</p><h2>{copy.codeTitle} {codeRank}</h2><p>{copy.rulesText}</p></div><Shield size={48} /></header>
-          <div className="code-rank-tabs" role="tablist" aria-label={copy.codeTitle}>{codeRanks.map((rank) => <button type="button" role="tab" aria-selected={codeRank === rank} className={codeRank === rank ? 'active' : ''} onClick={() => setCodeRank(rank)} key={rank}>{rank}</button>)}</div>
-          <div className="rules-grid">{codeRuleIndexes[codeRank].map((ruleIndex, index) => <article key={copy.ruleItems[ruleIndex]}><span>{String(index + 1).padStart(2, '0')}</span><p>{copy.ruleItems[ruleIndex]}</p></article>)}</div>
+          <header className="section-header"><div><p className="eyebrow">{copy.codeLabel}</p><h2>{copy.codeTitle}: {codeAudience === 'players' ? copy.codePlayers : copy.codeAdmins}</h2><p>{copy.rulesText}</p></div><Shield size={48} /></header>
+          <div className="code-rank-tabs" role="tablist" aria-label={copy.codeTitle}>{codeAudiences.map((audience) => <button type="button" role="tab" aria-selected={codeAudience === audience} className={codeAudience === audience ? 'active' : ''} onClick={() => setCodeAudience(audience)} key={audience}>{audience === 'players' ? copy.codePlayers : copy.codeAdmins}</button>)}</div>
+          <div className="rules-grid">{codeRuleIndexes[codeAudience].map((ruleIndex, index) => <article key={copy.ruleItems[ruleIndex]}><span>{String(index + 1).padStart(2, '0')}</span><p>{copy.ruleItems[ruleIndex]}</p></article>)}</div>
         </section>
       </main>
 

@@ -60,18 +60,18 @@ type MemberAccessCopy = {
   currentAccount: string; searchAccounts: string; noAccessResults: string
 }
 
-type AllianceCodeCopy = { codeLabel: string; codeTitle: string }
+type AllianceCodeCopy = { codeLabel: string; codeTitle: string; codePlayers: string; codeAdmins: string }
 
 const allianceCodeCopy: Record<Language, AllianceCodeCopy> = {
-  en:{ codeLabel:'Alliance standard',codeTitle:'Operational code' }, pt:{ codeLabel:'Padrão da aliança',codeTitle:'Código operacional' },
-  es:{ codeLabel:'Estándar de la alianza',codeTitle:'Código operativo' }, fr:{ codeLabel:'Standard de l’alliance',codeTitle:'Code opérationnel' },
-  de:{ codeLabel:'Allianzstandard',codeTitle:'Einsatzkodex' }, it:{ codeLabel:'Standard dell’alleanza',codeTitle:'Codice operativo' },
-  pl:{ codeLabel:'Standard sojuszu',codeTitle:'Kodeks operacyjny' }, ru:{ codeLabel:'Стандарт альянса',codeTitle:'Оперативный кодекс' },
-  tr:{ codeLabel:'İttifak standardı',codeTitle:'Operasyon kuralları' }, id:{ codeLabel:'Standar aliansi',codeTitle:'Kode operasional' },
-  vi:{ codeLabel:'Tiêu chuẩn liên minh',codeTitle:'Quy tắc hoạt động' }, th:{ codeLabel:'มาตรฐานพันธมิตร',codeTitle:'หลักปฏิบัติการ' },
-  ja:{ codeLabel:'同盟基準',codeTitle:'運用規範' }, ko:{ codeLabel:'동맹 기준',codeTitle:'운영 규정' },
-  ar:{ codeLabel:'معيار التحالف',codeTitle:'قواعد العمليات' }, 'zh-CN':{ codeLabel:'联盟标准',codeTitle:'行动准则' },
-  'zh-TW':{ codeLabel:'聯盟標準',codeTitle:'行動準則' },
+  en:{ codeLabel:'Alliance standard',codeTitle:'Operational code',codePlayers:'Other players',codeAdmins:'R4 · Administration' }, pt:{ codeLabel:'Padrão da aliança',codeTitle:'Código operacional',codePlayers:'Demais jogadores',codeAdmins:'R4 · Administração' },
+  es:{ codeLabel:'Estándar de la alianza',codeTitle:'Código operativo',codePlayers:'Demás jugadores',codeAdmins:'R4 · Administración' }, fr:{ codeLabel:'Standard de l’alliance',codeTitle:'Code opérationnel',codePlayers:'Autres joueurs',codeAdmins:'R4 · Administration' },
+  de:{ codeLabel:'Allianzstandard',codeTitle:'Einsatzkodex',codePlayers:'Andere Spieler',codeAdmins:'R4 · Verwaltung' }, it:{ codeLabel:'Standard dell’alleanza',codeTitle:'Codice operativo',codePlayers:'Altri giocatori',codeAdmins:'R4 · Amministrazione' },
+  pl:{ codeLabel:'Standard sojuszu',codeTitle:'Kodeks operacyjny',codePlayers:'Pozostali gracze',codeAdmins:'R4 · Administracja' }, ru:{ codeLabel:'Стандарт альянса',codeTitle:'Оперативный кодекс',codePlayers:'Остальные игроки',codeAdmins:'R4 · Администрация' },
+  tr:{ codeLabel:'İttifak standardı',codeTitle:'Operasyon kuralları',codePlayers:'Diğer oyuncular',codeAdmins:'R4 · Yönetim' }, id:{ codeLabel:'Standar aliansi',codeTitle:'Kode operasional',codePlayers:'Pemain lain',codeAdmins:'R4 · Administrasi' },
+  vi:{ codeLabel:'Tiêu chuẩn liên minh',codeTitle:'Quy tắc hoạt động',codePlayers:'Người chơi khác',codeAdmins:'R4 · Quản trị' }, th:{ codeLabel:'มาตรฐานพันธมิตร',codeTitle:'หลักปฏิบัติการ',codePlayers:'ผู้เล่นอื่น',codeAdmins:'R4 · ฝ่ายบริหาร' },
+  ja:{ codeLabel:'同盟基準',codeTitle:'運用規範',codePlayers:'その他のプレイヤー',codeAdmins:'R4 · 管理' }, ko:{ codeLabel:'동맹 기준',codeTitle:'운영 규정',codePlayers:'기타 플레이어',codeAdmins:'R4 · 관리' },
+  ar:{ codeLabel:'معيار التحالف',codeTitle:'قواعد العمليات',codePlayers:'اللاعبون الآخرون',codeAdmins:'R4 · الإدارة' }, 'zh-CN':{ codeLabel:'联盟标准',codeTitle:'行动准则',codePlayers:'其他玩家',codeAdmins:'R4 · 管理' },
+  'zh-TW':{ codeLabel:'聯盟標準',codeTitle:'行動準則',codePlayers:'其他玩家',codeAdmins:'R4 · 管理' },
 }
 
 export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy & DynamicTranslationCopy & MemberAccessCopy & AllianceCodeCopy & EventGuideCopy
