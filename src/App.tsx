@@ -164,7 +164,7 @@ function App() {
     }
     const formElement = event.currentTarget
     const form = new FormData(formElement)
-    const result = await portal.submitApplication(String(form.get('reason')), String(form.get('experience')), String(form.get('availability')))
+    const result = await portal.submitApplication(String(form.get('reason')), String(form.get('experience')), String(form.get('availability')), form.get('codeAgreement') === 'on')
     if (result.ok) {
       flash(copy.successApply)
       formElement.reset()

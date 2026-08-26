@@ -148,10 +148,12 @@ export function usePortal() {
     return { ok: true }
   }
 
-  const submitApplication = async (reason: string, experience: string, availability: string): Promise<ActionResult> => {
+  const submitApplication = async (reason: string, experience: string, availability: string, codeAgreed: boolean): Promise<ActionResult> => {
     if (!supabase || !user || !profile?.active || profile.registration_status !== 'approved') return { ok: false, message: 'LOGIN_REQUIRED' }
-    const { error } = await supabase.from('r4_applications').insert({ user_id: user.id, reason, experience, availability })
-    return error ? { ok: false, message: error.message } : { ok: true }
+    const { data, error } = await supabase.functions.invoke('submit-r4-application', {
+      body: { reason, experience, availability, codeAgreed },
+    })
+    return error ? { ok: false, message: data?.error ?? error.message } : { ok: true }
   }
 
   return {
