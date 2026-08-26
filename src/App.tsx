@@ -1,7 +1,9 @@
 import { lazy, Suspense, useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Archive, CalendarDays, CalendarRange, ChevronRight, ExternalLink, Globe2, Languages, LogIn, Megaphone, Menu, MessagesSquare, Radio, Search, Shield, Swords, TrendingUp, Users, Vote, X } from 'lucide-react'
 import { getCopy, languages, type Language } from './i18n'
+import { getDiscussionCopy } from './discussionCopy'
 import { AdminPortal } from './AdminPortal'
+import { Discussion } from './Discussion'
 import { usePortal } from './usePortal'
 import { getBoardNewsImageUrl, supabase, type AllianceMember, type BoardNews, type BoardNewsTranslation } from './supabase'
 import './App.css'
@@ -56,6 +58,7 @@ function App() {
   const [pollsSeenAt, setPollsSeenAt] = useState(() => localStorage.getItem('fff-polls-seen-at') ?? '')
   const portal = usePortal()
   const copy = getCopy(language)
+  const discussionCopy = getDiscussionCopy(language)
 
   useEffect(() => {
     const timer = window.setInterval(() => setClock(Date.now()), 60_000)
@@ -89,6 +92,7 @@ function App() {
   ]
   const visiblePolls = portal.configured ? portal.polls : demoPolls
   const canViewVoters = Boolean(portal.user && portal.profile?.active && portal.profile.registration_status === 'approved')
+  const canAccessDiscussions = Boolean(portal.user && portal.profile?.active && (portal.profile.registration_status === 'approved' || portal.profile.role === 'admin'))
   const news = portal.boardNews.map((item) => {
     const translationKey = `${item.id}:${language}`
     const translated = newsTranslations[translationKey]
@@ -223,6 +227,7 @@ function App() {
               <div className="board-news-meta"><span>{copy[item.priority]}</span><time><CalendarDays size={14} />{copy.createdOn}: {formatNewsDate(item.created_at)}</time></div>
               <h3>{item.translation.title}</h3><p>{item.translation.body}</p>
               {item.image_paths.length > 0 && <div className="board-news-media">{item.image_paths.map((path, imageIndex) => <a href={getBoardNewsImageUrl(path)} target="_blank" rel="noreferrer" key={path}><img src={getBoardNewsImageUrl(path)} alt={`${item.translation.title} ${imageIndex + 1}`} loading={index === 0 && imageIndex === 0 ? 'eager' : 'lazy'} /></a>)}</div>}
+              <Discussion kind="board_news" resourceId={item.id} language={language} copy={discussionCopy} canAccess={canAccessDiscussions} canPost={true} onSignIn={() => setAdminOpen(true)} />
               {item.canTranslate && <button className="news-translate-button" type="button" disabled={translatingNews === item.translationKey} onClick={() => void translateNews(item)}><Languages size={15} />{translatingNews === item.translationKey ? copy.translatingNews : item.isTranslated ? copy.viewOriginal : copy.translateNews}</button>}
               {newsTranslationErrors[item.id] && <small className="news-translation-error" role="alert">{newsTranslationErrors[item.id]}</small>}
               {item.expires_at && <div className="board-news-deadline"><span>{copy.expiresOn}</span><time>{formatNewsDate(item.expires_at)}</time></div>}
@@ -231,7 +236,7 @@ function App() {
           </div>
           {historicalNews.length > 0 && <div className="board-news-history">
             <button type="button" aria-expanded={historyOpen} onClick={() => setHistoryOpen((current) => !current)}><Archive size={17} />{copy.newsHistory}<span>{historicalNews.length}</span></button>
-            {historyOpen && <div className="history-list">{historicalNews.map((item) => <article key={item.id}><div><strong>{item.translation.title}</strong><small>{copy.createdOn}: {formatNewsDate(item.created_at)}</small></div><div className="history-news-content"><p>{item.translation.body}</p>{item.image_paths.length > 0 && <div className="board-news-media">{item.image_paths.map((path, imageIndex) => <a href={getBoardNewsImageUrl(path)} target="_blank" rel="noreferrer" key={path}><img src={getBoardNewsImageUrl(path)} alt={`${item.translation.title} ${imageIndex + 1}`} loading="lazy" /></a>)}</div>}{item.canTranslate && <button className="news-translate-button" type="button" disabled={translatingNews === item.translationKey} onClick={() => void translateNews(item)}><Languages size={15} />{translatingNews === item.translationKey ? copy.translatingNews : item.isTranslated ? copy.viewOriginal : copy.translateNews}</button>}{newsTranslationErrors[item.id] && <small className="news-translation-error" role="alert">{newsTranslationErrors[item.id]}</small>}</div><time>{copy.expiresOn}: {formatNewsDate(item.archived_at ?? item.expires_at!)}</time></article>)}</div>}
+            {historyOpen && <div className="history-list">{historicalNews.map((item) => <article key={item.id}><div><strong>{item.translation.title}</strong><small>{copy.createdOn}: {formatNewsDate(item.created_at)}</small></div><div className="history-news-content"><p>{item.translation.body}</p>{item.image_paths.length > 0 && <div className="board-news-media">{item.image_paths.map((path, imageIndex) => <a href={getBoardNewsImageUrl(path)} target="_blank" rel="noreferrer" key={path}><img src={getBoardNewsImageUrl(path)} alt={`${item.translation.title} ${imageIndex + 1}`} loading="lazy" /></a>)}</div>}<Discussion kind="board_news" resourceId={item.id} language={language} copy={discussionCopy} canAccess={canAccessDiscussions} canPost={false} onSignIn={() => setAdminOpen(true)} />{item.canTranslate && <button className="news-translate-button" type="button" disabled={translatingNews === item.translationKey} onClick={() => void translateNews(item)}><Languages size={15} />{translatingNews === item.translationKey ? copy.translatingNews : item.isTranslated ? copy.viewOriginal : copy.translateNews}</button>}{newsTranslationErrors[item.id] && <small className="news-translation-error" role="alert">{newsTranslationErrors[item.id]}</small>}</div><time>{copy.expiresOn}: {formatNewsDate(item.archived_at ?? item.expires_at!)}</time></article>)}</div>}
           </div>}
         </section>
 
@@ -272,7 +277,9 @@ function App() {
                 return <label className={`poll-option${showVoters ? ' has-voters' : ''}`} key={option.id}><input type="radio" name={`poll-${poll.id}`} checked={selectedOptions[poll.id] === option.id} aria-describedby={showVoters ? tooltipId : undefined} onChange={() => setSelectedOptions((current) => ({ ...current, [poll.id]: option.id }))} /><span>{option.label}</span><b>{totalVotes ? Math.round(option.voteCount / totalVotes * 100) : 0}%</b>
                   {showVoters && <span className="poll-voter-tooltip" id={tooltipId} role="tooltip">{option.voterNames?.join(', ')}</span>}</label>
               })}
-              <button className="primary-button" onClick={() => void submitVote(poll.id)}>{copy.vote}</button></article>
+              <button className="primary-button" onClick={() => void submitVote(poll.id)}>{copy.vote}</button>
+              <Discussion kind="poll" resourceId={poll.id} language={language} copy={discussionCopy} canAccess={canAccessDiscussions} canPost={!poll.closes_at || Date.parse(poll.closes_at) > clock} onSignIn={() => setAdminOpen(true)} />
+            </article>
           })}</div>
         </section>
 

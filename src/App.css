@@ -1,3 +1,23 @@
+.discussion { margin-top: 1rem; padding-top: .85rem; border-top: 1px solid rgba(151, 169, 159, .24); }
+.discussion > small { display: block; margin-top: .45rem; color: #96a39d; }
+.discussion-toggle { display: inline-flex; align-items: center; gap: .45rem; min-height: 2.25rem; padding: .45rem .65rem; border: 1px solid #46544d; background: transparent; color: inherit; font: inherit; font-weight: 700; cursor: pointer; }
+.discussion-toggle:hover, .discussion-toggle[aria-expanded="true"] { border-color: #f1aa38; color: #f1aa38; }
+.discussion-toggle span { min-width: 1.35rem; padding: .05rem .3rem; background: #f1aa38; color: #111713; text-align: center; }
+.discussion-panel { margin-top: .75rem; padding: .85rem; border-left: 2px solid #f1aa38; background: rgba(6, 12, 9, .34); }
+.discussion-list { display: grid; gap: .65rem; max-height: 28rem; margin: 0; padding: 0; overflow-y: auto; list-style: none; }
+.discussion-list li { padding: .7rem; border: 1px solid rgba(151, 169, 159, .22); background: rgba(20, 29, 24, .72); }
+.discussion-message-meta, .discussion-message-actions, .discussion-form > div { display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
+.discussion-message-meta time { color: #93a099; font-size: .72rem; }
+.discussion-list li > p { margin: .55rem 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.discussion-message-actions { justify-content: flex-start; }
+.discussion-message-actions button { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem 0; border: 0; background: transparent; color: #9ba7a0; font: inherit; font-size: .72rem; cursor: pointer; }
+.discussion-message-actions button:hover { color: #f1aa38; }
+.discussion-form { display: grid; gap: .55rem; margin-top: .8rem; }
+.discussion-form textarea { width: 100%; min-height: 5rem; resize: vertical; padding: .7rem; border: 1px solid #46544d; border-radius: 0; background: #0e1511; color: #edf2ef; font: inherit; }
+.discussion-form textarea:focus { outline: 2px solid #f1aa38; outline-offset: 1px; }
+.discussion-form small, .discussion-status { color: #97a59e; }
+.discussion-form .primary-button { min-height: 2.25rem; padding: .45rem .7rem; }
+.discussion-error { margin: .65rem 0 0; color: #ff7770; font-size: .8rem; }
 :root { --red:#e33a2f; --red-dark:#941e1b; --amber:#f2aa3a; --ink:#0c100f; --panel:#141a18; --panel-2:#1b221f; --paper:#e8e5dc; --muted:#929990; --line:rgba(232,229,220,.13); }
 .app-shell { min-height:100vh; overflow:hidden; background:var(--ink); }
 .topbar { position:fixed; z-index:50; inset:0 0 auto; height:72px; display:flex; align-items:center; padding:0 max(28px,calc((100vw - 1280px)/2)); border-bottom:1px solid var(--line); background:rgba(10,14,13,.92); backdrop-filter:blur(14px); }

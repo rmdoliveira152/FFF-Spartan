@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.notify-members]
 verify_jwt = false
+
+[functions.translate-comment]
+verify_jwt = false

@@ -85,6 +85,17 @@ export type BoardNews = {
   updated_at: string
 }
 
+export type DiscussionKind = 'board_news' | 'poll'
+
+export type DiscussionComment = {
+  comment_id: string
+  member_name: string
+  message: string
+  created_at: string
+  is_own: boolean
+  can_delete: boolean
+}
+
 export const getBoardNewsImageUrl = (path: string) =>
   supabase?.storage.from('board-news').getPublicUrl(path).data.publicUrl ?? ''
 
