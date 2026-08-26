@@ -1,0 +1,1 @@
+grant delete on public.r4_applications to authenticated;
