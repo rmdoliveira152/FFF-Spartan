@@ -45,6 +45,7 @@ export type PortalPoll = {
   question: string
   active: boolean
   closes_at: string | null
+  created_at: string
   poll_options: PollOption[]
 }
 

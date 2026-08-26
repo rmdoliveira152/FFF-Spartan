@@ -51,7 +51,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     const client = supabase
     if (!client || profile?.role !== 'admin') return
     const [pollResponse, newsResponse, applicationResponse, profileResponse, memberResponse] = await Promise.all([
-      client.from('polls').select('id, question, active, closes_at, poll_options(id, label, position)').order('created_at', { ascending: false }),
+      client.from('polls').select('id, question, active, closes_at, created_at, poll_options(id, label, position)').order('created_at', { ascending: false }),
       client.from('board_news').select('id, translations, default_language, priority, published, published_at, expires_at, archived_at, created_at, updated_at').order('created_at', { ascending: false }),
       client.from('r4_applications').select('id, user_id, reason, experience, availability, status, created_at').order('created_at', { ascending: false }),
       client.from('profiles').select('id, member_name, role, active, alliance_member_id, registration_status').order('member_name'),
@@ -251,6 +251,14 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     else await loadAdminData()
   }
 
+  const deleteApplication = async (application: R4Application) => {
+    if (!supabase || !window.confirm(`${copy.delete}: ${application.profiles?.member_name ?? application.user_id}?`)) return
+    setError('')
+    const { error: deleteError } = await supabase.from('r4_applications').delete().eq('id', application.id)
+    if (deleteError) setError(deleteError.message)
+    else await loadAdminData()
+  }
+
   const toggleMember = async (member: Profile) => {
     if (!supabase) return
     const { error: updateError } = await supabase.from('profiles').update({ active: !member.active }).eq('id', member.id)
@@ -382,7 +390,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
 
         <section className="admin-block"><h3>{copy.applications}</h3>
           <div className="admin-list">{applications.map((application) => <article key={application.id}><div><strong>{application.profiles?.member_name}</strong><small>{application.status}</small></div><p>{application.reason}</p><p>{application.experience}</p><small>{application.availability}</small>
-            {application.status === 'pending' && <div className="row-actions"><button className="compact-button" onClick={() => updateApplication(application, 'approved')}><Check size={14} />{copy.approve}</button><button className="compact-button danger" onClick={() => updateApplication(application, 'rejected')}><X size={14} />{copy.reject}</button></div>}</article>)}</div>
+            <div className="row-actions">{application.status === 'pending' && <><button className="compact-button" onClick={() => updateApplication(application, 'approved')}><Check size={14} />{copy.approve}</button><button className="compact-button danger" onClick={() => updateApplication(application, 'rejected')}><X size={14} />{copy.reject}</button></>}<button className="compact-button danger" onClick={() => void deleteApplication(application)}><Trash2 size={14} />{copy.delete}</button></div></article>)}</div>
         </section>
 
         <section className="admin-block"><h3>{copy.memberAccess}</h3>

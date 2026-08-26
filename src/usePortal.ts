@@ -35,7 +35,7 @@ export function usePortal() {
     if (!client) return
     const { data, error } = await client
       .from('polls')
-      .select('id, question, active, closes_at, poll_options(id, label, position)')
+      .select('id, question, active, closes_at, created_at, poll_options(id, label, position)')
       .eq('active', true)
       .order('created_at', { ascending: false })
     if (error) throw error

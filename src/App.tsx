@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { Archive, CalendarDays, ChevronRight, ExternalLink, Globe2, Languages, LogIn, Megaphone, Menu, MessagesSquare, Radio, Search, Shield, Swords, Users, Vote, X } from 'lucide-react'
+import { Archive, CalendarDays, CalendarRange, ChevronRight, ExternalLink, Globe2, Languages, LogIn, Megaphone, Menu, MessagesSquare, Radio, Search, Shield, Swords, Users, Vote, X } from 'lucide-react'
 import { getCopy, languages, type Language } from './i18n'
 import { AdminPortal } from './AdminPortal'
 import { usePortal } from './usePortal'
@@ -35,6 +35,7 @@ function App() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [adminOpen, setAdminOpen] = useState(false)
   const [historyOpen, setHistoryOpen] = useState(false)
+  const [selectedEvent, setSelectedEvent] = useState(0)
   const [clock, setClock] = useState(initialClock)
   const [notice, setNotice] = useState('')
   const [newsTranslations, setNewsTranslations] = useState<Record<string, BoardNewsTranslation>>({})
@@ -42,6 +43,8 @@ function App() {
   const [translatingNews, setTranslatingNews] = useState<string | null>(null)
   const [newsTranslationErrors, setNewsTranslationErrors] = useState<Record<string, string>>({})
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({})
+  const [newsSeenAt, setNewsSeenAt] = useState(() => localStorage.getItem('fff-news-seen-at') ?? '')
+  const [pollsSeenAt, setPollsSeenAt] = useState(() => localStorage.getItem('fff-polls-seen-at') ?? '')
   const portal = usePortal()
   const copy = getCopy(language)
 
@@ -72,8 +75,8 @@ function App() {
   }
 
   const demoPolls = [
-    { id: 'operation', question: copy.pollOperation, active: true, closes_at: null, poll_options: ['18:00 UTC', '20:00 UTC', '22:00 UTC'].map((label, index) => ({ id: `operation-${index}`, label, position: index + 1, voteCount: [15, 22, 11][index] })) },
-    { id: 'training', question: copy.pollTraining, active: true, closes_at: null, poll_options: [copy.rallyCoordination, copy.defensiveFormations, copy.resourceEfficiency].map((label, index) => ({ id: `training-${index}`, label, position: index + 1, voteCount: [18, 10, 7][index] })) },
+    { id: 'operation', question: copy.pollOperation, active: true, closes_at: null, created_at: new Date(initialClock).toISOString(), poll_options: ['18:00 UTC', '20:00 UTC', '22:00 UTC'].map((label, index) => ({ id: `operation-${index}`, label, position: index + 1, voteCount: [15, 22, 11][index] })) },
+    { id: 'training', question: copy.pollTraining, active: true, closes_at: null, created_at: new Date(initialClock).toISOString(), poll_options: [copy.rallyCoordination, copy.defensiveFormations, copy.resourceEfficiency].map((label, index) => ({ id: `training-${index}`, label, position: index + 1, voteCount: [18, 10, 7][index] })) },
   ]
   const visiblePolls = portal.configured ? portal.polls : demoPolls
   const news = portal.boardNews.map((item) => {
@@ -90,7 +93,21 @@ function App() {
   })
   const currentNews = news.filter((item) => !item.archived_at && (!item.expires_at || Date.parse(item.expires_at) > clock))
   const historicalNews = news.filter((item) => item.archived_at || (item.expires_at && Date.parse(item.expires_at) <= clock))
+  const unreadNews = currentNews.filter((item) => !newsSeenAt || Date.parse(item.published_at) > Date.parse(newsSeenAt)).length
+  const unreadPolls = visiblePolls.filter((poll) => !pollsSeenAt || Date.parse(poll.created_at) > Date.parse(pollsSeenAt)).length
   const formatNewsDate = (value: string) => new Intl.DateTimeFormat(language, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
+
+  const markNewsSeen = () => {
+    const seenAt = new Date().toISOString()
+    localStorage.setItem('fff-news-seen-at', seenAt)
+    setNewsSeenAt(seenAt)
+  }
+
+  const markPollsSeen = () => {
+    const seenAt = new Date().toISOString()
+    localStorage.setItem('fff-polls-seen-at', seenAt)
+    setPollsSeenAt(seenAt)
+  }
 
   const translateNews = async (newsItem: BoardNews & { translationKey: string; isTranslated: boolean }) => {
     if (newsItem.isTranslated) {
@@ -156,7 +173,7 @@ function App() {
         </a>
         <button className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Menu">{menuOpen ? <X /> : <Menu />}</button>
         <nav className={menuOpen ? 'nav open' : 'nav'} onClick={() => setMenuOpen(false)}>
-          <a href="#command">{copy.navHome}</a><a href="#news">{copy.navNews}</a><a href="#roster">{copy.navRanks}</a><a href="#polls">{copy.navPolls}</a>
+          <a href="#command">{copy.navHome}</a><a href="#events">{copy.navEvents}</a><a href="#news" className={unreadNews ? 'nav-new' : ''} onClick={markNewsSeen}>{copy.navNews}{unreadNews > 0 && <span>{unreadNews}</span>}</a><a href="#roster">{copy.navRanks}</a><a href="#polls" className={unreadPolls ? 'nav-new' : ''} onClick={markPollsSeen}>{copy.navPolls}{unreadPolls > 0 && <span>{unreadPolls}</span>}</a>
           <a href="#application">{copy.navR4}</a><a href="#code">{copy.navRules}</a>
           <a href="https://fff113.efferp.net/" target="_blank" rel="noreferrer"><Radio size={14} />RADIO-BUNKER</a>
         </nav>
@@ -187,6 +204,17 @@ function App() {
 
         <section className="values-strip" aria-label={`${copy.strength}, ${copy.unity}, ${copy.discipline}`}>
           <div><Swords /><b>{copy.strength}</b><small>01</small></div><div><Users /><b>{copy.unity}</b><small>02</small></div><div><Shield /><b>{copy.discipline}</b><small>03</small></div>
+        </section>
+
+        <section className="section events-section" id="events">
+          <header className="section-header"><div><p className="eyebrow">{copy.eventsLabel}</p><h2>{copy.eventsTitle}</h2><p>{copy.eventsIntro}</p></div><CalendarRange size={48} /></header>
+          <div className="event-tabs" role="tablist">
+            {copy.eventItems.map((eventItem, index) => <button type="button" role="tab" aria-selected={selectedEvent === index} className={selectedEvent === index ? 'active' : ''} onClick={() => setSelectedEvent(index)} key={eventItem.image}><span>{String(index + 1).padStart(2, '0')}</span>{eventItem.title}</button>)}
+          </div>
+          <article className="event-guide">
+            <div className="event-guide-media"><img src={asset(`events/${copy.eventItems[selectedEvent].image}`)} alt={copy.eventItems[selectedEvent].title} /></div>
+            <div className="event-guide-copy"><p className="eyebrow">{String(selectedEvent + 1).padStart(2, '0')}</p><h3>{copy.eventItems[selectedEvent].title}</h3><p>{copy.eventItems[selectedEvent].summary}</p><dl><div><dt>{copy.eventObjective}</dt><dd>{copy.eventItems[selectedEvent].objective}</dd></div><div><dt>{copy.eventStrategy}</dt><dd>{copy.eventItems[selectedEvent].strategy}</dd></div></dl></div>
+          </article>
         </section>
 
         <section className="section board-news-section" id="news">

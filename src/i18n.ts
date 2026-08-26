@@ -1,3 +1,5 @@
+import { eventGuideCopy, type EventGuideCopy } from './eventCopy'
+
 export const languages = [
   ['pt', 'Português'], ['en', 'English'], ['es', 'Español'], ['fr', 'Français'],
   ['de', 'Deutsch'], ['it', 'Italiano'], ['pl', 'Polski'], ['ru', 'Русский'],
@@ -48,14 +50,14 @@ type DynamicTranslationCopy = {
   translateNews: string; translatingNews: string; viewOriginal: string; translationFailed: string
 }
 
-export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy & DynamicTranslationCopy
+export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy & DynamicTranslationCopy & EventGuideCopy
 
 const en: BaseCopy = {
   navHome: 'Command', navRanks: 'Roster', navPolls: 'Polls', navR4: 'R4 application', navRules: 'Code', admin: 'Admin',
   eyebrow: 'Dark War: Survival Alliance', heroTitle: 'Survive together. Conquer as one.',
   heroText: 'The operational hub of FFF-Spartan: roster performance, alliance decisions and leadership applications in one place.',
   enterRanks: 'View roster', officialGame: 'Official game', alertLabel: 'Alliance directive',
-  alertText: 'Shield before reset. Join rallies on time and report extended absences to R4/R5.',
+  alertText: 'Shield before the kill event reset. Join rallies on time and report extended absences to R4/R5.',
   strength: 'Strength', unity: 'Unity', discipline: 'Discipline', rosterLabel: 'Alliance intelligence',
   rosterTitle: 'FFF-Spartan roster', rosterText: 'Compare member performance by rank and operational metric.',
   members: 'members', updated: 'Updated today', combatPower: 'Combat Power', kills: 'Kills', weeklyContribution: 'Weekly Contribution',
@@ -88,7 +90,7 @@ const pt: BaseCopy = {
   eyebrow: 'Aliança de Dark War: Survival', heroTitle: 'Sobreviver juntos. Conquistar como um só.',
   heroText: 'O centro operacional da FFF-Spartan: desempenho dos membros, decisões da aliança e candidaturas à liderança num único lugar.',
   enterRanks: 'Ver membros', officialGame: 'Jogo oficial', alertLabel: 'Diretiva da aliança',
-  alertText: 'Ative o escudo antes do reset. Entre nos rallies a horas e comunique ausências prolongadas aos R4/R5.',
+  alertText: 'Ative o escudo antes do reset do kill event. Entre nos rallies a horas e comunique ausências prolongadas aos R4/R5.',
   strength: 'Força', unity: 'União', discipline: 'Disciplina', rosterLabel: 'Inteligência da aliança', rosterTitle: 'Membros FFF-Spartan',
   rosterText: 'Compare o desempenho dos membros por patente e métrica operacional.', members: 'membros', updated: 'Atualizado hoje',
   combatPower: 'Poder de Combate', kills: 'Abates', weeklyContribution: 'Contribuição Semanal', search: 'Pesquisar sobrevivente', rank: 'Posição', member: 'Membro', role: 'Patente',
@@ -118,7 +120,7 @@ const translated: Record<Exclude<Language, 'en' | 'pt'>, BaseCopy> = {
   es: {
     navHome:'Comando',navRanks:'Miembros',navPolls:'Votaciones',navR4:'Candidatura R4',navRules:'Código',admin:'Administración',
     eyebrow:'Alianza de Dark War: Survival',heroTitle:'Sobrevivir juntos. Conquistar como uno.',heroText:'El centro operativo de FFF-Spartan: rendimiento de los miembros, decisiones de la alianza y candidaturas de liderazgo en un solo lugar.',
-    enterRanks:'Ver miembros',officialGame:'Juego oficial',alertLabel:'Directiva de la alianza',alertText:'Activa el escudo antes del reset. Únete a los rally a tiempo y avisa a R4/R5 de las ausencias prolongadas.',
+    enterRanks:'Ver miembros',officialGame:'Juego oficial',alertLabel:'Directiva de la alianza',alertText:'Activa el escudo antes del reset del kill event. Únete a los rally a tiempo y avisa a R4/R5 de las ausencias prolongadas.',
     strength:'Fuerza',unity:'Unidad',discipline:'Disciplina',rosterLabel:'Inteligencia de la alianza',rosterTitle:'Miembros de FFF-Spartan',rosterText:'Compara el rendimiento de los miembros por rango y métrica operativa.',
     members:'miembros',updated:'Actualizado hoy',combatPower:'Poder de combate',kills:'Bajas',weeklyContribution:'Contribución semanal',search:'Buscar superviviente',rank:'Rango',member:'Miembro',role:'Rol',
     pollsLabel:'Decisiones colectivas',pollsTitle:'Votaciones activas',pollsText:'Solo los miembros verificados de la alianza pueden votar. Una respuesta por miembro.',active:'Activa',votes:'votos',vote:'Votar',
@@ -137,7 +139,7 @@ const translated: Record<Exclude<Language, 'en' | 'pt'>, BaseCopy> = {
   fr: {
     navHome:'Commandement',navRanks:'Membres',navPolls:'Votes',navR4:'Candidature R4',navRules:'Code',admin:'Administration',
     eyebrow:'Alliance Dark War: Survival',heroTitle:'Survivre ensemble. Conquérir à l’unisson.',heroText:'Le centre opérationnel de FFF-Spartan : performance des membres, décisions de l’alliance et candidatures au leadership en un seul endroit.',
-    enterRanks:'Voir les membres',officialGame:'Jeu officiel',alertLabel:'Directive de l’alliance',alertText:'Activez le bouclier avant le reset. Rejoignez les rally à l’heure et signalez les absences prolongées aux R4/R5.',
+    enterRanks:'Voir les membres',officialGame:'Jeu officiel',alertLabel:'Directive de l’alliance',alertText:'Activez le bouclier avant le reset du kill event. Rejoignez les rally à l’heure et signalez les absences prolongées aux R4/R5.',
     strength:'Force',unity:'Unité',discipline:'Discipline',rosterLabel:'Renseignement de l’alliance',rosterTitle:'Membres FFF-Spartan',rosterText:'Comparez la performance des membres par rang et par indicateur opérationnel.',
     members:'membres',updated:'Mis à jour aujourd’hui',combatPower:'Puissance de combat',kills:'Éliminations',weeklyContribution:'Contribution hebdomadaire',search:'Rechercher un survivant',rank:'Rang',member:'Membre',role:'Rôle',
     pollsLabel:'Décisions collectives',pollsTitle:'Votes actifs',pollsText:'Seuls les membres vérifiés de l’alliance peuvent voter. Une réponse par membre.',active:'Actif',votes:'votes',vote:'Voter',
@@ -156,7 +158,7 @@ const translated: Record<Exclude<Language, 'en' | 'pt'>, BaseCopy> = {
   de: {
     navHome:'Kommando',navRanks:'Mitglieder',navPolls:'Abstimmungen',navR4:'R4-Bewerbung',navRules:'Kodex',admin:'Verwaltung',
     eyebrow:'Dark War: Survival Allianz',heroTitle:'Gemeinsam überleben. Als Einheit erobern.',heroText:'Das Operationszentrum von FFF-Spartan: Mitgliederleistung, Allianzentscheidungen und Führungsbewerbungen an einem Ort.',
-    enterRanks:'Mitglieder anzeigen',officialGame:'Offizielles Spiel',alertLabel:'Allianz-Anweisung',alertText:'Aktiviere den Schild vor dem Reset. Nimm pünktlich an rally teil und melde längere Abwesenheiten an R4/R5.',
+    enterRanks:'Mitglieder anzeigen',officialGame:'Offizielles Spiel',alertLabel:'Allianz-Anweisung',alertText:'Aktiviere den Schild vor dem Reset des Kill Events. Nimm pünktlich an rally teil und melde längere Abwesenheiten an R4/R5.',
     strength:'Stärke',unity:'Einheit',discipline:'Disziplin',rosterLabel:'Allianz-Intelligence',rosterTitle:'FFF-Spartan-Mitglieder',rosterText:'Vergleiche die Leistung der Mitglieder nach Rang und operativer Kennzahl.',
     members:'Mitglieder',updated:'Heute aktualisiert',combatPower:'Kampfkraft',kills:'Abschüsse',weeklyContribution:'Wöchentlicher Beitrag',search:'Überlebenden suchen',rank:'Rang',member:'Mitglied',role:'Rolle',
     pollsLabel:'Gemeinsame Entscheidungen',pollsTitle:'Aktive Abstimmungen',pollsText:'Nur verifizierte Allianzmitglieder dürfen abstimmen. Eine Antwort pro Mitglied.',active:'Aktiv',votes:'Stimmen',vote:'Abstimmen',
@@ -175,7 +177,7 @@ const translated: Record<Exclude<Language, 'en' | 'pt'>, BaseCopy> = {
   it: {
     navHome:'Comando',navRanks:'Membri',navPolls:'Sondaggi',navR4:'Candidatura R4',navRules:'Codice',admin:'Amministrazione',
     eyebrow:'Alleanza di Dark War: Survival',heroTitle:'Sopravvivere insieme. Conquistare uniti.',heroText:'Il centro operativo FFF-Spartan: prestazioni dei membri, decisioni dell’alleanza e candidature alla leadership in un unico luogo.',
-    enterRanks:'Vedi membri',officialGame:'Gioco ufficiale',alertLabel:'Direttiva dell’alleanza',alertText:'Attiva lo scudo prima del reset. Partecipa puntualmente ai rally e comunica le assenze prolungate a R4/R5.',
+    enterRanks:'Vedi membri',officialGame:'Gioco ufficiale',alertLabel:'Direttiva dell’alleanza',alertText:'Attiva lo scudo prima del reset del kill event. Partecipa puntualmente ai rally e comunica le assenze prolungate a R4/R5.',
     strength:'Forza',unity:'Unità',discipline:'Disciplina',rosterLabel:'Intelligence dell’alleanza',rosterTitle:'Membri FFF-Spartan',rosterText:'Confronta le prestazioni dei membri per grado e metrica operativa.',
     members:'membri',updated:'Aggiornato oggi',combatPower:'Potere di combattimento',kills:'Uccisioni',weeklyContribution:'Contributo settimanale',search:'Cerca sopravvissuto',rank:'Posizione',member:'Membro',role:'Grado',
     pollsLabel:'Decisioni collettive',pollsTitle:'Sondaggi attivi',pollsText:'Solo i membri verificati dell’alleanza possono votare. Una risposta per membro.',active:'Attivo',votes:'voti',vote:'Vota',
@@ -193,7 +195,7 @@ const translated: Record<Exclude<Language, 'en' | 'pt'>, BaseCopy> = {
   pl: {
     navHome:'Dowództwo',navRanks:'Członkowie',navPolls:'Głosowania',navR4:'Zgłoszenie R4',navRules:'Kodeks',admin:'Administracja',
     eyebrow:'Sojusz Dark War: Survival',heroTitle:'Przetrwajmy razem. Podbijajmy jako jedność.',heroText:'Centrum operacyjne FFF-Spartan: wyniki członków, decyzje sojuszu i zgłoszenia do roli lidera w jednym miejscu.',
-    enterRanks:'Zobacz członków',officialGame:'Oficjalna gra',alertLabel:'Dyrektywa sojuszu',alertText:'Włącz tarczę przed resetem. Dołączaj do rally na czas i zgłaszaj dłuższe nieobecności do R4/R5.',
+    enterRanks:'Zobacz członków',officialGame:'Oficjalna gra',alertLabel:'Dyrektywa sojuszu',alertText:'Włącz tarczę przed resetem kill eventu. Dołączaj do rally na czas i zgłaszaj dłuższe nieobecności do R4/R5.',
     strength:'Siła',unity:'Jedność',discipline:'Dyscyplina',rosterLabel:'Wywiad sojuszu',rosterTitle:'Członkowie FFF-Spartan',rosterText:'Porównuj wyniki członków według rangi i wskaźników operacyjnych.',
     members:'członkowie',updated:'Zaktualizowano dzisiaj',combatPower:'Moc bojowa',kills:'Eliminacje',weeklyContribution:'Tygodniowy wkład',search:'Szukaj ocalałego',rank:'Ranga',member:'Członek',role:'Rola',
     pollsLabel:'Decyzje zbiorowe',pollsTitle:'Aktywne głosowania',pollsText:'Głosować mogą tylko zweryfikowani członkowie sojuszu. Jedna odpowiedź na członka.',active:'Aktywne',votes:'głosów',vote:'Głosuj',
@@ -212,7 +214,7 @@ const translated: Record<Exclude<Language, 'en' | 'pt'>, BaseCopy> = {
   ru: {
     navHome:'Командование',navRanks:'Участники',navPolls:'Голосования',navR4:'Заявка R4',navRules:'Кодекс',admin:'Админ',
     eyebrow:'Альянс Dark War: Survival',heroTitle:'Выживаем вместе. Побеждаем как единое целое.',heroText:'Оперативный центр FFF-Spartan: результаты участников, решения альянса и заявки на лидерские роли в одном месте.',
-    enterRanks:'Смотреть состав',officialGame:'Официальная игра',alertLabel:'Директива альянса',alertText:'Включайте щит до reset. Вовремя вступайте в rally и сообщайте R4/R5 о длительном отсутствии.',
+    enterRanks:'Смотреть состав',officialGame:'Официальная игра',alertLabel:'Директива альянса',alertText:'Включайте щит до сброса kill event. Вовремя вступайте в rally и сообщайте R4/R5 о длительном отсутствии.',
     strength:'Сила',unity:'Единство',discipline:'Дисциплина',rosterLabel:'Разведданные альянса',rosterTitle:'Состав FFF-Spartan',rosterText:'Сравнивайте результаты участников по рангу и оперативным показателям.',
     members:'участников',updated:'Обновлено сегодня',combatPower:'Боевая мощь',kills:'Убийства',weeklyContribution:'Недельный вклад',search:'Найти выжившего',rank:'Ранг',member:'Участник',role:'Роль',
     pollsLabel:'Коллективные решения',pollsTitle:'Активные голосования',pollsText:'Голосовать могут только подтверждённые участники альянса. Один ответ на участника.',active:'Активно',votes:'голосов',vote:'Голосовать',
@@ -231,7 +233,7 @@ const translated: Record<Exclude<Language, 'en' | 'pt'>, BaseCopy> = {
   tr: {
     navHome:'Komuta',navRanks:'Üyeler',navPolls:'Oylamalar',navR4:'R4 Başvurusu',navRules:'Kod',admin:'Yönetim',
     eyebrow:'Dark War: Survival İttifakı',heroTitle:'Birlikte hayatta kal. Tek güç olarak fethet.',heroText:'FFF-Spartan operasyon merkezi: üye performansı, ittifak kararları ve liderlik başvuruları tek yerde.',
-    enterRanks:'Üyeleri görüntüle',officialGame:'Resmî oyun',alertLabel:'İttifak direktifi',alertText:'Resetten önce kalkanı aç. rally etkinliklerine zamanında katıl ve uzun yoklukları R4/R5 ekibine bildir.',
+    enterRanks:'Üyeleri görüntüle',officialGame:'Resmî oyun',alertLabel:'İttifak direktifi',alertText:'Kill event resetinden önce kalkanı aç. rally etkinliklerine zamanında katıl ve uzun yoklukları R4/R5 ekibine bildir.',
     strength:'Güç',unity:'Birlik',discipline:'Disiplin',rosterLabel:'İttifak istihbaratı',rosterTitle:'FFF-Spartan üyeleri',rosterText:'Üye performansını rütbe ve operasyon metriklerine göre karşılaştır.',
     members:'üye',updated:'Bugün güncellendi',combatPower:'Savaş Gücü',kills:'Öldürme',weeklyContribution:'Haftalık Katkı',search:'Hayatta kalan ara',rank:'Rütbe',member:'Üye',role:'Rol',
     pollsLabel:'Kolektif kararlar',pollsTitle:'Aktif oylamalar',pollsText:'Yalnızca doğrulanmış ittifak üyeleri oy verebilir. Üye başına bir yanıt.',active:'Aktif',votes:'oy',vote:'Oy ver',
@@ -250,7 +252,7 @@ const translated: Record<Exclude<Language, 'en' | 'pt'>, BaseCopy> = {
   id: {
     navHome:'Komando',navRanks:'Anggota',navPolls:'Pemungutan suara',navR4:'Pendaftaran R4',navRules:'Kode',admin:'Admin',
     eyebrow:'Aliansi Dark War: Survival',heroTitle:'Bertahan bersama. Menaklukkan sebagai satu.',heroText:'Pusat operasional FFF-Spartan: performa anggota, keputusan aliansi, dan pendaftaran kepemimpinan dalam satu tempat.',
-    enterRanks:'Lihat anggota',officialGame:'Game resmi',alertLabel:'Arahan aliansi',alertText:'Aktifkan perisai sebelum reset. Ikut rally tepat waktu dan laporkan ketidakhadiran panjang ke R4/R5.',
+    enterRanks:'Lihat anggota',officialGame:'Game resmi',alertLabel:'Arahan aliansi',alertText:'Aktifkan perisai sebelum reset kill event. Ikut rally tepat waktu dan laporkan ketidakhadiran panjang ke R4/R5.',
     strength:'Kekuatan',unity:'Persatuan',discipline:'Disiplin',rosterLabel:'Intel aliansi',rosterTitle:'Anggota FFF-Spartan',rosterText:'Bandingkan performa anggota berdasarkan rank dan metrik operasional.',
     members:'anggota',updated:'Diperbarui hari ini',combatPower:'Kekuatan Tempur',kills:'Eliminasi',weeklyContribution:'Kontribusi Mingguan',search:'Cari penyintas',rank:'Peringkat',member:'Anggota',role:'Peran',
     pollsLabel:'Keputusan kolektif',pollsTitle:'Pemungutan suara aktif',pollsText:'Hanya anggota aliansi terverifikasi yang dapat memilih. Satu suara per anggota.',active:'Aktif',votes:'suara',vote:'Pilih',
@@ -269,7 +271,7 @@ const translated: Record<Exclude<Language, 'en' | 'pt'>, BaseCopy> = {
   vi: {
     navHome:'Chỉ huy',navRanks:'Thành viên',navPolls:'Bỏ phiếu',navR4:'Ứng tuyển R4',navRules:'Bộ quy tắc',admin:'Quản trị',
     eyebrow:'Liên minh Dark War: Survival',heroTitle:'Cùng sinh tồn. Đồng lòng chinh phục.',heroText:'Trung tâm vận hành của FFF-Spartan: hiệu suất thành viên, quyết định liên minh và đơn ứng tuyển lãnh đạo trong một nơi.',
-    enterRanks:'Xem thành viên',officialGame:'Trò chơi chính thức',alertLabel:'Chỉ thị liên minh',alertText:'Bật khiên trước reset. Tham gia rally đúng giờ và báo cho R4/R5 nếu vắng mặt dài ngày.',
+    enterRanks:'Xem thành viên',officialGame:'Trò chơi chính thức',alertLabel:'Chỉ thị liên minh',alertText:'Bật khiên trước khi reset kill event. Tham gia rally đúng giờ và báo cho R4/R5 nếu vắng mặt dài ngày.',
     strength:'Sức mạnh',unity:'Đoàn kết',discipline:'Kỷ luật',rosterLabel:'Tình báo liên minh',rosterTitle:'Thành viên FFF-Spartan',rosterText:'So sánh hiệu suất thành viên theo cấp bậc và chỉ số vận hành.',
     members:'thành viên',updated:'Cập nhật hôm nay',combatPower:'Lực chiến',kills:'Hạ gục',weeklyContribution:'Đóng góp tuần',search:'Tìm người sống sót',rank:'Cấp bậc',member:'Thành viên',role:'Vai trò',
     pollsLabel:'Quyết định tập thể',pollsTitle:'Bỏ phiếu đang mở',pollsText:'Chỉ thành viên liên minh đã xác minh mới được bỏ phiếu. Mỗi thành viên một lựa chọn.',active:'Đang mở',votes:'phiếu',vote:'Bỏ phiếu',
@@ -288,7 +290,7 @@ const translated: Record<Exclude<Language, 'en' | 'pt'>, BaseCopy> = {
   th: {
     navHome:'ศูนย์บัญชาการ',navRanks:'สมาชิก',navPolls:'โพล',navR4:'สมัคร R4',navRules:'ระเบียบ',admin:'ผู้ดูแล',
     eyebrow:'พันธมิตร Dark War: Survival',heroTitle:'เอาชีวิตรอดไปด้วยกัน พิชิตในฐานะหนึ่งเดียว',heroText:'ศูนย์ปฏิบัติการของ FFF-Spartan: ผลงานสมาชิก การตัดสินใจของพันธมิตร และใบสมัครผู้นำในที่เดียว',
-    enterRanks:'ดูสมาชิก',officialGame:'เกมทางการ',alertLabel:'คำสั่งพันธมิตร',alertText:'เปิดโล่ก่อน reset เข้าร่วม rally ให้ตรงเวลา และแจ้ง R4/R5 หากจะไม่ออนไลน์นาน',
+    enterRanks:'ดูสมาชิก',officialGame:'เกมทางการ',alertLabel:'คำสั่งพันธมิตร',alertText:'เปิดโล่ก่อนรีเซ็ต kill event เข้าร่วม rally ให้ตรงเวลา และแจ้ง R4/R5 หากจะไม่ออนไลน์นาน',
     strength:'พลัง',unity:'ความสามัคคี',discipline:'วินัย',rosterLabel:'ข่าวกรองพันธมิตร',rosterTitle:'สมาชิก FFF-Spartan',rosterText:'เปรียบเทียบผลงานสมาชิกตามแรงก์และตัวชี้วัดการปฏิบัติการ',
     members:'สมาชิก',updated:'อัปเดตวันนี้',combatPower:'พลังรบ',kills:'สังหาร',weeklyContribution:'ผลงานรายสัปดาห์',search:'ค้นหาผู้รอดชีวิต',rank:'แรงก์',member:'สมาชิก',role:'บทบาท',
     pollsLabel:'การตัดสินใจร่วมกัน',pollsTitle:'โพลที่เปิดอยู่',pollsText:'มีสิทธิ์โหวตเฉพาะสมาชิกพันธมิตรที่ยืนยันแล้วเท่านั้น หนึ่งคำตอบต่อหนึ่งคน',active:'เปิดอยู่',votes:'โหวต',vote:'โหวต',
@@ -307,7 +309,7 @@ const translated: Record<Exclude<Language, 'en' | 'pt'>, BaseCopy> = {
   ja: {
     navHome:'司令部',navRanks:'メンバー',navPolls:'投票',navR4:'R4申請',navRules:'規範',admin:'管理',
     eyebrow:'Dark War: Survival アライアンス',heroTitle:'共に生き残り、一つになって征服する。',heroText:'FFF-Spartanの作戦ハブ。メンバー実績、アライアンスの意思決定、リーダー応募を一か所で管理。',
-    enterRanks:'メンバーを見る',officialGame:'公式ゲーム',alertLabel:'アライアンス指令',alertText:'reset前にシールドを有効化。rallyには時間どおり参加し、長期不在はR4/R5へ報告。',
+    enterRanks:'メンバーを見る',officialGame:'公式ゲーム',alertLabel:'アライアンス指令',alertText:'kill eventのreset前にシールドを有効化。rallyには時間どおり参加し、長期不在はR4/R5へ報告。',
     strength:'戦力',unity:'団結',discipline:'規律',rosterLabel:'アライアンス情報',rosterTitle:'FFF-Spartanメンバー',rosterText:'階級と運用指標でメンバー実績を比較します。',
     members:'名',updated:'本日更新',combatPower:'戦闘力',kills:'撃破数',weeklyContribution:'週間貢献',search:'生存者を検索',rank:'ランク',member:'メンバー',role:'役職',
     pollsLabel:'共同意思決定',pollsTitle:'進行中の投票',pollsText:'投票できるのは認証済みのアライアンスメンバーのみ。1人1票です。',active:'進行中',votes:'票',vote:'投票する',
@@ -326,7 +328,7 @@ const translated: Record<Exclude<Language, 'en' | 'pt'>, BaseCopy> = {
   ko: {
     navHome:'지휘부',navRanks:'연맹원',navPolls:'투표',navR4:'R4 지원',navRules:'규정',admin:'관리',
     eyebrow:'Dark War: Survival 연맹',heroTitle:'함께 생존하고 하나로 정복하라.',heroText:'FFF-Spartan 운영 허브: 연맹원 성과, 연맹 의사결정, 리더십 지원을 한곳에서 관리합니다.',
-    enterRanks:'연맹원 보기',officialGame:'공식 게임',alertLabel:'연맹 지시',alertText:'reset 전에 보호막을 켜세요. rally에는 제시간에 참여하고 장기 부재는 R4/R5에 보고하세요.',
+    enterRanks:'연맹원 보기',officialGame:'공식 게임',alertLabel:'연맹 지시',alertText:'kill event reset 전에 보호막을 켜세요. rally에는 제시간에 참여하고 장기 부재는 R4/R5에 보고하세요.',
     strength:'전력',unity:'단결',discipline:'규율',rosterLabel:'연맹 인텔리전스',rosterTitle:'FFF-Spartan 연맹원',rosterText:'연맹원 성과를 랭크와 운영 지표별로 비교하세요.',
     members:'명',updated:'오늘 업데이트',combatPower:'전투력',kills:'처치',weeklyContribution:'주간 기여',search:'생존자 검색',rank:'랭크',member:'연맹원',role:'직책',
     pollsLabel:'공동 의사결정',pollsTitle:'진행 중인 투표',pollsText:'검증된 연맹원만 투표할 수 있습니다. 1인 1표입니다.',active:'진행 중',votes:'표',vote:'투표',
@@ -345,7 +347,7 @@ const translated: Record<Exclude<Language, 'en' | 'pt'>, BaseCopy> = {
   ar: {
     navHome:'القيادة',navRanks:'الأعضاء',navPolls:'الاستطلاعات',navR4:'ترشح R4',navRules:'المدونة',admin:'الإدارة',
     eyebrow:'تحالف Dark War: Survival',heroTitle:'ننجو معًا. وننتصر كقوة واحدة.',heroText:'المركز التشغيلي لـ FFF-Spartan: أداء الأعضاء وقرارات التحالف وطلبات القيادة في مكان واحد.',
-    enterRanks:'عرض الأعضاء',officialGame:'اللعبة الرسمية',alertLabel:'توجيه التحالف',alertText:'فعّل الدرع قبل reset. انضم إلى rally في الوقت المحدد وأبلغ R4/R5 عند الغياب الطويل.',
+    enterRanks:'عرض الأعضاء',officialGame:'اللعبة الرسمية',alertLabel:'توجيه التحالف',alertText:'فعّل الدرع قبل إعادة ضبط kill event. انضم إلى rally في الوقت المحدد وأبلغ R4/R5 عند الغياب الطويل.',
     strength:'القوة',unity:'الوحدة',discipline:'الانضباط',rosterLabel:'استخبارات التحالف',rosterTitle:'أعضاء FFF-Spartan',rosterText:'قارن أداء الأعضاء حسب الرتبة والمؤشرات التشغيلية.',
     members:'أعضاء',updated:'تم التحديث اليوم',combatPower:'قوة القتال',kills:'الإقصاءات',weeklyContribution:'المساهمة الأسبوعية',search:'ابحث عن ناجٍ',rank:'الرتبة',member:'العضو',role:'الدور',
     pollsLabel:'قرارات جماعية',pollsTitle:'الاستطلاعات النشطة',pollsText:'يُسمح بالتصويت فقط لأعضاء التحالف الموثقين. صوت واحد لكل عضو.',active:'نشط',votes:'أصوات',vote:'تصويت',
@@ -364,7 +366,7 @@ const translated: Record<Exclude<Language, 'en' | 'pt'>, BaseCopy> = {
   'zh-CN': {
     navHome:'指挥部',navRanks:'成员',navPolls:'投票',navR4:'R4申请',navRules:'守则',admin:'管理',
     eyebrow:'Dark War: Survival 联盟',heroTitle:'共同生存，同心征服。',heroText:'FFF-Spartan 的作战中心：成员表现、联盟决策与领导岗位申请集中在一个地方。',
-    enterRanks:'查看成员',officialGame:'官方游戏',alertLabel:'联盟指令',alertText:'在 reset 前开启护盾。按时参加 rally，并将长期缺席告知 R4/R5。',
+    enterRanks:'查看成员',officialGame:'官方游戏',alertLabel:'联盟指令',alertText:'在 kill event 重置前开启护盾。按时参加 rally，并将长期缺席告知 R4/R5。',
     strength:'力量',unity:'团结',discipline:'纪律',rosterLabel:'联盟情报',rosterTitle:'FFF-Spartan 成员',rosterText:'按军衔和作战指标比较成员表现。',
     members:'成员',updated:'今日更新',combatPower:'战斗力',kills:'击杀',weeklyContribution:'每周贡献',search:'搜索幸存者',rank:'军衔',member:'成员',role:'职责',
     pollsLabel:'集体决策',pollsTitle:'进行中的投票',pollsText:'仅已验证的联盟成员可投票。每名成员仅限一次。',active:'进行中',votes:'票',vote:'投票',
@@ -383,7 +385,7 @@ const translated: Record<Exclude<Language, 'en' | 'pt'>, BaseCopy> = {
   'zh-TW': {
     navHome:'指揮部',navRanks:'成員',navPolls:'投票',navR4:'R4申請',navRules:'守則',admin:'管理',
     eyebrow:'Dark War: Survival 聯盟',heroTitle:'共同生存，同心征服。',heroText:'FFF-Spartan 的作戰中心：成員表現、聯盟決策與領導職位申請一次整合。',
-    enterRanks:'查看成員',officialGame:'官方遊戲',alertLabel:'聯盟指令',alertText:'在 reset 前開啟護盾。準時參加 rally，並將長時間缺席回報給 R4/R5。',
+    enterRanks:'查看成員',officialGame:'官方遊戲',alertLabel:'聯盟指令',alertText:'在 kill event 重設前開啟護盾。準時參加 rally，並將長時間缺席回報給 R4/R5。',
     strength:'力量',unity:'團結',discipline:'紀律',rosterLabel:'聯盟情報',rosterTitle:'FFF-Spartan 成員',rosterText:'依軍階與作戰指標比較成員表現。',
     members:'成員',updated:'今日更新',combatPower:'戰鬥力',kills:'擊殺',weeklyContribution:'每週貢獻',search:'搜尋倖存者',rank:'軍階',member:'成員',role:'職務',
     pollsLabel:'集體決策',pollsTitle:'進行中的投票',pollsText:'只有已驗證的聯盟成員可以投票。每位成員限投一次。',active:'進行中',votes:'票',vote:'投票',
@@ -488,5 +490,5 @@ const automaticTranslationHint: Record<Language, string> = {
 
 export function getCopy(language: Language): Copy {
   const base = language === 'pt' ? pt : language === 'en' ? en : { ...en, ...translated[language] }
-  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language] }
+  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language] }
 }
