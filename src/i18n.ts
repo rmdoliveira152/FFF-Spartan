@@ -65,6 +65,8 @@ type MemberAccessCopy = {
   currentAccount: string; searchAccounts: string; noAccessResults: string
 }
 
+type RosterFilterCopy = { rosterAll: string; rosterActive: string; rosterInactive: string }
+
 type AdminRoleCopy = {
   promoteToAdmin: string; demoteToMember: string; confirmPromoteAdmin: string; confirmDemoteAdmin: string
 }
@@ -167,7 +169,7 @@ const allianceCodeCopy: Record<Language, AllianceCodeCopy> = {
   'zh-TW':{ codeLabel:'聯盟標準',codeTitle:'行動準則',codePlayers:'其他玩家',codeAdmins:'R4 · 管理',codeCourtesy:'友善並有禮貌地對待其他玩家。' },
 }
 
-export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy & DynamicTranslationCopy & MemberAccessCopy & AdminRoleCopy & NotificationCopy & PollAdminCopy & ExportCopy & PerformanceCopy & AllianceCodeCopy & EventGuideCopy & { codeAgreement: string }
+export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy & DynamicTranslationCopy & MemberAccessCopy & RosterFilterCopy & AdminRoleCopy & NotificationCopy & PollAdminCopy & ExportCopy & PerformanceCopy & AllianceCodeCopy & EventGuideCopy & { codeAgreement: string }
 
 const en: BaseCopy = {
   navHome: 'Command', navRanks: 'Roster', navPolls: 'Polls', navR4: 'R4 application', navRules: 'Code', admin: 'Admin',
@@ -585,6 +587,26 @@ const memberAccessCopy: Record<Language, MemberAccessCopy> = {
   'zh-TW': { accessPending:'待處理',accessApproved:'已核准',accessInactive:'未啟用',currentAccount:'目前帳號',searchAccounts:'搜尋帳號',noAccessResults:'找不到帳號。' },
 }
 
+const rosterFilterCopy: Record<Language, RosterFilterCopy> = {
+  en:{rosterAll:'All',rosterActive:'Active',rosterInactive:'Inactive'},
+  pt:{rosterAll:'Todos',rosterActive:'Ativos',rosterInactive:'Inativos'},
+  es:{rosterAll:'Todos',rosterActive:'Activos',rosterInactive:'Inactivos'},
+  fr:{rosterAll:'Tous',rosterActive:'Actifs',rosterInactive:'Inactifs'},
+  de:{rosterAll:'Alle',rosterActive:'Aktiv',rosterInactive:'Inaktiv'},
+  it:{rosterAll:'Tutti',rosterActive:'Attivi',rosterInactive:'Inattivi'},
+  pl:{rosterAll:'Wszyscy',rosterActive:'Aktywni',rosterInactive:'Nieaktywni'},
+  ru:{rosterAll:'Все',rosterActive:'Активные',rosterInactive:'Неактивные'},
+  tr:{rosterAll:'Tümü',rosterActive:'Aktif',rosterInactive:'Etkin değil'},
+  id:{rosterAll:'Semua',rosterActive:'Aktif',rosterInactive:'Nonaktif'},
+  vi:{rosterAll:'Tất cả',rosterActive:'Hoạt động',rosterInactive:'Không hoạt động'},
+  th:{rosterAll:'ทั้งหมด',rosterActive:'ใช้งาน',rosterInactive:'ไม่ใช้งาน'},
+  ja:{rosterAll:'すべて',rosterActive:'有効',rosterInactive:'無効'},
+  ko:{rosterAll:'전체',rosterActive:'활성',rosterInactive:'비활성'},
+  ar:{rosterAll:'الكل',rosterActive:'نشط',rosterInactive:'غير نشط'},
+  'zh-CN':{rosterAll:'全部',rosterActive:'启用',rosterInactive:'未启用'},
+  'zh-TW':{rosterAll:'全部',rosterActive:'啟用',rosterInactive:'未啟用'},
+}
+
 const notificationCopy: Record<Language, NotificationCopy> = {
   en:{notifyMembers:'Notify active members by email',membersNotified:'Members notified by email.',notificationFailed:'Content saved, but email notification failed.',emailPreferences:'Email notifications',notifyPollEmails:'New polls',notifyNewsEmails:'Board News'},
   pt:{notifyMembers:'Notificar membros ativos por email',membersNotified:'Membros notificados por email.',notificationFailed:'Conteúdo guardado, mas a notificação por email falhou.',emailPreferences:'Notificações por email',notifyPollEmails:'Novas votações',notifyNewsEmails:'Board News'},
@@ -717,5 +739,5 @@ const automaticTranslationHint: Record<Language, string> = {
 
 export function getCopy(language: Language): Copy {
   const base = language === 'pt' ? pt : language === 'en' ? en : { ...en, ...translated[language] }
-  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...adminRoleCopy[language], ...notificationCopy[language], ...pollAdminCopy[language], ...exportCopy[language], ...performanceEnglish, ...performanceCopy[language], ...dailyPerformanceCopy[language], ...performanceIndicatorCopy[language], ...allianceCodeCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language], gameServerTime: gameServerTimeCopy[language], codeAgreement: codeAgreementCopy[language] }
+  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...rosterFilterCopy[language], ...adminRoleCopy[language], ...notificationCopy[language], ...pollAdminCopy[language], ...exportCopy[language], ...performanceEnglish, ...performanceCopy[language], ...dailyPerformanceCopy[language], ...performanceIndicatorCopy[language], ...allianceCodeCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language], gameServerTime: gameServerTimeCopy[language], codeAgreement: codeAgreementCopy[language] }
 }
