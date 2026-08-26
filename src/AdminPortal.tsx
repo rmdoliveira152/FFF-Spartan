@@ -86,6 +86,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
   const [newsImagePaths, setNewsImagePaths] = useState<string[]>([])
   const [newsImageFiles, setNewsImageFiles] = useState<SelectedNewsImage[]>([])
   const [polls, setPolls] = useState<PortalPoll[]>([])
+  const [editingPoll, setEditingPoll] = useState<PortalPoll | null>(null)
   const [applications, setApplications] = useState<R4Application[]>([])
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [adminMembers, setAdminMembers] = useState<AllianceMember[]>(initialMembers)
@@ -274,7 +275,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     const { data: pollId, error: createError } = await supabase.rpc('create_poll', {
       poll_question: String(form.get('question')),
       option_labels: labels,
-      poll_closes_at: closesAt ? new Date(closesAt).toISOString() : null,
+      poll_closes_at: closesAt ? fromGameServerTime(closesAt) : null,
     })
     if (createError) setError(createError.message)
     else {
@@ -285,11 +286,39 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     setBusy(false)
   }
 
+  const updatePoll = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!supabase || !editingPoll) return
+    setBusy(true)
+    setError('')
+    const form = new FormData(event.currentTarget)
+    const hasVotes = editingPoll.poll_options.some((option) => option.voteCount > 0)
+    const labels = hasVotes
+      ? editingPoll.poll_options.map((option) => option.label)
+      : String(form.get('options')).split('\n').map((option) => option.trim()).filter(Boolean)
+    const closesAt = String(form.get('closesAt'))
+    const { error: updateError } = await supabase.rpc('update_poll', {
+      requested_poll: editingPoll.id,
+      poll_question: String(form.get('question')),
+      option_labels: labels,
+      poll_closes_at: closesAt ? fromGameServerTime(closesAt) : null,
+    })
+    if (updateError) setError(updateError.message)
+    else {
+      setEditingPoll(null)
+      await Promise.all([loadAdminData(), onRefreshPolls()])
+    }
+    setBusy(false)
+  }
+
   const togglePoll = async (poll: PortalPoll) => {
     if (!supabase) return
     const { error: updateError } = await supabase.from('polls').update({ active: !poll.active }).eq('id', poll.id)
     if (updateError) setError(updateError.message)
-    else await Promise.all([loadAdminData(), onRefreshPolls()])
+    else {
+      if (editingPoll?.id === poll.id) setEditingPoll(null)
+      await Promise.all([loadAdminData(), onRefreshPolls()])
+    }
   }
 
   const deletePoll = async (poll: PortalPoll) => {
@@ -716,9 +745,22 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
         </section>
 
         <section className="admin-block" id="admin-polls"><h3>{copy.pollsTitle}</h3>
-          <div className="admin-list">{polls.map((poll) => <article key={poll.id}><div><strong>{poll.question}</strong><small>{poll.poll_options.reduce((total, option) => total + option.voteCount, 0)} {copy.votes}</small></div>
-            <ul>{poll.poll_options.map((option) => <li key={option.id}>{option.label}<b>{option.voteCount}</b></li>)}</ul>
-            <div className="row-actions"><button className="compact-button" onClick={() => togglePoll(poll)}>{poll.active ? copy.deactivate : copy.activate}</button>{!poll.active && <button className="compact-button danger" onClick={() => void deletePoll(poll)}><Trash2 size={14} />{copy.delete}</button>}</div></article>)}</div>
+          <div className="admin-list">{polls.map((poll) => {
+            const voteCount = poll.poll_options.reduce((total, option) => total + option.voteCount, 0)
+            const isEditing = editingPoll?.id === poll.id
+            return <article key={poll.id}>{isEditing
+              ? <form className="admin-form" onSubmit={updatePoll}>
+                <label>{copy.question}<input name="question" required minLength={5} maxLength={240} defaultValue={poll.question} /></label>
+                <label>{copy.options}<textarea name="options" required rows={4} disabled={voteCount > 0} defaultValue={poll.poll_options.map((option) => option.label).join('\n')} /></label>
+                {voteCount > 0 && <small>{copy.optionsLockedAfterVoting}</small>}
+                <label>{copy.closingDate}<input name="closesAt" type="datetime-local" defaultValue={toDateTimeInput(poll.closes_at)} /></label>
+                <div className="row-actions"><button className="primary-button" type="submit" disabled={busy}>{copy.save}</button><button className="ghost-button" type="button" onClick={() => setEditingPoll(null)}>{copy.cancel}</button></div>
+              </form>
+              : <><div><strong>{poll.question}</strong><small>{voteCount} {copy.votes}</small></div>
+                <ul>{poll.poll_options.map((option) => <li key={option.id}>{option.label}<b>{option.voteCount}</b></li>)}</ul>
+                <div className="row-actions">{poll.active && <button className="compact-button" type="button" onClick={() => setEditingPoll(poll)}><Pencil size={14} />{copy.editPoll}</button>}<button className="compact-button" type="button" onClick={() => togglePoll(poll)}>{poll.active ? copy.deactivate : copy.activate}</button>{!poll.active && <button className="compact-button danger" type="button" onClick={() => void deletePoll(poll)}><Trash2 size={14} />{copy.delete}</button>}</div></>}
+            </article>
+          })}</div>
         </section>
 
         <section className="admin-block" id="admin-applications"><h3>{copy.applications}</h3>

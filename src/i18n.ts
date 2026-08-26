@@ -70,6 +70,28 @@ type NotificationCopy = {
   emailPreferences: string; notifyPollEmails: string; notifyNewsEmails: string
 }
 
+type PollAdminCopy = { editPoll: string; optionsLockedAfterVoting: string }
+
+const pollAdminCopy: Record<Language, PollAdminCopy> = {
+  en:{editPoll:'Edit poll',optionsLockedAfterVoting:'Options cannot be changed after voting has started.'},
+  pt:{editPoll:'Editar votação',optionsLockedAfterVoting:'As opções não podem ser alteradas depois de a votação começar.'},
+  es:{editPoll:'Editar encuesta',optionsLockedAfterVoting:'Las opciones no se pueden cambiar después de que comience la votación.'},
+  fr:{editPoll:'Modifier le sondage',optionsLockedAfterVoting:'Les options ne peuvent plus être modifiées après le début du vote.'},
+  de:{editPoll:'Umfrage bearbeiten',optionsLockedAfterVoting:'Optionen können nach Beginn der Abstimmung nicht mehr geändert werden.'},
+  it:{editPoll:'Modifica sondaggio',optionsLockedAfterVoting:'Le opzioni non possono essere modificate dopo l’inizio della votazione.'},
+  pl:{editPoll:'Edytuj ankietę',optionsLockedAfterVoting:'Opcji nie można zmienić po rozpoczęciu głosowania.'},
+  ru:{editPoll:'Изменить опрос',optionsLockedAfterVoting:'Варианты нельзя изменить после начала голосования.'},
+  tr:{editPoll:'Anketi düzenle',optionsLockedAfterVoting:'Oylama başladıktan sonra seçenekler değiştirilemez.'},
+  id:{editPoll:'Edit jajak pendapat',optionsLockedAfterVoting:'Pilihan tidak dapat diubah setelah pemungutan suara dimulai.'},
+  vi:{editPoll:'Sửa bình chọn',optionsLockedAfterVoting:'Không thể thay đổi các lựa chọn sau khi cuộc bỏ phiếu bắt đầu.'},
+  th:{editPoll:'แก้ไขแบบสำรวจ',optionsLockedAfterVoting:'ไม่สามารถเปลี่ยนตัวเลือกได้หลังจากเริ่มลงคะแนนแล้ว'},
+  ja:{editPoll:'投票を編集',optionsLockedAfterVoting:'投票開始後は選択肢を変更できません。'},
+  ko:{editPoll:'투표 수정',optionsLockedAfterVoting:'투표가 시작된 후에는 선택지를 변경할 수 없습니다.'},
+  ar:{editPoll:'تعديل التصويت',optionsLockedAfterVoting:'لا يمكن تغيير الخيارات بعد بدء التصويت.'},
+  'zh-CN':{editPoll:'编辑投票',optionsLockedAfterVoting:'投票开始后无法更改选项。'},
+  'zh-TW':{editPoll:'編輯投票',optionsLockedAfterVoting:'投票開始後無法變更選項。'},
+}
+
 type ExportCopy = { exportStatistics: string; exportFailed: string; rosterSheet: string }
 
 const exportCopy: Record<Language, ExportCopy> = {
@@ -120,7 +142,7 @@ const allianceCodeCopy: Record<Language, AllianceCodeCopy> = {
   'zh-TW':{ codeLabel:'聯盟標準',codeTitle:'行動準則',codePlayers:'其他玩家',codeAdmins:'R4 · 管理',codeCourtesy:'友善並有禮貌地對待其他玩家。' },
 }
 
-export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy & DynamicTranslationCopy & MemberAccessCopy & NotificationCopy & ExportCopy & PerformanceCopy & AllianceCodeCopy & EventGuideCopy & { codeAgreement: string }
+export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy & DynamicTranslationCopy & MemberAccessCopy & NotificationCopy & PollAdminCopy & ExportCopy & PerformanceCopy & AllianceCodeCopy & EventGuideCopy & { codeAgreement: string }
 
 const en: BaseCopy = {
   navHome: 'Command', navRanks: 'Roster', navPolls: 'Polls', navR4: 'R4 application', navRules: 'Code', admin: 'Admin',
@@ -650,5 +672,5 @@ const automaticTranslationHint: Record<Language, string> = {
 
 export function getCopy(language: Language): Copy {
   const base = language === 'pt' ? pt : language === 'en' ? en : { ...en, ...translated[language] }
-  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...notificationCopy[language], ...exportCopy[language], ...performanceEnglish, ...performanceCopy[language], ...dailyPerformanceCopy[language], ...allianceCodeCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language], gameServerTime: gameServerTimeCopy[language], codeAgreement: codeAgreementCopy[language] }
+  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...notificationCopy[language], ...pollAdminCopy[language], ...exportCopy[language], ...performanceEnglish, ...performanceCopy[language], ...dailyPerformanceCopy[language], ...allianceCodeCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language], gameServerTime: gameServerTimeCopy[language], codeAgreement: codeAgreementCopy[language] }
 }
