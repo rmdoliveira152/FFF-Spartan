@@ -230,7 +230,8 @@ footer img { width:110px; opacity:.65; }
 .roster-admin-list { max-height:430px; overflow-y:auto; }
 .roster-admin-search { height:42px; display:flex; align-items:center; gap:9px; margin-bottom:12px; padding:0 12px; color:var(--muted); border:1px solid #303834; background:#1b221f; }
 .roster-admin-search:focus-within { color:#fff; border-color:var(--red); }
-.roster-admin-search input { width:100%; color:#fff; border:0; outline:0; background:transparent; }
+.roster-admin-search svg { flex:0 0 auto; }
+.roster-admin-search input { width:100%; height:100%; min-width:0; margin:0; padding:0; color:#fff; border:0; outline:0; appearance:none; background:transparent; font:inherit; line-height:normal; }
 .roster-admin-search input::placeholder { color:#777f79; }
 .roster-admin-list .row-actions { display:flex; flex-direction:row; margin:0; }
 .member-access-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
