@@ -832,9 +832,9 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
 
         <section className="admin-block" id="admin-roster"><div className="admin-block-heading"><h3>{copy.manageRoster}</h3><button className="compact-button" type="button" disabled={busy} onClick={() => void exportRosterStatistics()}><FileSpreadsheet size={16} />{copy.exportStatistics}</button></div>
           <div className="performance-indicators">
-            <div><TrendingUp size={18} /><span>{copy.growthPeriod}</span><strong>{indicators.filter((item) => item.combat_power_change > 0).length}</strong></div>
-            <div><TrendingDown size={18} /><span>{copy.growthPeriod}</span><strong>{indicators.filter((item) => item.combat_power_change < 0 || item.kills_change < 0 || item.contribution_change < 0).length}</strong></div>
-            <div><History size={18} /><span>{copy.lastUpdate}</span><strong>{indicators.filter((item) => item.days_since_update > 14).length}</strong></div>
+            <div><TrendingUp size={18} /><span>{copy.membersPowerIncreased}</span><strong>{indicators.filter((item) => item.combat_power_change > 0).length}</strong></div>
+            <div><TrendingDown size={18} /><span>{copy.membersPerformanceDeclined}</span><strong>{indicators.filter((item) => item.combat_power_change < 0 || item.kills_change < 0 || item.contribution_change < 0).length}</strong></div>
+            <div><History size={18} /><span>{copy.membersNotUpdated}</span><strong>{indicators.filter((item) => item.days_since_update > 14).length}</strong></div>
           </div>
           {performanceMember && <form className="performance-entry-form" key={`${performanceMember.id}:${performanceDefaults?.recorded_at ?? 'new'}`} onSubmit={savePerformance}>
             <div className="performance-entry-heading"><div><small>{copy.recordPerformance}</small><strong>{performanceMember.member_name}</strong></div><button className="icon-button" type="button" title={copy.close} onClick={() => setPerformanceMember(null)}><X size={15} /></button></div>

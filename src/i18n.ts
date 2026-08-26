@@ -143,6 +143,7 @@ type PerformanceCopy = {
   snapshotDate: string; formation: string; saveSnapshot: string; performanceSaved: string
   currentPower: string; growthPeriod: string; noPerformanceHistory: string; signInForHistory: string
   sundayRecommended: string; myStatistics: string; selfPerformanceHint: string; currentWeek: string; previousWeek: string; viewEvolution: string
+  membersPowerIncreased: string; membersPerformanceDeclined: string; membersNotUpdated: string
 }
 
 type AllianceCodeCopy = { codeLabel: string; codeTitle: string; codePlayers: string; codeAdmins: string; codeCourtesy: string }
@@ -606,12 +607,32 @@ const notificationCopy: Record<Language, NotificationCopy> = {
 
 const performanceEnglish: PerformanceCopy = {
   performanceHistory:'Performance history',recordPerformance:'Record weekly performance',lastUpdate:'Last update',neverUpdated:'Never updated',snapshotDate:'Snapshot date',formation:'Formation',saveSnapshot:'Save weekly snapshot',performanceSaved:'Weekly performance saved.',currentPower:'Current power',growthPeriod:'Growth in period',noPerformanceHistory:'No performance history yet.',signInForHistory:'Sign in as an approved member to view performance history.',sundayRecommended:'Sunday is recommended for consistent weekly comparisons.',
-  myStatistics:'My statistics',selfPerformanceHint:'Update your own statistics for the current or previous week.',currentWeek:'Current week',previousWeek:'Previous week',viewEvolution:'View evolution',
+  myStatistics:'My statistics',selfPerformanceHint:'Update your own statistics for the current or previous week.',currentWeek:'Current week',previousWeek:'Previous week',viewEvolution:'View evolution',membersPowerIncreased:'Members with increased power',membersPerformanceDeclined:'Members with declining performance',membersNotUpdated:'Not updated in 14 days',
 }
 
 const performancePortuguese: PerformanceCopy = {
   performanceHistory:'Histórico de desempenho',recordPerformance:'Registar desempenho semanal',lastUpdate:'Última atualização',neverUpdated:'Nunca atualizado',snapshotDate:'Data do registo',formation:'Formação',saveSnapshot:'Guardar registo semanal',performanceSaved:'Desempenho semanal guardado.',currentPower:'Poder atual',growthPeriod:'Crescimento no período',noPerformanceHistory:'Ainda não existe histórico de desempenho.',signInForHistory:'Entre como membro aprovado para consultar o histórico de desempenho.',sundayRecommended:'Recomenda-se o domingo para comparações semanais consistentes.',
-  myStatistics:'As minhas estatísticas',selfPerformanceHint:'Atualize as suas estatísticas da semana atual ou anterior.',currentWeek:'Semana atual',previousWeek:'Semana anterior',viewEvolution:'Ver evolução',
+  myStatistics:'As minhas estatísticas',selfPerformanceHint:'Atualize as suas estatísticas da semana atual ou anterior.',currentWeek:'Semana atual',previousWeek:'Semana anterior',viewEvolution:'Ver evolução',membersPowerIncreased:'Membros com aumento de poder',membersPerformanceDeclined:'Membros com queda de desempenho',membersNotUpdated:'Sem atualização há 14 dias',
+}
+
+const performanceIndicatorCopy: Record<Language, Pick<PerformanceCopy, 'membersPowerIncreased' | 'membersPerformanceDeclined' | 'membersNotUpdated'>> = {
+  en:{membersPowerIncreased:'Members with increased power',membersPerformanceDeclined:'Members with declining performance',membersNotUpdated:'Not updated in 14 days'},
+  pt:{membersPowerIncreased:'Membros com aumento de poder',membersPerformanceDeclined:'Membros com queda de desempenho',membersNotUpdated:'Sem atualização há 14 dias'},
+  es:{membersPowerIncreased:'Miembros con aumento de poder',membersPerformanceDeclined:'Miembros con rendimiento en descenso',membersNotUpdated:'Sin actualizar desde hace 14 días'},
+  fr:{membersPowerIncreased:'Membres avec puissance en hausse',membersPerformanceDeclined:'Membres avec performance en baisse',membersNotUpdated:'Non mis à jour depuis 14 jours'},
+  de:{membersPowerIncreased:'Mitglieder mit gestiegener Stärke',membersPerformanceDeclined:'Mitglieder mit sinkender Leistung',membersNotUpdated:'Seit 14 Tagen nicht aktualisiert'},
+  it:{membersPowerIncreased:'Membri con potenza aumentata',membersPerformanceDeclined:'Membri con prestazioni in calo',membersNotUpdated:'Non aggiornati da 14 giorni'},
+  pl:{membersPowerIncreased:'Członkowie ze wzrostem siły',membersPerformanceDeclined:'Członkowie ze spadkiem wyników',membersNotUpdated:'Brak aktualizacji od 14 dni'},
+  ru:{membersPowerIncreased:'Участники с ростом мощи',membersPerformanceDeclined:'Участники со снижением показателей',membersNotUpdated:'Не обновлялись 14 дней'},
+  tr:{membersPowerIncreased:'Gücü artan üyeler',membersPerformanceDeclined:'Performansı düşen üyeler',membersNotUpdated:'14 gündür güncellenmedi'},
+  id:{membersPowerIncreased:'Anggota dengan kekuatan meningkat',membersPerformanceDeclined:'Anggota dengan performa menurun',membersNotUpdated:'Tidak diperbarui selama 14 hari'},
+  vi:{membersPowerIncreased:'Thành viên tăng sức mạnh',membersPerformanceDeclined:'Thành viên giảm hiệu suất',membersNotUpdated:'Chưa cập nhật trong 14 ngày'},
+  th:{membersPowerIncreased:'สมาชิกที่พลังเพิ่มขึ้น',membersPerformanceDeclined:'สมาชิกที่ผลงานลดลง',membersNotUpdated:'ไม่ได้อัปเดตมา 14 วัน'},
+  ja:{membersPowerIncreased:'戦力が増加したメンバー',membersPerformanceDeclined:'成績が低下したメンバー',membersNotUpdated:'14日間未更新'},
+  ko:{membersPowerIncreased:'전투력이 증가한 회원',membersPerformanceDeclined:'성과가 감소한 회원',membersNotUpdated:'14일 동안 업데이트 없음'},
+  ar:{membersPowerIncreased:'الأعضاء الذين زادت قوتهم',membersPerformanceDeclined:'الأعضاء ذوو الأداء المتراجع',membersNotUpdated:'لم يتم التحديث منذ 14 يومًا'},
+  'zh-CN':{membersPowerIncreased:'战力增长的成员',membersPerformanceDeclined:'表现下降的成员',membersNotUpdated:'14 天未更新'},
+  'zh-TW':{membersPowerIncreased:'戰力增長的成員',membersPerformanceDeclined:'表現下降的成員',membersNotUpdated:'14 天未更新'},
 }
 
 const dailyPerformanceCopy: Record<Language, Partial<PerformanceCopy>> = {
@@ -696,5 +717,5 @@ const automaticTranslationHint: Record<Language, string> = {
 
 export function getCopy(language: Language): Copy {
   const base = language === 'pt' ? pt : language === 'en' ? en : { ...en, ...translated[language] }
-  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...adminRoleCopy[language], ...notificationCopy[language], ...pollAdminCopy[language], ...exportCopy[language], ...performanceEnglish, ...performanceCopy[language], ...dailyPerformanceCopy[language], ...allianceCodeCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language], gameServerTime: gameServerTimeCopy[language], codeAgreement: codeAgreementCopy[language] }
+  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...adminRoleCopy[language], ...notificationCopy[language], ...pollAdminCopy[language], ...exportCopy[language], ...performanceEnglish, ...performanceCopy[language], ...dailyPerformanceCopy[language], ...performanceIndicatorCopy[language], ...allianceCodeCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language], gameServerTime: gameServerTimeCopy[language], codeAgreement: codeAgreementCopy[language] }
 }
