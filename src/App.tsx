@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useState, type FormEvent } from 'react'
-import { Archive, CalendarDays, CalendarRange, ChevronRight, ExternalLink, Globe2, Languages, LogIn, Megaphone, Menu, MessagesSquare, Radio, Search, Shield, Swords, Users, Vote, X } from 'lucide-react'
+import { Archive, CalendarDays, CalendarRange, ChevronRight, ExternalLink, Globe2, Languages, LogIn, Megaphone, Menu, MessagesSquare, Radio, Search, Shield, Swords, TrendingUp, Users, Vote, X } from 'lucide-react'
 import { getCopy, languages, type Language } from './i18n'
 import { AdminPortal } from './AdminPortal'
 import { usePortal } from './usePortal'
@@ -253,10 +253,10 @@ function App() {
           <div className="data-toolbar"><div className="metric-tabs">{(['combat_power', 'kills', 'weekly_contribution'] as Metric[]).map((item) =>
             <button className={metric === item ? 'active' : ''} onClick={() => setMetric(item)} key={item}>{copy[item === 'combat_power' ? 'combatPower' : item === 'weekly_contribution' ? 'weeklyContribution' : 'kills']}</button>)}</div>
             <label className="search"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={copy.search} /></label></div>
-          <div className="ranking-table"><div className="table-head"><span>#</span><span>{copy.member}</span><span>{copy.role}</span><span>{copy[metric === 'combat_power' ? 'combatPower' : metric === 'weekly_contribution' ? 'weeklyContribution' : 'kills']}</span></div>
+          <div className="ranking-table"><div className="table-head"><span>#</span><span>{copy.member}</span><span>{copy.role}</span><span>{copy[metric === 'combat_power' ? 'combatPower' : metric === 'weekly_contribution' ? 'weeklyContribution' : 'kills']}</span><span className="performance-column">{copy.performanceHistory}</span></div>
             {roster.map((item, index) => <button className="member-row" type="button" onClick={() => setPerformanceMember(item)} aria-label={`${copy.performanceHistory}: ${item.member_name}`} key={item.id}><span className="position">{String(index + 1).padStart(2, '0')}</span>
               <span className="member-name"><i>{item.player_level}</i><b>{item.member_name}</b></span><span><em className={`rank rank-${item.rank.toLowerCase()}`}>{item.rank}</em></span>
-              <strong>{item[metric].toLocaleString(language)}</strong></button>)}</div>
+              <strong>{item[metric].toLocaleString(language)}</strong><span className="performance-link"><TrendingUp size={17} /><b>{copy.performanceHistory}</b></span></button>)}</div>
         </section>
 
         <section className="section polls-section" id="polls">
