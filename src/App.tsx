@@ -187,7 +187,7 @@ function App() {
         </a>
         <button className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Menu">{menuOpen ? <X /> : <Menu />}</button>
         <nav className={menuOpen ? 'nav open' : 'nav'} onClick={() => setMenuOpen(false)}>
-          <a href="#command">{copy.navHome}</a><a href="#events">{copy.navEvents}</a><a href="#news" className={unreadNews ? 'nav-new' : ''} onClick={markNewsSeen}>{copy.navNews}{unreadNews > 0 && <span>{unreadNews}</span>}</a><a href="#roster">{copy.navRanks}</a><a href="#polls" className={unreadPolls ? 'nav-new' : ''} onClick={markPollsSeen}>{copy.navPolls}{unreadPolls > 0 && <span>{unreadPolls}</span>}</a>
+          <a href="#command">{copy.navHome}</a><a href="#news" className={unreadNews ? 'nav-new' : ''} onClick={markNewsSeen}>{copy.navNews}{unreadNews > 0 && <span>{unreadNews}</span>}</a><a href="#polls" className={unreadPolls ? 'nav-new' : ''} onClick={markPollsSeen}>{copy.navPolls}{unreadPolls > 0 && <span>{unreadPolls}</span>}</a><a href="#events">{copy.navEvents}</a><a href="#roster">{copy.navRanks}</a>
           <a href="#application">{copy.navR4}</a><a href="#code">{copy.navRules}</a>
           <a href="https://fff113.efferp.net/" target="_blank" rel="noreferrer"><Radio size={14} />RADIO-BUNKER</a>
         </nav>
@@ -240,6 +240,24 @@ function App() {
           </div>}
         </section>
 
+        <section className="section polls-section" id="polls">
+          <header className="section-header light"><div><p className="eyebrow">{copy.pollsLabel}</p><h2>{copy.pollsTitle}</h2><p>{copy.pollsText}</p></div><Vote size={46} /></header>
+          {!portal.loading && visiblePolls.length === 0 && <p className="empty-state">{copy.noPolls}</p>}
+          <div className="poll-grid">{visiblePolls.map((poll) => {
+            const totalVotes = poll.poll_options.reduce((total, option) => total + option.voteCount, 0)
+            return <article className="poll-card" key={poll.id}><div className="poll-meta"><span>{copy.active}</span><small>{totalVotes} {copy.votes}</small></div><h3>{poll.question}</h3>
+              {poll.poll_options.map((option) => {
+                const showVoters = canViewVoters && Boolean(option.voterNames?.length)
+                const tooltipId = `poll-voters-${option.id}`
+                return <label className={`poll-option${showVoters ? ' has-voters' : ''}`} key={option.id}><input type="radio" name={`poll-${poll.id}`} checked={selectedOptions[poll.id] === option.id} aria-describedby={showVoters ? tooltipId : undefined} onChange={() => setSelectedOptions((current) => ({ ...current, [poll.id]: option.id }))} /><span>{option.label}</span><b>{totalVotes ? Math.round(option.voteCount / totalVotes * 100) : 0}%</b>
+                  {showVoters && <span className="poll-voter-tooltip" id={tooltipId} role="tooltip">{option.voterNames?.join(', ')}</span>}</label>
+              })}
+              <button className="primary-button" onClick={() => void submitVote(poll.id)}>{copy.vote}</button>
+              <Discussion kind="poll" resourceId={poll.id} language={language} copy={discussionCopy} canAccess={canAccessDiscussions} canPost={!poll.closes_at || Date.parse(poll.closes_at) > clock} onSignIn={() => setAdminOpen(true)} />
+            </article>
+          })}</div>
+        </section>
+
         <section className="section events-section" id="events">
           <header className="section-header"><div><p className="eyebrow">{copy.eventsLabel}</p><h2>{copy.eventsTitle}</h2><p>{copy.eventsIntro}</p></div><CalendarRange size={48} /></header>
           <div className="event-tabs" role="tablist">
@@ -263,24 +281,6 @@ function App() {
             {roster.map((item, index) => <button className="member-row" type="button" onClick={() => setPerformanceMember(item)} aria-label={`${copy.performanceHistory}: ${item.member_name}`} key={item.id}><span className="position">{String(index + 1).padStart(2, '0')}</span>
               <span className="member-name"><i>{item.player_level}</i><b>{item.member_name}</b></span><span><em className={`rank rank-${item.rank.toLowerCase()}`}>{item.rank}</em></span>
               <strong>{item[metric].toLocaleString(language)}</strong><span className="performance-link"><TrendingUp size={17} /><b>{copy.viewEvolution}</b></span></button>)}</div>
-        </section>
-
-        <section className="section polls-section" id="polls">
-          <header className="section-header light"><div><p className="eyebrow">{copy.pollsLabel}</p><h2>{copy.pollsTitle}</h2><p>{copy.pollsText}</p></div><Vote size={46} /></header>
-          {!portal.loading && visiblePolls.length === 0 && <p className="empty-state">{copy.noPolls}</p>}
-          <div className="poll-grid">{visiblePolls.map((poll) => {
-            const totalVotes = poll.poll_options.reduce((total, option) => total + option.voteCount, 0)
-            return <article className="poll-card" key={poll.id}><div className="poll-meta"><span>{copy.active}</span><small>{totalVotes} {copy.votes}</small></div><h3>{poll.question}</h3>
-              {poll.poll_options.map((option) => {
-                const showVoters = canViewVoters && Boolean(option.voterNames?.length)
-                const tooltipId = `poll-voters-${option.id}`
-                return <label className={`poll-option${showVoters ? ' has-voters' : ''}`} key={option.id}><input type="radio" name={`poll-${poll.id}`} checked={selectedOptions[poll.id] === option.id} aria-describedby={showVoters ? tooltipId : undefined} onChange={() => setSelectedOptions((current) => ({ ...current, [poll.id]: option.id }))} /><span>{option.label}</span><b>{totalVotes ? Math.round(option.voteCount / totalVotes * 100) : 0}%</b>
-                  {showVoters && <span className="poll-voter-tooltip" id={tooltipId} role="tooltip">{option.voterNames?.join(', ')}</span>}</label>
-              })}
-              <button className="primary-button" onClick={() => void submitVote(poll.id)}>{copy.vote}</button>
-              <Discussion kind="poll" resourceId={poll.id} language={language} copy={discussionCopy} canAccess={canAccessDiscussions} canPost={!poll.closes_at || Date.parse(poll.closes_at) > clock} onSignIn={() => setAdminOpen(true)} />
-            </article>
-          })}</div>
         </section>
 
         <section className="section application-section" id="application">
