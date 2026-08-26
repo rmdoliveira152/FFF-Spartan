@@ -206,17 +206,6 @@ function App() {
           <div><Swords /><b>{copy.strength}</b><small>01</small></div><div><Users /><b>{copy.unity}</b><small>02</small></div><div><Shield /><b>{copy.discipline}</b><small>03</small></div>
         </section>
 
-        <section className="section events-section" id="events">
-          <header className="section-header"><div><p className="eyebrow">{copy.eventsLabel}</p><h2>{copy.eventsTitle}</h2><p>{copy.eventsIntro}</p></div><CalendarRange size={48} /></header>
-          <div className="event-tabs" role="tablist">
-            {copy.eventItems.map((eventItem, index) => <button type="button" role="tab" aria-selected={selectedEvent === index} className={selectedEvent === index ? 'active' : ''} onClick={() => setSelectedEvent(index)} key={eventItem.image}><span>{String(index + 1).padStart(2, '0')}</span>{eventItem.title}</button>)}
-          </div>
-          <article className="event-guide">
-            <div className="event-guide-media"><img src={asset(`events/${copy.eventItems[selectedEvent].image}`)} alt={copy.eventItems[selectedEvent].title} /></div>
-            <div className="event-guide-copy"><p className="eyebrow">{String(selectedEvent + 1).padStart(2, '0')}</p><h3>{copy.eventItems[selectedEvent].title}</h3><p>{copy.eventItems[selectedEvent].summary}</p><dl><div><dt>{copy.eventObjective}</dt><dd>{copy.eventItems[selectedEvent].objective}</dd></div><div><dt>{copy.eventStrategy}</dt><dd>{copy.eventItems[selectedEvent].strategy}</dd></div></dl></div>
-          </article>
-        </section>
-
         <section className="section board-news-section" id="news">
           <header className="section-header"><div><p className="eyebrow">{copy.newsLabel}</p><h2>{copy.newsTitle}</h2><p>{copy.newsIntro}</p></div><Megaphone size={48} /></header>
           <div className="board-news-grid">
@@ -233,6 +222,17 @@ function App() {
             <button type="button" aria-expanded={historyOpen} onClick={() => setHistoryOpen((current) => !current)}><Archive size={17} />{copy.newsHistory}<span>{historicalNews.length}</span></button>
             {historyOpen && <div className="history-list">{historicalNews.map((item) => <article key={item.id}><div><strong>{item.translation.title}</strong><small>{copy.createdOn}: {formatNewsDate(item.created_at)}</small></div><div className="history-news-content"><p>{item.translation.body}</p>{item.canTranslate && <button className="news-translate-button" type="button" disabled={translatingNews === item.translationKey} onClick={() => void translateNews(item)}><Languages size={15} />{translatingNews === item.translationKey ? copy.translatingNews : item.isTranslated ? copy.viewOriginal : copy.translateNews}</button>}{newsTranslationErrors[item.id] && <small className="news-translation-error" role="alert">{newsTranslationErrors[item.id]}</small>}</div><time>{copy.expiresOn}: {formatNewsDate(item.archived_at ?? item.expires_at!)}</time></article>)}</div>}
           </div>}
+        </section>
+
+        <section className="section events-section" id="events">
+          <header className="section-header"><div><p className="eyebrow">{copy.eventsLabel}</p><h2>{copy.eventsTitle}</h2><p>{copy.eventsIntro}</p></div><CalendarRange size={48} /></header>
+          <div className="event-tabs" role="tablist">
+            {copy.eventItems.map((eventItem, index) => <button type="button" role="tab" aria-selected={selectedEvent === index} className={selectedEvent === index ? 'active' : ''} onClick={() => setSelectedEvent(index)} key={eventItem.image}><span>{String(index + 1).padStart(2, '0')}</span>{eventItem.title}</button>)}
+          </div>
+          <article className="event-guide">
+            <div className="event-guide-media"><img src={asset(`events/${copy.eventItems[selectedEvent].image}`)} alt={copy.eventItems[selectedEvent].title} /></div>
+            <div className="event-guide-copy"><p className="eyebrow">{String(selectedEvent + 1).padStart(2, '0')}</p><h3>{copy.eventItems[selectedEvent].title}</h3><p>{copy.eventItems[selectedEvent].summary}</p><dl><div><dt>{copy.eventObjective}</dt><dd>{copy.eventItems[selectedEvent].objective}</dd></div><div><dt>{copy.eventStrategy}</dt><dd>{copy.eventItems[selectedEvent].strategy}</dd></div></dl></div>
+          </article>
         </section>
 
         <section className="section roster-section" id="roster">
