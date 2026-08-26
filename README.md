@@ -7,7 +7,7 @@ Centro comunitário não oficial da aliança FFF-Spartan em **Dark War: Survival
 - Classificação de membros R1-R5 por Poder de Combate, Abates e Contribuição Semanal
 - Votações internas da aliança
 - Board News em destaque, com prioridade, validade configurável e histórico permanente
-- Conteúdo de anúncios por idioma, com fallback para o idioma original
+- Tradução automática dos anúncios, sob pedido, para o idioma selecionado no portal
 - Formulário de candidatura a R4
 - Código operacional da liderança
 - Interface responsiva com suporte RTL
@@ -40,6 +40,24 @@ npm run lint
 3. No GitHub, crie as Repository Variables `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY`.
 4. Em Authentication → URL Configuration, defina o Site URL e autorize os URLs de redirecionamento do portal.
 5. Os jogadores criam a conta no portal, selecionam a identidade da aliança e aguardam aprovação administrativa.
+
+### Tradução do Board News
+
+O administrador escreve cada anúncio num único idioma. A função `translate-board-news` deteta o idioma original, traduz através do Azure AI Translator e guarda o resultado numa cache privada.
+
+1. Crie um recurso Azure AI Translator no plano F0.
+2. Configure os segredos apenas no Supabase:
+
+```bash
+supabase secrets set AZURE_TRANSLATOR_KEY=... AZURE_TRANSLATOR_REGION=...
+```
+
+3. Aplique a migração `20260826200000_dynamic_board_news_translation.sql`.
+4. Publique a função:
+
+```bash
+supabase functions deploy translate-board-news --no-verify-jwt
+```
 
 A chave `service_role` e a palavra-passe da base de dados nunca devem ser colocadas no frontend ou no GitHub.
 

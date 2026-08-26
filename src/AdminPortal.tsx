@@ -1,7 +1,7 @@
 import { useEffect, useEffectEvent, useState, type FormEvent } from 'react'
 import type { User } from '@supabase/supabase-js'
-import { Archive, Check, Languages, LogOut, Megaphone, Pencil, Plus, RotateCcw, Shield, Trash2, X } from 'lucide-react'
-import { languages, type Copy, type Language } from './i18n'
+import { Archive, Check, LogOut, Megaphone, Pencil, Plus, RotateCcw, Shield, Trash2, X } from 'lucide-react'
+import { type Copy, type Language } from './i18n'
 import { supabase, type AllianceMember, type AvailableMember, type BoardNews, type BoardNewsTranslation, type PortalPoll, type Profile, type R4Application } from './supabase'
 
 type Props = {
@@ -41,9 +41,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
   const [editingMember, setEditingMember] = useState<AllianceMember | null>(null)
   const [editingNews, setEditingNews] = useState<BoardNews | null>(null)
   const [newsItems, setNewsItems] = useState<BoardNews[]>([])
-  const [newsLanguage, setNewsLanguage] = useState<Language>(language)
-  const [newsDefaultLanguage, setNewsDefaultLanguage] = useState<Language>(language)
-  const [newsTranslations, setNewsTranslations] = useState<Partial<Record<Language, BoardNewsTranslation>>>({})
+  const [newsOriginal, setNewsOriginal] = useState<BoardNewsTranslation>(emptyNewsTranslation)
   const [polls, setPolls] = useState<PortalPoll[]>([])
   const [applications, setApplications] = useState<R4Application[]>([])
   const [profiles, setProfiles] = useState<Profile[]>([])
@@ -180,24 +178,12 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
 
   const resetNewsEditor = () => {
     setEditingNews(null)
-    setNewsLanguage(language)
-    setNewsDefaultLanguage(language)
-    setNewsTranslations({})
+    setNewsOriginal(emptyNewsTranslation)
   }
 
   const editNews = (news: BoardNews) => {
-    const defaultLanguage = news.default_language as Language
     setEditingNews(news)
-    setNewsDefaultLanguage(defaultLanguage)
-    setNewsLanguage((news.translations[language] ? language : defaultLanguage) as Language)
-    setNewsTranslations(news.translations as Partial<Record<Language, BoardNewsTranslation>>)
-  }
-
-  const updateNewsTranslation = (field: keyof BoardNewsTranslation, value: string) => {
-    setNewsTranslations((current) => ({
-      ...current,
-      [newsLanguage]: { ...(current[newsLanguage] ?? emptyNewsTranslation), [field]: value },
-    }))
+    setNewsOriginal(news.translations[news.default_language] ?? Object.values(news.translations)[0] ?? emptyNewsTranslation)
   }
 
   const saveNews = async (event: FormEvent<HTMLFormElement>) => {
@@ -207,12 +193,8 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     setError('')
     const formElement = event.currentTarget
     const form = new FormData(formElement)
-    const translations: Partial<Record<Language, BoardNewsTranslation>> = {}
-    for (const [code, translation] of Object.entries(newsTranslations) as [Language, BoardNewsTranslation][]) {
-      const cleanTranslation = { title: translation.title.trim(), body: translation.body.trim() }
-      if (cleanTranslation.title && cleanTranslation.body) translations[code] = cleanTranslation
-    }
-    if (!translations[newsDefaultLanguage]) {
+    const original = { title: newsOriginal.title.trim(), body: newsOriginal.body.trim() }
+    if (!original.title || !original.body) {
       setError(copy.translationHint)
       setBusy(false)
       return
@@ -220,8 +202,8 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     const expiresAt = String(form.get('expiresAt'))
     const published = form.get('published') === 'on'
     const values = {
-      translations,
-      default_language: newsDefaultLanguage,
+      translations: { und: original },
+      default_language: 'und',
       priority: String(form.get('priority')),
       published,
       published_at: editingNews?.published || !published ? editingNews?.published_at ?? new Date().toISOString() : new Date().toISOString(),
@@ -321,8 +303,6 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     else await Promise.all([onRefreshMembers(), loadAdminData()])
   }
 
-  const selectedNewsTranslation = newsTranslations[newsLanguage] ?? emptyNewsTranslation
-
   return <div className="modal-backdrop" onMouseDown={onClose}>
     <section className={`login-modal ${profile?.role === 'admin' ? 'admin-portal' : ''}`} role="dialog" aria-modal="true" onMouseDown={(event) => event.stopPropagation()}>
       <button className="close-button" onClick={onClose} aria-label={copy.close}><X /></button>
@@ -365,11 +345,9 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
         <section className="admin-block news-admin-block">
           <h3><Megaphone size={18} />{copy.manageNews}</h3>
           <form className="admin-form news-admin-form" key={editingNews?.id ?? 'new-news'} onSubmit={saveNews}>
-            <label>{copy.sourceLanguage}<select value={newsDefaultLanguage} onChange={(event) => { const value = event.target.value as Language; setNewsDefaultLanguage(value); setNewsLanguage(value) }}>{languages.map(([code, name]) => <option value={code} key={code}>{name}</option>)}</select></label>
-            <label><Languages size={14} />{copy.language}<select value={newsLanguage} onChange={(event) => setNewsLanguage(event.target.value as Language)}>{languages.map(([code, name]) => <option value={code} key={code}>{name}{newsTranslations[code]?.title && newsTranslations[code]?.body ? ' ✓' : ''}</option>)}</select></label>
             <p className="admin-form-hint">{copy.translationHint}</p>
-            <label>{copy.newsHeadline}<input required={newsLanguage === newsDefaultLanguage} maxLength={120} value={selectedNewsTranslation.title} onChange={(event) => updateNewsTranslation('title', event.target.value)} /></label>
-            <label className="news-body-field">{copy.newsBody}<textarea required={newsLanguage === newsDefaultLanguage} rows={5} maxLength={2000} value={selectedNewsTranslation.body} onChange={(event) => updateNewsTranslation('body', event.target.value)} /></label>
+            <label>{copy.newsHeadline}<input required maxLength={120} value={newsOriginal.title} onChange={(event) => setNewsOriginal((current) => ({ ...current, title: event.target.value }))} /></label>
+            <label className="news-body-field">{copy.newsBody}<textarea required rows={5} maxLength={2000} value={newsOriginal.body} onChange={(event) => setNewsOriginal((current) => ({ ...current, body: event.target.value }))} /></label>
             <label>{copy.priority}<select name="priority" defaultValue={editingNews?.priority ?? 'standard'}><option value="standard">{copy.standard}</option><option value="important">{copy.important}</option><option value="critical">{copy.critical}</option></select></label>
             <label>{copy.expiresOn}<input name="expiresAt" type="datetime-local" defaultValue={toDateTimeInput(editingNews?.expires_at ?? null)} /></label>
             <label className="check-field"><input name="published" type="checkbox" defaultChecked={editingNews?.published ?? true} />{copy.publishNow}</label>

@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { Archive, CalendarDays, ChevronRight, ExternalLink, Globe2, LogIn, Megaphone, Menu, MessagesSquare, Radio, Search, Shield, Swords, Users, Vote, X } from 'lucide-react'
+import { Archive, CalendarDays, ChevronRight, ExternalLink, Globe2, Languages, LogIn, Megaphone, Menu, MessagesSquare, Radio, Search, Shield, Swords, Users, Vote, X } from 'lucide-react'
 import { getCopy, languages, type Language } from './i18n'
 import { AdminPortal } from './AdminPortal'
 import { usePortal } from './usePortal'
-import type { BoardNews, BoardNewsTranslation } from './supabase'
+import { supabase, type BoardNews, type BoardNewsTranslation } from './supabase'
 import './App.css'
 
 type Metric = 'combat_power' | 'kills' | 'weekly_contribution'
@@ -17,10 +17,9 @@ const demoMembers = [
 const rankOrder: AllianceRank[] = ['R5', 'R4', 'R3', 'R2', 'R1']
 const initialClock = Date.now()
 
-const getNewsTranslation = (news: BoardNews, language: Language): BoardNewsTranslation => {
+const getOriginalNews = (news: BoardNews): BoardNewsTranslation => {
   const translations = news.translations
-  return translations[language]
-    ?? translations[news.default_language]
+  return translations[news.default_language]
     ?? translations.en
     ?? translations.pt
     ?? Object.values(translations)[0]
@@ -38,6 +37,10 @@ function App() {
   const [historyOpen, setHistoryOpen] = useState(false)
   const [clock, setClock] = useState(initialClock)
   const [notice, setNotice] = useState('')
+  const [newsTranslations, setNewsTranslations] = useState<Record<string, BoardNewsTranslation>>({})
+  const [newsSourceLanguages, setNewsSourceLanguages] = useState<Record<string, string>>({})
+  const [translatingNews, setTranslatingNews] = useState<string | null>(null)
+  const [newsTranslationErrors, setNewsTranslationErrors] = useState<Record<string, string>>({})
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({})
   const portal = usePortal()
   const copy = getCopy(language)
@@ -73,10 +76,47 @@ function App() {
     { id: 'training', question: copy.pollTraining, active: true, closes_at: null, poll_options: [copy.rallyCoordination, copy.defensiveFormations, copy.resourceEfficiency].map((label, index) => ({ id: `training-${index}`, label, position: index + 1, voteCount: [18, 10, 7][index] })) },
   ]
   const visiblePolls = portal.configured ? portal.polls : demoPolls
-  const news = portal.boardNews.map((item) => ({ ...item, translation: getNewsTranslation(item, language) }))
+  const news = portal.boardNews.map((item) => {
+    const translationKey = `${item.id}:${language}`
+    const translated = newsTranslations[translationKey]
+    const sourceLanguage = newsSourceLanguages[item.id] ?? item.default_language
+    return {
+      ...item,
+      translation: translated ?? getOriginalNews(item),
+      translationKey,
+      isTranslated: Boolean(translated),
+      canTranslate: sourceLanguage === 'und' || sourceLanguage !== language,
+    }
+  })
   const currentNews = news.filter((item) => !item.archived_at && (!item.expires_at || Date.parse(item.expires_at) > clock))
   const historicalNews = news.filter((item) => item.archived_at || (item.expires_at && Date.parse(item.expires_at) <= clock))
   const formatNewsDate = (value: string) => new Intl.DateTimeFormat(language, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
+
+  const translateNews = async (newsItem: BoardNews & { translationKey: string; isTranslated: boolean }) => {
+    if (newsItem.isTranslated) {
+      setNewsTranslations((current) => {
+        const next = { ...current }
+        delete next[newsItem.translationKey]
+        return next
+      })
+      return
+    }
+    if (!supabase) return
+    setTranslatingNews(newsItem.translationKey)
+    setNewsTranslationErrors((current) => ({ ...current, [newsItem.id]: '' }))
+    const { data, error } = await supabase.functions.invoke('translate-board-news', {
+      body: { newsId: newsItem.id, targetLanguage: language },
+    })
+    if (error || !data?.translation) {
+      setNewsTranslationErrors((current) => ({ ...current, [newsItem.id]: copy.translationFailed }))
+    } else {
+      setNewsSourceLanguages((current) => ({ ...current, [newsItem.id]: data.sourceLanguage ?? 'und' }))
+      if (data.sourceLanguage !== language) {
+        setNewsTranslations((current) => ({ ...current, [newsItem.translationKey]: data.translation }))
+      }
+    }
+    setTranslatingNews(null)
+  }
 
   const submitVote = async (pollId: string) => {
     const optionId = selectedOptions[pollId]
@@ -155,13 +195,15 @@ function App() {
             {currentNews.map((item, index) => <article className={`board-news-card ${index === 0 ? 'featured' : ''}`} data-priority={item.priority} key={item.id}>
               <div className="board-news-meta"><span>{copy[item.priority]}</span><time><CalendarDays size={14} />{copy.createdOn}: {formatNewsDate(item.created_at)}</time></div>
               <h3>{item.translation.title}</h3><p>{item.translation.body}</p>
+              {item.canTranslate && <button className="news-translate-button" type="button" disabled={translatingNews === item.translationKey} onClick={() => void translateNews(item)}><Languages size={15} />{translatingNews === item.translationKey ? copy.translatingNews : item.isTranslated ? copy.viewOriginal : copy.translateNews}</button>}
+              {newsTranslationErrors[item.id] && <small className="news-translation-error" role="alert">{newsTranslationErrors[item.id]}</small>}
               {item.expires_at && <div className="board-news-deadline"><span>{copy.expiresOn}</span><time>{formatNewsDate(item.expires_at)}</time></div>}
             </article>)}
             {!portal.loading && currentNews.length === 0 && <p className="board-news-empty">{copy.noNews}</p>}
           </div>
           {historicalNews.length > 0 && <div className="board-news-history">
             <button type="button" aria-expanded={historyOpen} onClick={() => setHistoryOpen((current) => !current)}><Archive size={17} />{copy.newsHistory}<span>{historicalNews.length}</span></button>
-            {historyOpen && <div className="history-list">{historicalNews.map((item) => <article key={item.id}><div><strong>{item.translation.title}</strong><small>{copy.createdOn}: {formatNewsDate(item.created_at)}</small></div><p>{item.translation.body}</p><time>{copy.expiresOn}: {formatNewsDate(item.archived_at ?? item.expires_at!)}</time></article>)}</div>}
+            {historyOpen && <div className="history-list">{historicalNews.map((item) => <article key={item.id}><div><strong>{item.translation.title}</strong><small>{copy.createdOn}: {formatNewsDate(item.created_at)}</small></div><div className="history-news-content"><p>{item.translation.body}</p>{item.canTranslate && <button className="news-translate-button" type="button" disabled={translatingNews === item.translationKey} onClick={() => void translateNews(item)}><Languages size={15} />{translatingNews === item.translationKey ? copy.translatingNews : item.isTranslated ? copy.viewOriginal : copy.translateNews}</button>}{newsTranslationErrors[item.id] && <small className="news-translation-error" role="alert">{newsTranslationErrors[item.id]}</small>}</div><time>{copy.expiresOn}: {formatNewsDate(item.archived_at ?? item.expires_at!)}</time></article>)}</div>}
           </div>}
         </section>
 

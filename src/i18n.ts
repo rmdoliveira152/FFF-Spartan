@@ -44,7 +44,11 @@ type BoardNewsCopy = {
   translationHint: string; confirmDeleteNews: string
 }
 
-export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy
+type DynamicTranslationCopy = {
+  translateNews: string; translatingNews: string; viewOriginal: string; translationFailed: string
+}
+
+export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy & DynamicTranslationCopy
 
 const en: BaseCopy = {
   navHome: 'Command', navRanks: 'Roster', navPolls: 'Polls', navR4: 'R4 application', navRules: 'Code', admin: 'Admin',
@@ -442,7 +446,47 @@ const createdOnCopy: Record<Language, string> = {
   id:'Dibuat', vi:'Đã tạo', th:'สร้างเมื่อ', ja:'作成日', ko:'작성일', ar:'تاريخ الإنشاء', 'zh-CN':'创建时间', 'zh-TW':'建立時間',
 }
 
+const dynamicTranslationCopy: Record<Language, DynamicTranslationCopy> = {
+  en: { translateNews:'Translate',translatingNews:'Translating…',viewOriginal:'View original',translationFailed:'Translation is temporarily unavailable.' },
+  pt: { translateNews:'Traduzir',translatingNews:'A traduzir…',viewOriginal:'Ver original',translationFailed:'A tradução está temporariamente indisponível.' },
+  es: { translateNews:'Traducir',translatingNews:'Traduciendo…',viewOriginal:'Ver original',translationFailed:'La traducción no está disponible temporalmente.' },
+  fr: { translateNews:'Traduire',translatingNews:'Traduction…',viewOriginal:'Voir l’original',translationFailed:'La traduction est temporairement indisponible.' },
+  de: { translateNews:'Übersetzen',translatingNews:'Wird übersetzt…',viewOriginal:'Original anzeigen',translationFailed:'Die Übersetzung ist vorübergehend nicht verfügbar.' },
+  it: { translateNews:'Traduci',translatingNews:'Traduzione…',viewOriginal:'Vedi originale',translationFailed:'La traduzione non è temporaneamente disponibile.' },
+  pl: { translateNews:'Przetłumacz',translatingNews:'Tłumaczenie…',viewOriginal:'Pokaż oryginał',translationFailed:'Tłumaczenie jest chwilowo niedostępne.' },
+  ru: { translateNews:'Перевести',translatingNews:'Перевод…',viewOriginal:'Показать оригинал',translationFailed:'Перевод временно недоступен.' },
+  tr: { translateNews:'Çevir',translatingNews:'Çevriliyor…',viewOriginal:'Orijinali göster',translationFailed:'Çeviri geçici olarak kullanılamıyor.' },
+  id: { translateNews:'Terjemahkan',translatingNews:'Menerjemahkan…',viewOriginal:'Lihat asli',translationFailed:'Terjemahan sementara tidak tersedia.' },
+  vi: { translateNews:'Dịch',translatingNews:'Đang dịch…',viewOriginal:'Xem bản gốc',translationFailed:'Tạm thời không thể dịch.' },
+  th: { translateNews:'แปล',translatingNews:'กำลังแปล…',viewOriginal:'ดูต้นฉบับ',translationFailed:'ไม่สามารถแปลได้ชั่วคราว' },
+  ja: { translateNews:'翻訳',translatingNews:'翻訳中…',viewOriginal:'原文を表示',translationFailed:'現在、翻訳を利用できません。' },
+  ko: { translateNews:'번역',translatingNews:'번역 중…',viewOriginal:'원문 보기',translationFailed:'현재 번역을 사용할 수 없습니다.' },
+  ar: { translateNews:'ترجمة',translatingNews:'جارٍ الترجمة…',viewOriginal:'عرض النص الأصلي',translationFailed:'الترجمة غير متاحة مؤقتًا.' },
+  'zh-CN': { translateNews:'翻译',translatingNews:'正在翻译…',viewOriginal:'查看原文',translationFailed:'暂时无法翻译。' },
+  'zh-TW': { translateNews:'翻譯',translatingNews:'正在翻譯…',viewOriginal:'查看原文',translationFailed:'暫時無法翻譯。' },
+}
+
+const automaticTranslationHint: Record<Language, string> = {
+  en:'Write the announcement in any language. Visitors can translate it automatically into the language selected on the site.',
+  pt:'Escreva o anúncio em qualquer idioma. Os visitantes poderão traduzi-lo automaticamente para o idioma selecionado no site.',
+  es:'Escribe el anuncio en cualquier idioma. Los visitantes podrán traducirlo automáticamente al idioma seleccionado en el sitio.',
+  fr:'Rédigez l’annonce dans n’importe quelle langue. Les visiteurs pourront la traduire automatiquement dans la langue choisie sur le site.',
+  de:'Verfassen Sie die Mitteilung in einer beliebigen Sprache. Besucher können sie automatisch in die auf der Website gewählte Sprache übersetzen.',
+  it:'Scrivi l’annuncio in qualsiasi lingua. I visitatori potranno tradurlo automaticamente nella lingua selezionata sul sito.',
+  pl:'Napisz ogłoszenie w dowolnym języku. Odwiedzający mogą je automatycznie przetłumaczyć na język wybrany w witrynie.',
+  ru:'Напишите объявление на любом языке. Посетители смогут автоматически перевести его на выбранный на сайте язык.',
+  tr:'Duyuruyu herhangi bir dilde yazın. Ziyaretçiler duyuruyu sitede seçilen dile otomatik olarak çevirebilir.',
+  id:'Tulis pengumuman dalam bahasa apa pun. Pengunjung dapat menerjemahkannya secara otomatis ke bahasa yang dipilih di situs.',
+  vi:'Viết thông báo bằng bất kỳ ngôn ngữ nào. Khách truy cập có thể tự động dịch sang ngôn ngữ đã chọn trên trang.',
+  th:'เขียนประกาศเป็นภาษาใดก็ได้ ผู้เข้าชมสามารถแปลเป็นภาษาที่เลือกบนเว็บไซต์ได้โดยอัตโนมัติ',
+  ja:'お知らせはどの言語でも作成できます。訪問者はサイトで選択した言語に自動翻訳できます。',
+  ko:'공지사항을 어떤 언어로든 작성하세요. 방문자는 사이트에서 선택한 언어로 자동 번역할 수 있습니다.',
+  ar:'اكتب الإعلان بأي لغة. يمكن للزوار ترجمته تلقائيًا إلى اللغة المحددة في الموقع.',
+  'zh-CN':'可以使用任何语言撰写公告。访问者可将其自动翻译为网站中选择的语言。',
+  'zh-TW':'可以使用任何語言撰寫公告。訪客可將其自動翻譯為網站中選擇的語言。',
+}
+
 export function getCopy(language: Language): Copy {
   const base = language === 'pt' ? pt : language === 'en' ? en : { ...en, ...translated[language] }
-  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], createdOn: createdOnCopy[language] }
+  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language] }
 }
