@@ -69,7 +69,7 @@ type PerformanceCopy = {
   performanceHistory: string; recordPerformance: string; lastUpdate: string; neverUpdated: string
   snapshotDate: string; formation: string; saveSnapshot: string; performanceSaved: string
   currentPower: string; growthPeriod: string; noPerformanceHistory: string; signInForHistory: string
-  sundayRecommended: string; myStatistics: string; selfPerformanceHint: string; currentWeek: string; previousWeek: string
+  sundayRecommended: string; myStatistics: string; selfPerformanceHint: string; currentWeek: string; previousWeek: string; viewEvolution: string
 }
 
 type AllianceCodeCopy = { codeLabel: string; codeTitle: string; codePlayers: string; codeAdmins: string; codeCourtesy: string }
@@ -533,12 +533,12 @@ const notificationCopy: Record<Language, NotificationCopy> = {
 
 const performanceEnglish: PerformanceCopy = {
   performanceHistory:'Performance history',recordPerformance:'Record weekly performance',lastUpdate:'Last update',neverUpdated:'Never updated',snapshotDate:'Snapshot date',formation:'Formation',saveSnapshot:'Save weekly snapshot',performanceSaved:'Weekly performance saved.',currentPower:'Current power',growthPeriod:'Growth in period',noPerformanceHistory:'No performance history yet.',signInForHistory:'Sign in as an approved member to view performance history.',sundayRecommended:'Sunday is recommended for consistent weekly comparisons.',
-  myStatistics:'My statistics',selfPerformanceHint:'Update your own statistics for the current or previous week.',currentWeek:'Current week',previousWeek:'Previous week',
+  myStatistics:'My statistics',selfPerformanceHint:'Update your own statistics for the current or previous week.',currentWeek:'Current week',previousWeek:'Previous week',viewEvolution:'View evolution',
 }
 
 const performancePortuguese: PerformanceCopy = {
   performanceHistory:'Histórico de desempenho',recordPerformance:'Registar desempenho semanal',lastUpdate:'Última atualização',neverUpdated:'Nunca atualizado',snapshotDate:'Data do registo',formation:'Formação',saveSnapshot:'Guardar registo semanal',performanceSaved:'Desempenho semanal guardado.',currentPower:'Poder atual',growthPeriod:'Crescimento no período',noPerformanceHistory:'Ainda não existe histórico de desempenho.',signInForHistory:'Entre como membro aprovado para consultar o histórico de desempenho.',sundayRecommended:'Recomenda-se o domingo para comparações semanais consistentes.',
-  myStatistics:'As minhas estatísticas',selfPerformanceHint:'Atualize as suas estatísticas da semana atual ou anterior.',currentWeek:'Semana atual',previousWeek:'Semana anterior',
+  myStatistics:'As minhas estatísticas',selfPerformanceHint:'Atualize as suas estatísticas da semana atual ou anterior.',currentWeek:'Semana atual',previousWeek:'Semana anterior',viewEvolution:'Ver evolução',
 }
 
 const performanceCopy: Record<Language, Partial<PerformanceCopy>> = {

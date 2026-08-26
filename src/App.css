@@ -365,8 +365,15 @@ footer img { width:110px; opacity:.65; }
   .section-stat { display:none; }
   .data-toolbar { flex-direction:column; }
   .search { min-width:0; padding:0 5px 10px; }
-  .ranking-table { overflow-x:auto; }
-  .table-head,.member-row { min-width:820px; }
+  .ranking-table { overflow:visible; }
+  .table-head { display:none; }
+  .ranking-table button.member-row { min-width:0; grid-template-columns:44px minmax(0,1fr) auto; grid-template-areas:'position member rank' 'metric metric history'; row-gap:12px; padding:12px 0; }
+  .member-row .position { grid-area:position; }
+  .member-row .member-name { grid-area:member; min-width:0; padding-left:8px; }
+  .member-row .member-name b { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .member-row > span:nth-child(3) { grid-area:rank; padding-left:0; }
+  .member-row > strong { grid-area:metric; text-align:left; }
+  .member-row .performance-link { grid-area:history; justify-content:flex-end; padding-left:0; white-space:nowrap; }
   .performance-modal { padding:28px 18px; }
   .performance-summary { grid-template-columns:1fr; }
   .performance-entry-form { grid-template-columns:1fr; }
