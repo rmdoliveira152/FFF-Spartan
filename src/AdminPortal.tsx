@@ -23,6 +23,7 @@ type Props = {
   onRefreshPolls: () => Promise<void>
   onRefreshBoardNews: () => Promise<void>
   onRefreshMembers: () => Promise<void>
+  onRefreshAvailableMembers: () => Promise<void>
 }
 
 const emptyNewsTranslation: BoardNewsTranslation = { title: '', body: '' }
@@ -74,7 +75,7 @@ const previousSundayUtc = () => {
 
 const maximumSafeInteger = Number.MAX_SAFE_INTEGER
 
-export function AdminPortal({ open, copy, language, user, profile, availableMembers, members: initialMembers, onClose, onSignIn, onSignUp, onRequestPasswordReset, onUpdatePassword, onUpdateEmailPreferences, passwordRecovery, onSignOut, onRefreshPolls, onRefreshBoardNews, onRefreshMembers }: Props) {
+export function AdminPortal({ open, copy, language, user, profile, availableMembers, members: initialMembers, onClose, onSignIn, onSignUp, onRequestPasswordReset, onUpdatePassword, onUpdateEmailPreferences, passwordRecovery, onSignOut, onRefreshPolls, onRefreshBoardNews, onRefreshMembers, onRefreshAvailableMembers }: Props) {
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
@@ -453,6 +454,14 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     else await loadAdminData()
   }
 
+  const deleteInactiveAccount = async (member: Profile) => {
+    if (!supabase || member.active || member.role !== 'member' || !window.confirm(`${copy.delete}: ${member.member_name}?`)) return
+    setError('')
+    const { error: deleteError } = await supabase.rpc('delete_inactive_member_account', { requested_profile: member.id })
+    if (deleteError) setError(deleteError.message)
+    else await Promise.all([loadAdminData(), onRefreshAvailableMembers()])
+  }
+
   const saveMember = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!supabase) return
@@ -652,9 +661,10 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
               ? <small className="current-account">{copy.currentAccount}</small>
               : <span className="row-actions">{accessFilter === 'pending'
                 ? <><button className="compact-button" onClick={() => reviewRegistration(member, 'approved')}><Check size={14} />{copy.approve}</button><button className="compact-button danger" onClick={() => reviewRegistration(member, 'rejected')}><X size={14} />{copy.reject}</button></>
-                : member.registration_status === 'rejected'
+                : <>{member.registration_status === 'rejected'
                   ? <button className="compact-button" onClick={() => reviewRegistration(member, 'approved')}><Check size={14} />{copy.approve}</button>
                   : <button className="compact-button" onClick={() => toggleMember(member)}>{member.active ? copy.deactivate : copy.activate}</button>}
+                  {!member.active && member.role === 'member' && <button className="compact-button danger" type="button" onClick={() => void deleteInactiveAccount(member)}><Trash2 size={14} />{copy.delete}</button>}</>}
               </span>}
           </div>)}
             {filteredAccessProfiles.length === 0 && <p className="access-empty">{accessQuery ? copy.noAccessResults : accessFilter === 'pending' ? copy.noRegistrations : copy.noAccessResults}</p>}
