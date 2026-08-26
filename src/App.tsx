@@ -11,6 +11,7 @@ import './App.css'
 type Metric = 'combat_power' | 'kills' | 'weekly_contribution'
 type AllianceRank = 'R5' | 'R4' | 'R3' | 'R2' | 'R1'
 type CodeAudience = 'players' | 'r4'
+type PollTranslation = { question: string; options: Record<string, string> }
 
 const demoMembers = [
   { id: 'demo-1', member_name: 'SPARTAN ONE', rank: 'R5' as AllianceRank, player_level: 10, combat_power: 184_600_000, kills: 9_420_300, weekly_contribution: 92_500, active: true, performance_updated_at: null },
@@ -53,6 +54,10 @@ function App() {
   const [newsSourceLanguages, setNewsSourceLanguages] = useState<Record<string, string>>({})
   const [translatingNews, setTranslatingNews] = useState<string | null>(null)
   const [newsTranslationErrors, setNewsTranslationErrors] = useState<Record<string, string>>({})
+  const [pollTranslations, setPollTranslations] = useState<Record<string, PollTranslation>>({})
+  const [pollSourceLanguages, setPollSourceLanguages] = useState<Record<string, string>>({})
+  const [translatingPoll, setTranslatingPoll] = useState<string | null>(null)
+  const [pollTranslationErrors, setPollTranslationErrors] = useState<Record<string, string>>({})
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({})
   const [newsSeenAt, setNewsSeenAt] = useState(() => localStorage.getItem('fff-news-seen-at') ?? '')
   const [pollsSeenAt, setPollsSeenAt] = useState(() => localStorage.getItem('fff-polls-seen-at') ?? '')
@@ -90,7 +95,20 @@ function App() {
     { id: 'operation', question: copy.pollOperation, active: true, closes_at: null, created_at: new Date(initialClock).toISOString(), poll_options: ['18:00 UTC', '20:00 UTC', '22:00 UTC'].map((label, index) => ({ id: `operation-${index}`, label, position: index + 1, voteCount: [15, 22, 11][index], voterNames: [] })) },
     { id: 'training', question: copy.pollTraining, active: true, closes_at: null, created_at: new Date(initialClock).toISOString(), poll_options: [copy.rallyCoordination, copy.defensiveFormations, copy.resourceEfficiency].map((label, index) => ({ id: `training-${index}`, label, position: index + 1, voteCount: [18, 10, 7][index], voterNames: [] })) },
   ]
-  const visiblePolls = portal.configured ? portal.polls : demoPolls
+  const sourcePolls = portal.configured ? portal.polls : demoPolls
+  const visiblePolls = sourcePolls.map((poll) => {
+    const translationKey = `${poll.id}:${language}`
+    const translation = pollTranslations[translationKey]
+    const sourceLanguage = pollSourceLanguages[poll.id] ?? 'und'
+    return {
+      ...poll,
+      question: translation?.question ?? poll.question,
+      poll_options: poll.poll_options.map((option) => ({ ...option, label: translation?.options[option.id] ?? option.label })),
+      translationKey,
+      isTranslated: Boolean(translation),
+      canTranslate: portal.configured && (sourceLanguage === 'und' || sourceLanguage !== language),
+    }
+  })
   const canViewVoters = Boolean(portal.user && portal.profile?.active && portal.profile.registration_status === 'approved')
   const canAccessDiscussions = Boolean(portal.user && portal.profile?.active && (portal.profile.registration_status === 'approved' || portal.profile.role === 'admin'))
   const news = portal.boardNews.map((item) => {
@@ -147,6 +165,32 @@ function App() {
       }
     }
     setTranslatingNews(null)
+  }
+
+  const translatePoll = async (poll: { id: string; translationKey: string; isTranslated: boolean }) => {
+    if (poll.isTranslated) {
+      setPollTranslations((current) => {
+        const next = { ...current }
+        delete next[poll.translationKey]
+        return next
+      })
+      return
+    }
+    if (!supabase) return
+    setTranslatingPoll(poll.translationKey)
+    setPollTranslationErrors((current) => ({ ...current, [poll.id]: '' }))
+    const { data, error } = await supabase.functions.invoke('translate-poll', {
+      body: { pollId: poll.id, targetLanguage: language },
+    })
+    if (error || !data?.translation) {
+      setPollTranslationErrors((current) => ({ ...current, [poll.id]: copy.translationFailed }))
+    } else {
+      setPollSourceLanguages((current) => ({ ...current, [poll.id]: data.sourceLanguage ?? 'und' }))
+      if (data.sourceLanguage !== language) {
+        setPollTranslations((current) => ({ ...current, [poll.translationKey]: data.translation }))
+      }
+    }
+    setTranslatingPoll(null)
   }
 
   const submitVote = async (pollId: string) => {
@@ -254,6 +298,8 @@ function App() {
               })}
               <button className="primary-button" onClick={() => void submitVote(poll.id)}>{copy.vote}</button>
               <Discussion kind="poll" resourceId={poll.id} language={language} copy={discussionCopy} canAccess={canAccessDiscussions} canPost={!poll.closes_at || Date.parse(poll.closes_at) > clock} onSignIn={() => setAdminOpen(true)} />
+              {poll.canTranslate && <button className="news-translate-button" type="button" disabled={translatingPoll === poll.translationKey} onClick={() => void translatePoll(poll)}><Languages size={15} />{translatingPoll === poll.translationKey ? copy.translatingNews : poll.isTranslated ? copy.viewOriginal : copy.translateNews}</button>}
+              {pollTranslationErrors[poll.id] && <small className="news-translation-error" role="alert">{pollTranslationErrors[poll.id]}</small>}
             </article>
           })}</div>
         </section>
