@@ -62,6 +62,13 @@ type MemberAccessCopy = {
 
 type AllianceCodeCopy = { codeLabel: string; codeTitle: string; codePlayers: string; codeAdmins: string; codeCourtesy: string }
 
+const codeAgreementCopy: Record<Language, string> = {
+  en:'I have read and agree to the operational code', pt:'Li e concordo com o código operacional', es:'He leído y acepto el código operativo', fr:'J’ai lu et j’accepte le code opérationnel', de:'Ich habe den Einsatzkodex gelesen und stimme ihm zu:',
+  it:'Ho letto e accetto il codice operativo', pl:'Przeczytałem i akceptuję kodeks operacyjny', ru:'Я прочитал и принимаю оперативный кодекс', tr:'Operasyon kurallarını okudum ve kabul ediyorum:', id:'Saya telah membaca dan menyetujui kode operasional',
+  vi:'Tôi đã đọc và đồng ý với quy tắc hoạt động', th:'ฉันได้อ่านและยอมรับหลักปฏิบัติการ', ja:'運用規範を読み、同意します：', ko:'운영 규정을 읽고 동의합니다:', ar:'لقد قرأت وأوافق على قواعد العمليات',
+  'zh-CN':'我已阅读并同意行动准则', 'zh-TW':'我已閱讀並同意行動準則',
+}
+
 const allianceCodeCopy: Record<Language, AllianceCodeCopy> = {
   en:{ codeLabel:'Alliance standard',codeTitle:'Operational code',codePlayers:'Other players',codeAdmins:'R4 · Administration',codeCourtesy:'Be kind and polite to other players.' }, pt:{ codeLabel:'Padrão da aliança',codeTitle:'Código operacional',codePlayers:'Demais jogadores',codeAdmins:'R4 · Administração',codeCourtesy:'Ser gentil e educado com outros jogadores.' },
   es:{ codeLabel:'Estándar de la alianza',codeTitle:'Código operativo',codePlayers:'Demás jugadores',codeAdmins:'R4 · Administración',codeCourtesy:'Sé amable y educado con los demás jugadores.' }, fr:{ codeLabel:'Standard de l’alliance',codeTitle:'Code opérationnel',codePlayers:'Autres joueurs',codeAdmins:'R4 · Administration',codeCourtesy:'Soyez aimable et poli avec les autres joueurs.' },
@@ -74,7 +81,7 @@ const allianceCodeCopy: Record<Language, AllianceCodeCopy> = {
   'zh-TW':{ codeLabel:'聯盟標準',codeTitle:'行動準則',codePlayers:'其他玩家',codeAdmins:'R4 · 管理',codeCourtesy:'友善並有禮貌地對待其他玩家。' },
 }
 
-export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy & DynamicTranslationCopy & MemberAccessCopy & AllianceCodeCopy & EventGuideCopy
+export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy & DynamicTranslationCopy & MemberAccessCopy & AllianceCodeCopy & EventGuideCopy & { codeAgreement: string }
 
 const en: BaseCopy = {
   navHome: 'Command', navRanks: 'Roster', navPolls: 'Polls', navR4: 'R4 application', navRules: 'Code', admin: 'Admin',
@@ -534,5 +541,5 @@ const automaticTranslationHint: Record<Language, string> = {
 
 export function getCopy(language: Language): Copy {
   const base = language === 'pt' ? pt : language === 'en' ? en : { ...en, ...translated[language] }
-  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...allianceCodeCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language] }
+  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...allianceCodeCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language], codeAgreement: codeAgreementCopy[language] }
 }

@@ -273,7 +273,9 @@ function App() {
           <form className="application-form" onSubmit={submitApplication}>
             <div className="signed-member"><span>{copy.selectMember}</span><strong>{portal.profile?.member_name ?? copy.loginRequired}</strong></div>
             <label>{copy.reason}<textarea name="reason" required minLength={10} placeholder={copy.reasonHint} rows={4} /></label><label>{copy.experience}<textarea name="experience" required minLength={10} placeholder={copy.experienceHint} rows={3} /></label>
-            <label>{copy.availability}<input name="availability" required placeholder="18:00–23:00 UTC" /></label><button className="primary-button" type="submit">{copy.submit}<ChevronRight size={18} /></button>
+            <label>{copy.availability}<input name="availability" required placeholder="18:00–23:00 UTC" /></label>
+            <label className="code-agreement"><input type="checkbox" name="codeAgreement" required /><span>{copy.codeAgreement} <a href="#code" onClick={() => setCodeAudience('r4')}>{copy.codeAdmins}</a>.</span></label>
+            <button className="primary-button" type="submit">{copy.submit}<ChevronRight size={18} /></button>
           </form>
         </section>
 

@@ -158,6 +158,9 @@
 .login-modal select option:disabled { color:#9aa19b; }
 .application-form select option:checked,.login-modal select option:checked,.admin-form select option:checked { color:#fff; background:#8f2c27; }
 .application-form .primary-button { justify-self:start; }
+.application-form .code-agreement { display:flex; align-items:flex-start; gap:10px; text-transform:none; line-height:1.45; }
+.application-form .code-agreement input { width:18px; height:18px; margin:1px 0 0; padding:0; flex:0 0 18px; accent-color:var(--red); }
+.code-agreement a { color:#fff; font-weight:800; text-decoration-color:var(--red); text-underline-offset:3px; }
 .signed-member { display:grid; gap:7px; padding:13px 14px; color:#b7bdb7; border:1px solid #303834; background:#1b221f; }
 .signed-member span { font-size:.72rem; font-weight:700; text-transform:uppercase; }
 .signed-member strong { color:#fff; }
