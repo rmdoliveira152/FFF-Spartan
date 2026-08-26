@@ -241,7 +241,7 @@ function App() {
         </section>
 
         <section className="section polls-section" id="polls">
-          <header className="section-header light"><div><p className="eyebrow">{copy.pollsLabel}</p><h2>{copy.pollsTitle}</h2><p>{copy.pollsText}</p></div><Vote size={46} /></header>
+          <header className="section-header"><div><p className="eyebrow">{copy.pollsLabel}</p><h2>{copy.pollsTitle}</h2><p>{copy.pollsText}</p></div><Vote size={46} /></header>
           {!portal.loading && visiblePolls.length === 0 && <p className="empty-state">{copy.noPolls}</p>}
           <div className="poll-grid">{visiblePolls.map((poll) => {
             const totalVotes = poll.poll_options.reduce((total, option) => total + option.voteCount, 0)
