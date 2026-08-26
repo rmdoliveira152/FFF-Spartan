@@ -455,19 +455,21 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     setError('')
     const formElement = event.currentTarget
     const form = new FormData(formElement)
-    const values = {
+    const memberDetails = {
       member_name: String(form.get('memberName')).trim(),
       rank: String(form.get('rank')),
       player_level: Number(form.get('playerLevel')),
-      combat_power: Number(form.get('combatPower')),
-      kills: Number(form.get('kills')),
-      weekly_contribution: Number(form.get('weeklyContribution')),
       active: form.get('active') === 'on',
       updated_at: new Date().toISOString(),
     }
     const response = editingMember
-      ? await supabase.from('alliance_members').update(values).eq('id', editingMember.id)
-      : await supabase.from('alliance_members').insert(values)
+      ? await supabase.from('alliance_members').update(memberDetails).eq('id', editingMember.id)
+      : await supabase.from('alliance_members').insert({
+          ...memberDetails,
+          combat_power: Number(form.get('combatPower')),
+          kills: Number(form.get('kills')),
+          weekly_contribution: Number(form.get('weeklyContribution')),
+        })
     if (response.error) setError(response.error.message)
     else {
       setEditingMember(null)
@@ -747,9 +749,9 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
             <label>{copy.memberName}<input name="memberName" required maxLength={60} defaultValue={editingMember?.member_name} /></label>
             <label>{copy.rank}<select name="rank" required defaultValue={editingMember?.rank ?? 'R3'}>{['R1', 'R2', 'R3', 'R4', 'R5'].map((rank) => <option key={rank}>{rank}</option>)}</select></label>
             <label>{copy.playerLevel}<input name="playerLevel" type="number" required min={1} max={10} defaultValue={editingMember?.player_level ?? 1} /></label>
-            <label>{copy.combatPower}<input name="combatPower" type="number" required min={0} defaultValue={editingMember?.combat_power ?? 0} /></label>
-            <label>{copy.kills}<input name="kills" type="number" required min={0} defaultValue={editingMember?.kills ?? 0} /></label>
-            <label>{copy.weeklyContribution}<input name="weeklyContribution" type="number" required min={0} defaultValue={editingMember?.weekly_contribution ?? 0} /></label>
+            {!editingMember && <><label>{copy.combatPower}<input name="combatPower" type="number" required min={0} defaultValue={0} /></label>
+              <label>{copy.kills}<input name="kills" type="number" required min={0} defaultValue={0} /></label>
+              <label>{copy.weeklyContribution}<input name="weeklyContribution" type="number" required min={0} defaultValue={0} /></label></>}
             <label className="check-field"><input name="active" type="checkbox" defaultChecked={editingMember?.active ?? true} />{copy.active}</label>
             <div className="row-actions"><button className="primary-button" type="submit" disabled={busy}>{editingMember ? copy.save : copy.addMember}</button>{editingMember && <button className="ghost-button" type="button" onClick={() => setEditingMember(null)}>{copy.cancel}</button>}</div>
           </form>
