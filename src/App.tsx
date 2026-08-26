@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Archive, CalendarDays, CalendarRange, ChevronRight, ExternalLink, Globe2, Languages, LogIn, Megaphone, Menu, MessagesSquare, Radio, Search, Shield, Swords, Users, Vote, X } from 'lucide-react'
 import { getCopy, languages, type Language } from './i18n'
 import { AdminPortal } from './AdminPortal'
 import { usePortal } from './usePortal'
-import { getBoardNewsImageUrl, supabase, type BoardNews, type BoardNewsTranslation } from './supabase'
+import { getBoardNewsImageUrl, supabase, type AllianceMember, type BoardNews, type BoardNewsTranslation } from './supabase'
 import './App.css'
 
 type Metric = 'combat_power' | 'kills' | 'weekly_contribution'
@@ -11,8 +11,8 @@ type AllianceRank = 'R5' | 'R4' | 'R3' | 'R2' | 'R1'
 type CodeAudience = 'players' | 'r4'
 
 const demoMembers = [
-  { id: 'demo-1', member_name: 'SPARTAN ONE', rank: 'R5' as AllianceRank, player_level: 10, combat_power: 184_600_000, kills: 9_420_300, weekly_contribution: 92_500, active: true },
-  { id: 'demo-2', member_name: 'Valquíria', rank: 'R4' as AllianceRank, player_level: 9, combat_power: 171_200_000, kills: 8_890_100, weekly_contribution: 96_800, active: true },
+  { id: 'demo-1', member_name: 'SPARTAN ONE', rank: 'R5' as AllianceRank, player_level: 10, combat_power: 184_600_000, kills: 9_420_300, weekly_contribution: 92_500, active: true, performance_updated_at: null },
+  { id: 'demo-2', member_name: 'Valquíria', rank: 'R4' as AllianceRank, player_level: 9, combat_power: 171_200_000, kills: 8_890_100, weekly_contribution: 96_800, active: true, performance_updated_at: null },
 ]
 
 const rankOrder: AllianceRank[] = ['R5', 'R4', 'R3', 'R2', 'R1']
@@ -22,6 +22,7 @@ const codeRuleIndexes: Record<CodeAudience, number[]> = {
   r4: [0, 1, 2, 3, 4, 5, 6, 7],
 }
 const initialClock = Date.now()
+const MemberPerformanceModal = lazy(() => import('./MemberPerformanceModal').then((module) => ({ default: module.MemberPerformanceModal })))
 
 const getOriginalNews = (news: BoardNews): BoardNewsTranslation => {
   const translations = news.translations
@@ -41,6 +42,7 @@ function App() {
   const [query, setQuery] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
   const [adminOpen, setAdminOpen] = useState(false)
+  const [performanceMember, setPerformanceMember] = useState<AllianceMember | null>(null)
   const [historyOpen, setHistoryOpen] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState(0)
   const [clock, setClock] = useState(initialClock)
@@ -252,9 +254,9 @@ function App() {
             <button className={metric === item ? 'active' : ''} onClick={() => setMetric(item)} key={item}>{copy[item === 'combat_power' ? 'combatPower' : item === 'weekly_contribution' ? 'weeklyContribution' : 'kills']}</button>)}</div>
             <label className="search"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={copy.search} /></label></div>
           <div className="ranking-table"><div className="table-head"><span>#</span><span>{copy.member}</span><span>{copy.role}</span><span>{copy[metric === 'combat_power' ? 'combatPower' : metric === 'weekly_contribution' ? 'weeklyContribution' : 'kills']}</span></div>
-            {roster.map((item, index) => <div className="member-row" key={item.id}><span className="position">{String(index + 1).padStart(2, '0')}</span>
+            {roster.map((item, index) => <button className="member-row" type="button" onClick={() => setPerformanceMember(item)} aria-label={`${copy.performanceHistory}: ${item.member_name}`} key={item.id}><span className="position">{String(index + 1).padStart(2, '0')}</span>
               <span className="member-name"><i>{item.player_level}</i><b>{item.member_name}</b></span><span><em className={`rank rank-${item.rank.toLowerCase()}`}>{item.rank}</em></span>
-              <strong>{item[metric].toLocaleString(language)}</strong></div>)}</div>
+              <strong>{item[metric].toLocaleString(language)}</strong></button>)}</div>
         </section>
 
         <section className="section polls-section" id="polls">
@@ -288,6 +290,7 @@ function App() {
 
       <footer><div className="brand"><span className="brand-mark"><Shield size={20} /></span><span><b>FFF</b><strong>SPARTAN</strong></span></div><p>{copy.footer}<br /><small>{copy.fanNotice}</small></p><img src={asset('dark-war-logo.png')} alt="Dark War: Survival" /></footer>
       {notice && <div className="toast" role="status">{notice}</div>}
+      <Suspense fallback={null}><MemberPerformanceModal member={performanceMember} copy={copy} language={language} canView={Boolean(portal.user && portal.profile?.active && portal.profile.registration_status === 'approved')} onClose={() => setPerformanceMember(null)} onSignIn={() => { setPerformanceMember(null); setAdminOpen(true) }} /></Suspense>
       <AdminPortal open={adminOpen || portal.passwordRecovery} copy={copy} language={language} user={portal.user} profile={portal.profile} availableMembers={portal.availableMembers} members={portal.members} onClose={() => { setAdminOpen(false); if (portal.passwordRecovery) void portal.signOut() }} onSignIn={portal.signIn} onSignUp={portal.signUp} onRequestPasswordReset={portal.requestPasswordReset} onUpdatePassword={async (password) => { const result = await portal.updatePassword(password); if (result.ok) setAdminOpen(true); return result }} onUpdateEmailPreferences={portal.updateEmailPreferences} passwordRecovery={portal.passwordRecovery} onSignOut={portal.signOut} onRefreshPolls={portal.refreshPolls} onRefreshBoardNews={portal.refreshBoardNews} onRefreshMembers={portal.refreshMembers} />
     </div>
   )

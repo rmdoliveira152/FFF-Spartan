@@ -65,6 +65,13 @@ type NotificationCopy = {
   emailPreferences: string; notifyPollEmails: string; notifyNewsEmails: string
 }
 
+type PerformanceCopy = {
+  performanceHistory: string; recordPerformance: string; lastUpdate: string; neverUpdated: string
+  snapshotDate: string; formation: string; saveSnapshot: string; performanceSaved: string
+  currentPower: string; growthPeriod: string; noPerformanceHistory: string; signInForHistory: string
+  sundayRecommended: string
+}
+
 type AllianceCodeCopy = { codeLabel: string; codeTitle: string; codePlayers: string; codeAdmins: string; codeCourtesy: string }
 
 const codeAgreementCopy: Record<Language, string> = {
@@ -86,7 +93,7 @@ const allianceCodeCopy: Record<Language, AllianceCodeCopy> = {
   'zh-TW':{ codeLabel:'聯盟標準',codeTitle:'行動準則',codePlayers:'其他玩家',codeAdmins:'R4 · 管理',codeCourtesy:'友善並有禮貌地對待其他玩家。' },
 }
 
-export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy & DynamicTranslationCopy & MemberAccessCopy & NotificationCopy & AllianceCodeCopy & EventGuideCopy & { codeAgreement: string }
+export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy & DynamicTranslationCopy & MemberAccessCopy & NotificationCopy & PerformanceCopy & AllianceCodeCopy & EventGuideCopy & { codeAgreement: string }
 
 const en: BaseCopy = {
   navHome: 'Command', navRanks: 'Roster', navPolls: 'Polls', navR4: 'R4 application', navRules: 'Code', admin: 'Admin',
@@ -524,6 +531,34 @@ const notificationCopy: Record<Language, NotificationCopy> = {
   'zh-TW':{notifyMembers:'透過電子郵件通知活躍成員',membersNotified:'已透過電子郵件通知成員。',notificationFailed:'內容已儲存，但郵件通知失敗。',emailPreferences:'電子郵件通知',notifyPollEmails:'新投票',notifyNewsEmails:'Board News'},
 }
 
+const performanceEnglish: PerformanceCopy = {
+  performanceHistory:'Performance history',recordPerformance:'Record weekly performance',lastUpdate:'Last update',neverUpdated:'Never updated',snapshotDate:'Snapshot date',formation:'Formation',saveSnapshot:'Save weekly snapshot',performanceSaved:'Weekly performance saved.',currentPower:'Current power',growthPeriod:'Growth in period',noPerformanceHistory:'No performance history yet.',signInForHistory:'Sign in as an approved member to view performance history.',sundayRecommended:'Sunday is recommended for consistent weekly comparisons.',
+}
+
+const performancePortuguese: PerformanceCopy = {
+  performanceHistory:'Histórico de desempenho',recordPerformance:'Registar desempenho semanal',lastUpdate:'Última atualização',neverUpdated:'Nunca atualizado',snapshotDate:'Data do registo',formation:'Formação',saveSnapshot:'Guardar registo semanal',performanceSaved:'Desempenho semanal guardado.',currentPower:'Poder atual',growthPeriod:'Crescimento no período',noPerformanceHistory:'Ainda não existe histórico de desempenho.',signInForHistory:'Entre como membro aprovado para consultar o histórico de desempenho.',sundayRecommended:'Recomenda-se o domingo para comparações semanais consistentes.',
+}
+
+const performanceCopy: Record<Language, PerformanceCopy> = {
+  en:performanceEnglish,
+  pt:performancePortuguese,
+  es:{performanceHistory:'Historial de rendimiento',recordPerformance:'Registrar rendimiento semanal',lastUpdate:'Última actualización',neverUpdated:'Nunca actualizado',snapshotDate:'Fecha del registro',formation:'Formación',saveSnapshot:'Guardar registro semanal',performanceSaved:'Rendimiento semanal guardado.',currentPower:'Poder actual',growthPeriod:'Crecimiento del período',noPerformanceHistory:'Aún no hay historial de rendimiento.',signInForHistory:'Inicia sesión como miembro aprobado para ver el historial.',sundayRecommended:'Se recomienda el domingo para comparaciones semanales consistentes.'},
+  fr:{performanceHistory:'Historique des performances',recordPerformance:'Enregistrer la performance hebdomadaire',lastUpdate:'Dernière mise à jour',neverUpdated:'Jamais mis à jour',snapshotDate:'Date du relevé',formation:'Formation',saveSnapshot:'Enregistrer le relevé hebdomadaire',performanceSaved:'Performance hebdomadaire enregistrée.',currentPower:'Puissance actuelle',growthPeriod:'Progression sur la période',noPerformanceHistory:'Aucun historique de performance.',signInForHistory:'Connectez-vous comme membre approuvé pour voir l’historique.',sundayRecommended:'Le dimanche est recommandé pour des comparaisons hebdomadaires cohérentes.'},
+  de:{performanceHistory:'Leistungsverlauf',recordPerformance:'Wöchentliche Leistung erfassen',lastUpdate:'Letzte Aktualisierung',neverUpdated:'Nie aktualisiert',snapshotDate:'Erfassungsdatum',formation:'Formation',saveSnapshot:'Wochenstand speichern',performanceSaved:'Wochenleistung gespeichert.',currentPower:'Aktuelle Stärke',growthPeriod:'Wachstum im Zeitraum',noPerformanceHistory:'Noch kein Leistungsverlauf.',signInForHistory:'Melde dich als bestätigtes Mitglied an, um den Verlauf zu sehen.',sundayRecommended:'Sonntag wird für konsistente Wochenvergleiche empfohlen.'},
+  it:{performanceHistory:'Storico prestazioni',recordPerformance:'Registra prestazione settimanale',lastUpdate:'Ultimo aggiornamento',neverUpdated:'Mai aggiornato',snapshotDate:'Data rilevazione',formation:'Formazione',saveSnapshot:'Salva rilevazione settimanale',performanceSaved:'Prestazione settimanale salvata.',currentPower:'Potenza attuale',growthPeriod:'Crescita nel periodo',noPerformanceHistory:'Nessuno storico disponibile.',signInForHistory:'Accedi come membro approvato per vedere lo storico.',sundayRecommended:'La domenica è consigliata per confronti settimanali coerenti.'},
+  pl:{performanceHistory:'Historia wyników',recordPerformance:'Zapisz tygodniowy wynik',lastUpdate:'Ostatnia aktualizacja',neverUpdated:'Nigdy nie aktualizowano',snapshotDate:'Data zapisu',formation:'Formacja',saveSnapshot:'Zapisz tygodniowy stan',performanceSaved:'Tygodniowy wynik zapisany.',currentPower:'Aktualna siła',growthPeriod:'Wzrost w okresie',noPerformanceHistory:'Brak historii wyników.',signInForHistory:'Zaloguj się jako zatwierdzony członek, aby zobaczyć historię.',sundayRecommended:'Niedziela jest zalecana dla spójnych porównań tygodniowych.'},
+  ru:{performanceHistory:'История показателей',recordPerformance:'Записать недельные показатели',lastUpdate:'Последнее обновление',neverUpdated:'Не обновлялось',snapshotDate:'Дата записи',formation:'Формация',saveSnapshot:'Сохранить недельную запись',performanceSaved:'Недельные показатели сохранены.',currentPower:'Текущая мощь',growthPeriod:'Рост за период',noPerformanceHistory:'Истории показателей пока нет.',signInForHistory:'Войдите как одобренный участник для просмотра истории.',sundayRecommended:'Для стабильного сравнения рекомендуется обновлять по воскресеньям.'},
+  tr:{performanceHistory:'Performans geçmişi',recordPerformance:'Haftalık performansı kaydet',lastUpdate:'Son güncelleme',neverUpdated:'Hiç güncellenmedi',snapshotDate:'Kayıt tarihi',formation:'Dizilim',saveSnapshot:'Haftalık kaydı kaydet',performanceSaved:'Haftalık performans kaydedildi.',currentPower:'Mevcut güç',growthPeriod:'Dönemsel büyüme',noPerformanceHistory:'Henüz performans geçmişi yok.',signInForHistory:'Geçmişi görmek için onaylı üye olarak giriş yapın.',sundayRecommended:'Tutarlı haftalık karşılaştırmalar için pazar günü önerilir.'},
+  id:{performanceHistory:'Riwayat performa',recordPerformance:'Catat performa mingguan',lastUpdate:'Pembaruan terakhir',neverUpdated:'Belum pernah diperbarui',snapshotDate:'Tanggal catatan',formation:'Formasi',saveSnapshot:'Simpan catatan mingguan',performanceSaved:'Performa mingguan disimpan.',currentPower:'Kekuatan saat ini',growthPeriod:'Pertumbuhan periode',noPerformanceHistory:'Belum ada riwayat performa.',signInForHistory:'Masuk sebagai anggota yang disetujui untuk melihat riwayat.',sundayRecommended:'Hari Minggu disarankan untuk perbandingan mingguan yang konsisten.'},
+  vi:{performanceHistory:'Lịch sử hiệu suất',recordPerformance:'Ghi hiệu suất hàng tuần',lastUpdate:'Cập nhật gần nhất',neverUpdated:'Chưa từng cập nhật',snapshotDate:'Ngày ghi nhận',formation:'Đội hình',saveSnapshot:'Lưu bản ghi hàng tuần',performanceSaved:'Đã lưu hiệu suất hàng tuần.',currentPower:'Sức mạnh hiện tại',growthPeriod:'Tăng trưởng trong kỳ',noPerformanceHistory:'Chưa có lịch sử hiệu suất.',signInForHistory:'Đăng nhập bằng tài khoản thành viên đã duyệt để xem lịch sử.',sundayRecommended:'Nên cập nhật vào Chủ nhật để so sánh hàng tuần nhất quán.'},
+  th:{performanceHistory:'ประวัติผลงาน',recordPerformance:'บันทึกผลงานรายสัปดาห์',lastUpdate:'อัปเดตล่าสุด',neverUpdated:'ยังไม่เคยอัปเดต',snapshotDate:'วันที่บันทึก',formation:'ขบวน',saveSnapshot:'บันทึกข้อมูลรายสัปดาห์',performanceSaved:'บันทึกผลงานรายสัปดาห์แล้ว',currentPower:'พลังปัจจุบัน',growthPeriod:'การเติบโตในช่วงเวลา',noPerformanceHistory:'ยังไม่มีประวัติผลงาน',signInForHistory:'เข้าสู่ระบบในฐานะสมาชิกที่ได้รับอนุมัติเพื่อดูประวัติ',sundayRecommended:'แนะนำให้บันทึกวันอาทิตย์เพื่อเปรียบเทียบรายสัปดาห์อย่างสม่ำเสมอ'},
+  ja:{performanceHistory:'戦績履歴',recordPerformance:'週間戦績を記録',lastUpdate:'最終更新',neverUpdated:'未更新',snapshotDate:'記録日',formation:'編成',saveSnapshot:'週間記録を保存',performanceSaved:'週間戦績を保存しました。',currentPower:'現在の戦力',growthPeriod:'期間内の成長',noPerformanceHistory:'戦績履歴はまだありません。',signInForHistory:'承認済みメンバーとしてログインすると履歴を表示できます。',sundayRecommended:'一貫した週間比較のため日曜日の記録を推奨します。'},
+  ko:{performanceHistory:'성과 기록',recordPerformance:'주간 성과 기록',lastUpdate:'마지막 업데이트',neverUpdated:'업데이트 없음',snapshotDate:'기록 날짜',formation:'편성',saveSnapshot:'주간 기록 저장',performanceSaved:'주간 성과를 저장했습니다.',currentPower:'현재 전투력',growthPeriod:'기간 성장',noPerformanceHistory:'아직 성과 기록이 없습니다.',signInForHistory:'승인된 회원으로 로그인하여 기록을 확인하세요.',sundayRecommended:'일관된 주간 비교를 위해 일요일 기록을 권장합니다.'},
+  ar:{performanceHistory:'سجل الأداء',recordPerformance:'تسجيل الأداء الأسبوعي',lastUpdate:'آخر تحديث',neverUpdated:'لم يتم التحديث',snapshotDate:'تاريخ التسجيل',formation:'التشكيلة',saveSnapshot:'حفظ السجل الأسبوعي',performanceSaved:'تم حفظ الأداء الأسبوعي.',currentPower:'القوة الحالية',growthPeriod:'النمو خلال الفترة',noPerformanceHistory:'لا يوجد سجل أداء بعد.',signInForHistory:'سجل الدخول كعضو معتمد لعرض السجل.',sundayRecommended:'يوصى بيوم الأحد لإجراء مقارنات أسبوعية متسقة.'},
+  'zh-CN':{performanceHistory:'表现记录',recordPerformance:'记录每周表现',lastUpdate:'最后更新',neverUpdated:'从未更新',snapshotDate:'记录日期',formation:'编队',saveSnapshot:'保存每周记录',performanceSaved:'每周表现已保存。',currentPower:'当前战力',growthPeriod:'期间增长',noPerformanceHistory:'暂无表现记录。',signInForHistory:'请以已批准成员身份登录以查看记录。',sundayRecommended:'建议每周日记录，以便进行一致的每周比较。'},
+  'zh-TW':{performanceHistory:'表現記錄',recordPerformance:'記錄每週表現',lastUpdate:'最後更新',neverUpdated:'從未更新',snapshotDate:'記錄日期',formation:'編隊',saveSnapshot:'儲存每週記錄',performanceSaved:'每週表現已儲存。',currentPower:'目前戰力',growthPeriod:'期間增長',noPerformanceHistory:'暫無表現記錄。',signInForHistory:'請以已核准成員身分登入以查看記錄。',sundayRecommended:'建議每週日記錄，以便進行一致的每週比較。'},
+}
+
 const dynamicTranslationCopy: Record<Language, DynamicTranslationCopy> = {
   en: { translateNews:'Translate',translatingNews:'Translating…',viewOriginal:'View original',translationFailed:'Translation is temporarily unavailable.' },
   pt: { translateNews:'Traduzir',translatingNews:'A traduzir…',viewOriginal:'Ver original',translationFailed:'A tradução está temporariamente indisponível.' },
@@ -566,5 +601,5 @@ const automaticTranslationHint: Record<Language, string> = {
 
 export function getCopy(language: Language): Copy {
   const base = language === 'pt' ? pt : language === 'en' ? en : { ...en, ...translated[language] }
-  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...notificationCopy[language], ...allianceCodeCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language], codeAgreement: codeAgreementCopy[language] }
+  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...notificationCopy[language], ...performanceCopy[language], ...allianceCodeCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language], codeAgreement: codeAgreementCopy[language] }
 }

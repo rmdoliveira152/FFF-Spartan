@@ -1,8 +1,8 @@
 import { useEffect, useEffectEvent, useState, type FormEvent } from 'react'
 import type { User } from '@supabase/supabase-js'
-import { Archive, Check, ClipboardList, ImagePlus, LogOut, Megaphone, Pencil, Plus, RotateCcw, Search, Shield, Trash2, Users, Vote, X } from 'lucide-react'
+import { Activity, Archive, Check, ClipboardList, ImagePlus, LogOut, Megaphone, Pencil, Plus, RotateCcw, Search, Shield, Trash2, Users, Vote, X } from 'lucide-react'
 import { type Copy, type Language } from './i18n'
-import { getBoardNewsImageUrl, supabase, type AllianceMember, type AvailableMember, type BoardNews, type BoardNewsTranslation, type PortalPoll, type Profile, type R4Application } from './supabase'
+import { getBoardNewsImageUrl, supabase, type AllianceMember, type AvailableMember, type BoardNews, type BoardNewsTranslation, type MemberPerformanceSnapshot, type PortalPoll, type Profile, type R4Application } from './supabase'
 
 type Props = {
   open: boolean
@@ -47,6 +47,19 @@ const toDateTimeInput = (value: string | null) => {
   return new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16)
 }
 
+const toDateInput = (date: Date) => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+const latestSunday = () => {
+  const date = new Date()
+  date.setDate(date.getDate() - date.getDay())
+  return toDateInput(date)
+}
+
 export function AdminPortal({ open, copy, language, user, profile, availableMembers, members: initialMembers, onClose, onSignIn, onSignUp, onRequestPasswordReset, onUpdatePassword, onUpdateEmailPreferences, passwordRecovery, onSignOut, onRefreshPolls, onRefreshBoardNews, onRefreshMembers }: Props) {
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
@@ -54,6 +67,8 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
   const [registering, setRegistering] = useState(false)
   const [requestingRecovery, setRequestingRecovery] = useState(false)
   const [editingMember, setEditingMember] = useState<AllianceMember | null>(null)
+  const [performanceMember, setPerformanceMember] = useState<AllianceMember | null>(null)
+  const [performanceDefaults, setPerformanceDefaults] = useState<MemberPerformanceSnapshot | null>(null)
   const [editingNews, setEditingNews] = useState<BoardNews | null>(null)
   const [newsItems, setNewsItems] = useState<BoardNews[]>([])
   const [newsOriginal, setNewsOriginal] = useState<BoardNewsTranslation>(emptyNewsTranslation)
@@ -87,7 +102,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
       client.from('board_news').select('id, translations, image_paths, default_language, priority, published, published_at, expires_at, archived_at, created_at, updated_at').order('created_at', { ascending: false }),
       client.from('r4_applications').select('id, user_id, reason, experience, availability, status, created_at').order('created_at', { ascending: false }),
       client.from('profiles').select('id, member_name, role, active, alliance_member_id, registration_status, notify_poll_emails, notify_news_emails').order('member_name'),
-      client.from('alliance_members').select('id, member_name, rank, player_level, combat_power, kills, weekly_contribution, active').order('member_name'),
+      client.from('alliance_members').select('id, member_name, rank, player_level, combat_power, kills, weekly_contribution, active, performance_updated_at').order('member_name'),
     ])
     if (pollResponse.error) throw pollResponse.error
     if (newsResponse.error) throw newsResponse.error
@@ -407,6 +422,41 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     setBusy(false)
   }
 
+  const openPerformanceEditor = async (member: AllianceMember) => {
+    setPerformanceMember(member)
+    setPerformanceDefaults(null)
+    setError('')
+    if (!supabase) return
+    const { data, error: historyError } = await supabase.rpc('member_performance_history', { requested_member: member.id })
+    if (historyError) setError(historyError.message)
+    else setPerformanceDefaults(((data ?? []).at(-1) as MemberPerformanceSnapshot | undefined) ?? null)
+  }
+
+  const savePerformance = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!supabase || !performanceMember) return
+    setBusy(true)
+    setError('')
+    setMessage('')
+    const form = new FormData(event.currentTarget)
+    const { error: saveError } = await supabase.rpc('save_member_performance', {
+      requested_member: performanceMember.id,
+      requested_date: String(form.get('snapshotDate')),
+      requested_combat_power: Number(form.get('combatPower')),
+      requested_kills: Number(form.get('kills')),
+      requested_weekly_contribution: Number(form.get('weeklyContribution')),
+      requested_formations: [1, 2, 3, 4].map((number) => Number(form.get(`formation${number}`))),
+    })
+    if (saveError) setError(saveError.message)
+    else {
+      setMessage(copy.performanceSaved)
+      setPerformanceMember(null)
+      setPerformanceDefaults(null)
+      await Promise.all([loadAdminData(), onRefreshMembers()])
+    }
+    setBusy(false)
+  }
+
   const deleteMember = async (member: AllianceMember) => {
     if (!supabase || !window.confirm(copy.confirmDelete)) return
     setError('')
@@ -541,6 +591,16 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
         </section>
 
         <section className="admin-block" id="admin-roster"><h3>{copy.manageRoster}</h3>
+          {performanceMember && <form className="performance-entry-form" key={`${performanceMember.id}:${performanceDefaults?.recorded_at ?? 'new'}`} onSubmit={savePerformance}>
+            <div className="performance-entry-heading"><div><small>{copy.recordPerformance}</small><strong>{performanceMember.member_name}</strong></div><button className="icon-button" type="button" title={copy.close} onClick={() => setPerformanceMember(null)}><X size={15} /></button></div>
+            <p>{copy.sundayRecommended}</p>
+            <label>{copy.snapshotDate}<input name="snapshotDate" type="date" required max={toDateInput(new Date())} defaultValue={latestSunday()} /></label>
+            <label>{copy.combatPower}<input name="combatPower" type="number" required min={0} defaultValue={performanceMember.combat_power} /></label>
+            <label>{copy.kills}<input name="kills" type="number" required min={0} defaultValue={performanceMember.kills} /></label>
+            <label>{copy.weeklyContribution}<input name="weeklyContribution" type="number" required min={0} defaultValue={performanceMember.weekly_contribution} /></label>
+            {[1, 2, 3, 4].map((number) => <label key={number}>{copy.formation} {number}<input name={`formation${number}`} type="number" required min={0} defaultValue={performanceDefaults?.[`formation_${number}` as keyof MemberPerformanceSnapshot] as number ?? 0} /></label>)}
+            <div className="row-actions"><button className="primary-button" type="submit" disabled={busy}>{copy.saveSnapshot}</button><button className="ghost-button" type="button" onClick={() => setPerformanceMember(null)}>{copy.cancel}</button></div>
+          </form>}
           <form className="admin-form roster-form" key={editingMember?.id ?? 'new'} onSubmit={saveMember}>
             <label>{copy.memberName}<input name="memberName" required maxLength={60} defaultValue={editingMember?.member_name} /></label>
             <label>{copy.rank}<select name="rank" required defaultValue={editingMember?.rank ?? 'R3'}>{['R1', 'R2', 'R3', 'R4', 'R5'].map((rank) => <option key={rank}>{rank}</option>)}</select></label>
@@ -552,7 +612,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
             <div className="row-actions"><button className="primary-button" type="submit" disabled={busy}>{editingMember ? copy.save : copy.addMember}</button>{editingMember && <button className="ghost-button" type="button" onClick={() => setEditingMember(null)}>{copy.cancel}</button>}</div>
           </form>
           <label className="roster-admin-search"><Search size={17} /><input type="search" value={memberQuery} onChange={(event) => setMemberQuery(event.target.value)} placeholder={copy.search} /></label>
-          <div className="member-access-list roster-admin-list">{filteredAdminMembers.map((member) => <div key={member.id}><span><strong>{member.member_name}</strong><small>{member.rank} · Lv. {member.player_level} · {member.combat_power.toLocaleString()} · {member.active ? copy.active : copy.deactivate}</small></span><span className="row-actions"><button className="icon-button" title={copy.editMember} onClick={() => setEditingMember(member)}><Pencil size={15} /></button><button className="icon-button danger" title={copy.delete} onClick={() => deleteMember(member)}><Trash2 size={15} /></button></span></div>)}</div>
+          <div className="member-access-list roster-admin-list">{filteredAdminMembers.map((member) => <div key={member.id}><span><strong>{member.member_name}</strong><small>{member.rank} · Lv. {member.player_level} · {member.combat_power.toLocaleString()} · {member.active ? copy.active : copy.deactivate}</small><small>{copy.lastUpdate}: {member.performance_updated_at ? new Intl.DateTimeFormat(language, { dateStyle: 'medium' }).format(new Date(member.performance_updated_at)) : copy.neverUpdated}</small></span><span className="row-actions"><button className="icon-button performance-button" type="button" title={copy.recordPerformance} onClick={() => void openPerformanceEditor(member)}><Activity size={15} /></button><button className="icon-button" type="button" title={copy.editMember} onClick={() => setEditingMember(member)}><Pencil size={15} /></button><button className="icon-button danger" type="button" title={copy.delete} onClick={() => deleteMember(member)}><Trash2 size={15} /></button></span></div>)}</div>
         </section>
       </div>}
       {error && profile?.role !== 'admin' && <p className="form-error" role="alert">{error}</p>}

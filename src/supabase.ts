@@ -31,6 +31,20 @@ export type AllianceMember = {
   kills: number
   weekly_contribution: number
   active: boolean
+  performance_updated_at: string | null
+}
+
+export type MemberPerformanceSnapshot = {
+  id: string
+  snapshot_date: string
+  combat_power: number
+  kills: number
+  weekly_contribution: number
+  formation_1: number
+  formation_2: number
+  formation_3: number
+  formation_4: number
+  recorded_at: string
 }
 
 export type AvailableMember = Pick<AllianceMember, 'id' | 'member_name' | 'rank'>

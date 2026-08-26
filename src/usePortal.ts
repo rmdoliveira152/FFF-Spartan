@@ -17,7 +17,7 @@ export function usePortal() {
   const loadMembers = async () => {
     const client = supabase
     if (!client) return
-    const { data, error } = await client.from('alliance_members').select('id, member_name, rank, player_level, combat_power, kills, weekly_contribution, active').eq('active', true)
+    const { data, error } = await client.from('alliance_members').select('id, member_name, rank, player_level, combat_power, kills, weekly_contribution, active, performance_updated_at').eq('active', true)
     if (error) throw error
     setMembers((data ?? []) as AllianceMember[])
   }
