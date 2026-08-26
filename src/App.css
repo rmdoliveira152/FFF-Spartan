@@ -159,7 +159,11 @@
 .performance-entry-form > p { grid-column:1/-1; margin:0; color:var(--muted); font-size:.78rem; }
 .performance-entry-form label { display:grid; gap:7px; color:#b7bdb7; font-size:.72rem; font-weight:700; text-transform:uppercase; }
 .performance-entry-form input { width:100%; padding:11px 12px; color:#fff; border:1px solid #303834; background:#1b221f; }
+.performance-entry-form select { width:100%; padding:11px 12px; color:#fff; border:1px solid #303834; background:#1b221f; color-scheme:dark; }
 .performance-entry-form .row-actions { grid-column:1/-1; }
+.own-performance-form { grid-template-columns:1fr 1fr; margin:4px 0 0; padding:16px; }
+.own-performance-form .performance-entry-heading > svg { color:var(--red); }
+.performance-loading { padding:24px; border:1px solid var(--line); text-align:center; }
 .performance-button { color:#8bd6ae; }
 .polls-section { background:#e5e1d6; color:#171b19; }
 .section-header.light h2 { color:#151917; }

@@ -60,6 +60,20 @@ const latestSunday = () => {
   return toDateInput(date)
 }
 
+const latestSundayUtc = () => {
+  const date = new Date()
+  date.setUTCDate(date.getUTCDate() - date.getUTCDay())
+  return date.toISOString().slice(0, 10)
+}
+
+const previousSundayUtc = () => {
+  const date = new Date(`${latestSundayUtc()}T12:00:00Z`)
+  date.setUTCDate(date.getUTCDate() - 7)
+  return date.toISOString().slice(0, 10)
+}
+
+const maximumSafeInteger = Number.MAX_SAFE_INTEGER
+
 export function AdminPortal({ open, copy, language, user, profile, availableMembers, members: initialMembers, onClose, onSignIn, onSignUp, onRequestPasswordReset, onUpdatePassword, onUpdateEmailPreferences, passwordRecovery, onSignOut, onRefreshPolls, onRefreshBoardNews, onRefreshMembers }: Props) {
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
@@ -69,6 +83,9 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
   const [editingMember, setEditingMember] = useState<AllianceMember | null>(null)
   const [performanceMember, setPerformanceMember] = useState<AllianceMember | null>(null)
   const [performanceDefaults, setPerformanceDefaults] = useState<MemberPerformanceSnapshot | null>(null)
+  const [ownPerformanceHistory, setOwnPerformanceHistory] = useState<MemberPerformanceSnapshot[]>([])
+  const [ownPerformanceLoadedFor, setOwnPerformanceLoadedFor] = useState<string | null>(null)
+  const [ownSnapshotDate, setOwnSnapshotDate] = useState(latestSundayUtc)
   const [editingNews, setEditingNews] = useState<BoardNews | null>(null)
   const [newsItems, setNewsItems] = useState<BoardNews[]>([])
   const [newsOriginal, setNewsOriginal] = useState<BoardNewsTranslation>(emptyNewsTranslation)
@@ -85,6 +102,10 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
   const filteredAdminMembers = adminMembers.filter((member) =>
     member.member_name.toLocaleLowerCase(language).includes(memberQuery.trim().toLocaleLowerCase(language)),
   )
+  const ownMember = profile?.alliance_member_id ? initialMembers.find((member) => member.id === profile.alliance_member_id) ?? null : null
+  const ownPerformanceDefaults = ownPerformanceHistory.find((snapshot) => snapshot.snapshot_date === ownSnapshotDate)
+    ?? ownPerformanceHistory.at(-1)
+    ?? null
   const accessProfiles: Record<AccessFilter, Profile[]> = {
     pending: profiles.filter((member) => member.registration_status === 'pending'),
     approved: profiles.filter((member) => member.registration_status === 'approved' && member.active),
@@ -134,12 +155,28 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
 
   const loadAdminDataEvent = useEffectEvent(loadAdminData)
 
+  const loadOwnPerformance = async () => {
+    if (!supabase || !ownMember || !profile?.active || profile.registration_status !== 'approved') return
+    const { data, error: historyError } = await supabase.rpc('member_performance_history', { requested_member: ownMember.id })
+    if (historyError) setError(historyError.message)
+    else setOwnPerformanceHistory((data ?? []) as MemberPerformanceSnapshot[])
+    setOwnPerformanceLoadedFor(ownMember.id)
+  }
+  const loadOwnPerformanceEvent = useEffectEvent(loadOwnPerformance)
+
   useEffect(() => {
     if (open && profile?.role === 'admin') {
       // oxlint-disable-next-line react/set-state-in-effect -- Updates happen after the external request resolves.
       void loadAdminDataEvent().catch(console.error)
     }
   }, [open, profile?.role])
+
+  useEffect(() => {
+    if (open && profile?.role !== 'admin' && profile?.active && profile.registration_status === 'approved' && ownMember) {
+      // oxlint-disable-next-line react/set-state-in-effect -- Synchronizes the form with performance history stored externally.
+      void loadOwnPerformanceEvent()
+    }
+  }, [open, profile?.role, profile?.active, profile?.registration_status, ownMember])
 
   if (!open) return null
 
@@ -162,6 +199,29 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     const result = await onSignUp(String(form.get('email')), String(form.get('password')), String(form.get('allianceMemberId')))
     if (!result.ok) setError(result.message ?? 'Unable to register.')
     else setMessage(copy.registrationSent)
+    setBusy(false)
+  }
+
+  const saveOwnPerformance = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!supabase || !ownMember) return
+    setBusy(true)
+    setError('')
+    setMessage('')
+    const form = new FormData(event.currentTarget)
+    const { error: saveError } = await supabase.rpc('save_own_member_performance', {
+      requested_date: String(form.get('snapshotDate')),
+      requested_combat_power: Number(form.get('combatPower')),
+      requested_kills: Number(form.get('kills')),
+      requested_weekly_contribution: Number(form.get('weeklyContribution')),
+      requested_formations: [1, 2, 3, 4].map((number) => Number(form.get(`formation${number}`))),
+    })
+    if (saveError) setError(saveError.message)
+    else {
+      setMessage(copy.performanceSaved)
+      await onRefreshMembers()
+      await loadOwnPerformance()
+    }
     setBusy(false)
   }
 
@@ -501,6 +561,17 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
         {profile?.registration_status === 'pending' && <p>{copy.pendingApproval}</p>}
         {profile?.registration_status === 'rejected' && <p>{copy.rejectedRegistration}</p>}
         {!profile?.active && profile?.registration_status === 'approved' && <p>{copy.inactiveMember}</p>}
+        {profile?.active && profile.registration_status === 'approved' && ownMember && ownPerformanceLoadedFor !== ownMember.id && <p className="performance-loading">...</p>}
+        {profile?.active && profile.registration_status === 'approved' && ownMember && ownPerformanceLoadedFor === ownMember.id && <form className="performance-entry-form own-performance-form" key={`${ownMember.id}:${ownSnapshotDate}:${ownPerformanceDefaults?.recorded_at ?? 'new'}`} onSubmit={saveOwnPerformance}>
+          <div className="performance-entry-heading"><div><small>{copy.myStatistics}</small><strong>{ownMember.member_name}</strong></div><Activity size={20} /></div>
+          <p>{copy.selfPerformanceHint}</p>
+          <label>{copy.snapshotDate}<select name="snapshotDate" value={ownSnapshotDate} onChange={(event) => setOwnSnapshotDate(event.target.value)}><option value={latestSundayUtc()}>{copy.currentWeek} · {latestSundayUtc()}</option><option value={previousSundayUtc()}>{copy.previousWeek} · {previousSundayUtc()}</option></select></label>
+          <label>{copy.combatPower}<input name="combatPower" type="number" required min={0} max={maximumSafeInteger} defaultValue={ownMember.combat_power} /></label>
+          <label>{copy.kills}<input name="kills" type="number" required min={0} max={maximumSafeInteger} defaultValue={ownMember.kills} /></label>
+          <label>{copy.weeklyContribution}<input name="weeklyContribution" type="number" required min={0} max={maximumSafeInteger} defaultValue={ownMember.weekly_contribution} /></label>
+          {[1, 2, 3, 4].map((number) => <label key={number}>{copy.formation} {number}<input name={`formation${number}`} type="number" required min={0} max={maximumSafeInteger} defaultValue={ownPerformanceDefaults?.[`formation_${number}` as keyof MemberPerformanceSnapshot] as number ?? 0} /></label>)}
+          <div className="row-actions"><button className="primary-button" type="submit" disabled={busy}>{copy.saveSnapshot}</button></div>
+        </form>}
         {profile && <fieldset className="email-preferences"><legend>{copy.emailPreferences}</legend><label className="check-field"><input type="checkbox" checked={profile.notify_poll_emails} onChange={(event) => void saveEmailPreferences(event.target.checked, profile.notify_news_emails)} />{copy.notifyPollEmails}</label><label className="check-field"><input type="checkbox" checked={profile.notify_news_emails} onChange={(event) => void saveEmailPreferences(profile.notify_poll_emails, event.target.checked)} />{copy.notifyNewsEmails}</label></fieldset>}
         <button className="ghost-button" onClick={onSignOut}><LogOut size={16} />{copy.signOut}</button>
       </div>}

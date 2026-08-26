@@ -69,7 +69,7 @@ type PerformanceCopy = {
   performanceHistory: string; recordPerformance: string; lastUpdate: string; neverUpdated: string
   snapshotDate: string; formation: string; saveSnapshot: string; performanceSaved: string
   currentPower: string; growthPeriod: string; noPerformanceHistory: string; signInForHistory: string
-  sundayRecommended: string
+  sundayRecommended: string; myStatistics: string; selfPerformanceHint: string; currentWeek: string; previousWeek: string
 }
 
 type AllianceCodeCopy = { codeLabel: string; codeTitle: string; codePlayers: string; codeAdmins: string; codeCourtesy: string }
@@ -161,7 +161,7 @@ const pt: BaseCopy = {
 
 const translated: Record<Exclude<Language, 'en' | 'pt'>, BaseCopy> = {
   es: {
-    navHome:'Comando',navRanks:'Miembros',navPolls:'Votaciones',navR4:'Candidatura R4',navRules:'Código',admin:'Administración',
+     navHome:'Comando',navRanks:'Miembros',navPolls:'Votaciones',navR4:'Candidatura R4',navRules:'Código',admin:'Administración',
     eyebrow:'Alianza de Dark War: Survival',heroTitle:'Sobrevivir juntos. Conquistar como uno.',heroText:'El centro operativo de FFF-Spartan: rendimiento de los miembros, decisiones de la alianza y candidaturas de liderazgo en un solo lugar.',
     enterRanks:'Ver miembros',officialGame:'Juego oficial',alertLabel:'Directiva de la alianza',alertText:'Reunirse es un comienzo. Mantenerse juntos es progreso. Trabajar juntos es éxito.',
     strength:'Fuerza',unity:'Unidad',discipline:'Disciplina',rosterLabel:'Inteligencia de la alianza',rosterTitle:'Miembros de FFF-Spartan',rosterText:'Compara el rendimiento de los miembros por rango y métrica operativa.',
@@ -180,7 +180,7 @@ const translated: Record<Exclude<Language, 'en' | 'pt'>, BaseCopy> = {
     manageRoster:'Gestionar estadísticas de miembros',addMember:'Añadir miembro',editMember:'Editar miembro',save:'Guardar',cancel:'Cancelar',delete:'Eliminar',playerLevel:'Nivel del jugador',memberName:'Nombre del miembro',registrationRequests:'Solicitudes de registro',noRegistrations:'No hay registros pendientes.',confirmDelete:'¿Eliminar este miembro y sus estadísticas?',
   },
   fr: {
-    navHome:'Commandement',navRanks:'Membres',navPolls:'Votes',navR4:'Candidature R4',navRules:'Code',admin:'Administration',
+     navHome:'Commandement',navRanks:'Membres',navPolls:'Votes',navR4:'Candidature R4',navRules:'Code',admin:'Administration',
     eyebrow:'Alliance Dark War: Survival',heroTitle:'Survivre ensemble. Conquérir à l’unisson.',heroText:'Le centre opérationnel de FFF-Spartan : performance des membres, décisions de l’alliance et candidatures au leadership en un seul endroit.',
     enterRanks:'Voir les membres',officialGame:'Jeu officiel',alertLabel:'Directive de l’alliance',alertText:'Se réunir est un début. Rester ensemble est un progrès. Travailler ensemble est une réussite.',
     strength:'Force',unity:'Unité',discipline:'Discipline',rosterLabel:'Renseignement de l’alliance',rosterTitle:'Membres FFF-Spartan',rosterText:'Comparez la performance des membres par rang et par indicateur opérationnel.',
@@ -533,16 +533,18 @@ const notificationCopy: Record<Language, NotificationCopy> = {
 
 const performanceEnglish: PerformanceCopy = {
   performanceHistory:'Performance history',recordPerformance:'Record weekly performance',lastUpdate:'Last update',neverUpdated:'Never updated',snapshotDate:'Snapshot date',formation:'Formation',saveSnapshot:'Save weekly snapshot',performanceSaved:'Weekly performance saved.',currentPower:'Current power',growthPeriod:'Growth in period',noPerformanceHistory:'No performance history yet.',signInForHistory:'Sign in as an approved member to view performance history.',sundayRecommended:'Sunday is recommended for consistent weekly comparisons.',
+  myStatistics:'My statistics',selfPerformanceHint:'Update your own statistics for the current or previous week.',currentWeek:'Current week',previousWeek:'Previous week',
 }
 
 const performancePortuguese: PerformanceCopy = {
   performanceHistory:'Histórico de desempenho',recordPerformance:'Registar desempenho semanal',lastUpdate:'Última atualização',neverUpdated:'Nunca atualizado',snapshotDate:'Data do registo',formation:'Formação',saveSnapshot:'Guardar registo semanal',performanceSaved:'Desempenho semanal guardado.',currentPower:'Poder atual',growthPeriod:'Crescimento no período',noPerformanceHistory:'Ainda não existe histórico de desempenho.',signInForHistory:'Entre como membro aprovado para consultar o histórico de desempenho.',sundayRecommended:'Recomenda-se o domingo para comparações semanais consistentes.',
+  myStatistics:'As minhas estatísticas',selfPerformanceHint:'Atualize as suas estatísticas da semana atual ou anterior.',currentWeek:'Semana atual',previousWeek:'Semana anterior',
 }
 
-const performanceCopy: Record<Language, PerformanceCopy> = {
+const performanceCopy: Record<Language, Partial<PerformanceCopy>> = {
   en:performanceEnglish,
   pt:performancePortuguese,
-  es:{performanceHistory:'Historial de rendimiento',recordPerformance:'Registrar rendimiento semanal',lastUpdate:'Última actualización',neverUpdated:'Nunca actualizado',snapshotDate:'Fecha del registro',formation:'Formación',saveSnapshot:'Guardar registro semanal',performanceSaved:'Rendimiento semanal guardado.',currentPower:'Poder actual',growthPeriod:'Crecimiento del período',noPerformanceHistory:'Aún no hay historial de rendimiento.',signInForHistory:'Inicia sesión como miembro aprobado para ver el historial.',sundayRecommended:'Se recomienda el domingo para comparaciones semanales consistentes.'},
+  es:{...performanceEnglish,performanceHistory:'Historial de rendimiento',recordPerformance:'Registrar rendimiento semanal',lastUpdate:'Última actualización',neverUpdated:'Nunca actualizado',snapshotDate:'Fecha del registro',formation:'Formación',saveSnapshot:'Guardar registro semanal',performanceSaved:'Rendimiento semanal guardado.',currentPower:'Poder actual',growthPeriod:'Crecimiento del período',noPerformanceHistory:'Aún no hay historial de rendimiento.',signInForHistory:'Inicia sesión como miembro aprobado para ver el historial.',sundayRecommended:'Se recomienda el domingo para comparaciones semanales consistentes.',myStatistics:'Mis estadísticas',selfPerformanceHint:'Actualiza tus estadísticas de la semana actual o anterior.',currentWeek:'Semana actual',previousWeek:'Semana anterior'},
   fr:{performanceHistory:'Historique des performances',recordPerformance:'Enregistrer la performance hebdomadaire',lastUpdate:'Dernière mise à jour',neverUpdated:'Jamais mis à jour',snapshotDate:'Date du relevé',formation:'Formation',saveSnapshot:'Enregistrer le relevé hebdomadaire',performanceSaved:'Performance hebdomadaire enregistrée.',currentPower:'Puissance actuelle',growthPeriod:'Progression sur la période',noPerformanceHistory:'Aucun historique de performance.',signInForHistory:'Connectez-vous comme membre approuvé pour voir l’historique.',sundayRecommended:'Le dimanche est recommandé pour des comparaisons hebdomadaires cohérentes.'},
   de:{performanceHistory:'Leistungsverlauf',recordPerformance:'Wöchentliche Leistung erfassen',lastUpdate:'Letzte Aktualisierung',neverUpdated:'Nie aktualisiert',snapshotDate:'Erfassungsdatum',formation:'Formation',saveSnapshot:'Wochenstand speichern',performanceSaved:'Wochenleistung gespeichert.',currentPower:'Aktuelle Stärke',growthPeriod:'Wachstum im Zeitraum',noPerformanceHistory:'Noch kein Leistungsverlauf.',signInForHistory:'Melde dich als bestätigtes Mitglied an, um den Verlauf zu sehen.',sundayRecommended:'Sonntag wird für konsistente Wochenvergleiche empfohlen.'},
   it:{performanceHistory:'Storico prestazioni',recordPerformance:'Registra prestazione settimanale',lastUpdate:'Ultimo aggiornamento',neverUpdated:'Mai aggiornato',snapshotDate:'Data rilevazione',formation:'Formazione',saveSnapshot:'Salva rilevazione settimanale',performanceSaved:'Prestazione settimanale salvata.',currentPower:'Potenza attuale',growthPeriod:'Crescita nel periodo',noPerformanceHistory:'Nessuno storico disponibile.',signInForHistory:'Accedi come membro approvato per vedere lo storico.',sundayRecommended:'La domenica è consigliata per confronti settimanali coerenti.'},
@@ -601,5 +603,5 @@ const automaticTranslationHint: Record<Language, string> = {
 
 export function getCopy(language: Language): Copy {
   const base = language === 'pt' ? pt : language === 'en' ? en : { ...en, ...translated[language] }
-  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...notificationCopy[language], ...performanceCopy[language], ...allianceCodeCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language], codeAgreement: codeAgreementCopy[language] }
+  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...notificationCopy[language], ...performanceEnglish, ...performanceCopy[language], ...allianceCodeCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language], codeAgreement: codeAgreementCopy[language] }
 }
