@@ -26,6 +26,19 @@ type Props = {
 
 const emptyNewsTranslation: BoardNewsTranslation = { title: '', body: '' }
 type AccessFilter = 'pending' | 'approved' | 'inactive'
+type SelectedNewsImage = { id: string; file: File }
+
+function NewsImagePreview({ image, title, removeLabel, onRemove }: { image: SelectedNewsImage; title: string; removeLabel: string; onRemove: () => void }) {
+  const [previewUrl] = useState(() => URL.createObjectURL(image.file))
+
+  useEffect(() => () => URL.revokeObjectURL(previewUrl), [previewUrl])
+
+  return <div className="news-image-pending">
+    <img src={previewUrl} alt={`${title || image.file.name} preview`} />
+    <span>{image.file.name}</span>
+    <button type="button" title={removeLabel} onClick={onRemove}><X size={14} /></button>
+  </div>
+}
 
 const toDateTimeInput = (value: string | null) => {
   if (!value) return ''
@@ -44,7 +57,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
   const [newsItems, setNewsItems] = useState<BoardNews[]>([])
   const [newsOriginal, setNewsOriginal] = useState<BoardNewsTranslation>(emptyNewsTranslation)
   const [newsImagePaths, setNewsImagePaths] = useState<string[]>([])
-  const [newsImageFiles, setNewsImageFiles] = useState<File[]>([])
+  const [newsImageFiles, setNewsImageFiles] = useState<SelectedNewsImage[]>([])
   const [polls, setPolls] = useState<PortalPoll[]>([])
   const [applications, setApplications] = useState<R4Application[]>([])
   const [profiles, setProfiles] = useState<Profile[]>([])
@@ -228,7 +241,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
       return
     }
     setError('')
-    setNewsImageFiles((current) => [...current, ...selectedFiles])
+    setNewsImageFiles((current) => [...current, ...selectedFiles.map((file) => ({ id: crypto.randomUUID(), file }))])
   }
 
   const saveNews = async (event: FormEvent<HTMLFormElement>) => {
@@ -247,7 +260,8 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     const expiresAt = String(form.get('expiresAt'))
     const published = form.get('published') === 'on'
     const uploadedPaths: string[] = []
-    for (const file of newsImageFiles) {
+    for (const selectedImage of newsImageFiles) {
+      const file = selectedImage.file
       const extension = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg'
       const path = `${user.id}/${crypto.randomUUID()}.${extension}`
       const { error: uploadError } = await supabase.storage.from('board-news').upload(path, file, { contentType: file.type })
@@ -436,7 +450,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
             <label className="news-images-field"><span><ImagePlus size={16} />{copy.newsImages}</span><input type="file" accept="image/png,image/jpeg,image/webp" multiple disabled={newsImagePaths.length + newsImageFiles.length >= 4} onChange={(event) => { selectNewsImages(event.target.files); event.target.value = '' }} /></label>
             {(newsImagePaths.length > 0 || newsImageFiles.length > 0) && <div className="news-image-selection">
               {newsImagePaths.map((path, index) => <div key={path}><img src={getBoardNewsImageUrl(path)} alt={`${newsOriginal.title} ${index + 1}`} /><button type="button" title={copy.delete} onClick={() => setNewsImagePaths((current) => current.filter((item) => item !== path))}><X size={14} /></button></div>)}
-              {newsImageFiles.map((file, index) => <div className="news-image-pending" key={`${file.name}-${file.lastModified}-${index}`}><ImagePlus size={22} /><span>{file.name}</span><button type="button" title={copy.delete} onClick={() => setNewsImageFiles((current) => current.filter((_, itemIndex) => itemIndex !== index))}><X size={14} /></button></div>)}
+              {newsImageFiles.map((image) => <NewsImagePreview image={image} title={newsOriginal.title} removeLabel={copy.delete} onRemove={() => setNewsImageFiles((current) => current.filter((item) => item.id !== image.id))} key={image.id} />)}
             </div>}
             <label>{copy.priority}<select name="priority" defaultValue={editingNews?.priority ?? 'standard'}><option value="standard">{copy.standard}</option><option value="important">{copy.important}</option><option value="critical">{copy.critical}</option></select></label>
             <label>{copy.expiresOn}<input name="expiresAt" type="datetime-local" defaultValue={toDateTimeInput(editingNews?.expires_at ?? null)} /></label>
