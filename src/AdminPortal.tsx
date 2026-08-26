@@ -1,6 +1,6 @@
 import { useEffect, useEffectEvent, useState, type FormEvent } from 'react'
 import type { User } from '@supabase/supabase-js'
-import { Archive, Check, LogOut, Megaphone, Pencil, Plus, RotateCcw, Search, Shield, Trash2, X } from 'lucide-react'
+import { Archive, Check, ClipboardList, LogOut, Megaphone, Pencil, Plus, RotateCcw, Search, Shield, Trash2, Users, Vote, X } from 'lucide-react'
 import { type Copy, type Language } from './i18n'
 import { supabase, type AllianceMember, type AvailableMember, type BoardNews, type BoardNewsTranslation, type PortalPoll, type Profile, type R4Application } from './supabase'
 
@@ -335,6 +335,10 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     else await Promise.all([onRefreshMembers(), loadAdminData()])
   }
 
+  const scrollToAdminSection = (sectionId: string) => {
+    document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   return <div className="modal-backdrop" onMouseDown={onClose}>
     <section className={`login-modal ${profile?.role === 'admin' ? 'admin-portal' : ''}`} role="dialog" aria-modal="true" onMouseDown={(event) => event.stopPropagation()}>
       <button className="close-button" onClick={onClose} aria-label={copy.close}><X /></button>
@@ -372,9 +376,17 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
 
       {!passwordRecovery && profile?.role === 'admin' && <div className="admin-content">
         <div className="admin-heading"><span>{copy.signedInAs}: <strong>{profile.member_name}</strong></span><button className="ghost-button" onClick={onSignOut}><LogOut size={16} />{copy.signOut}</button></div>
+        <nav className="admin-section-nav" aria-label={copy.adminDashboard}>
+          <button type="button" onClick={() => scrollToAdminSection('admin-news')}><Megaphone size={16} />{copy.manageNews}</button>
+          <button type="button" onClick={() => scrollToAdminSection('admin-create-poll')}><Plus size={16} />{copy.createPoll}</button>
+          <button type="button" onClick={() => scrollToAdminSection('admin-polls')}><Vote size={16} />{copy.pollsTitle}</button>
+          <button type="button" onClick={() => scrollToAdminSection('admin-applications')}><ClipboardList size={16} />{copy.applications}</button>
+          <button type="button" onClick={() => scrollToAdminSection('admin-access')}><Shield size={16} />{copy.memberAccess}</button>
+          <button type="button" onClick={() => scrollToAdminSection('admin-roster')}><Users size={16} />{copy.manageRoster}</button>
+        </nav>
         {error && <p className="form-error" role="alert">{error}</p>}
 
-        <section className="admin-block news-admin-block">
+        <section className="admin-block news-admin-block" id="admin-news">
           <h3><Megaphone size={18} />{copy.manageNews}</h3>
           <form className="admin-form news-admin-form" key={editingNews?.id ?? 'new-news'} onSubmit={saveNews}>
             <p className="admin-form-hint">{copy.translationHint}</p>
@@ -396,7 +408,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
           })}</div>
         </section>
 
-        <section className="admin-block">
+        <section className="admin-block" id="admin-create-poll">
           <h3><Plus size={18} />{copy.createPoll}</h3>
           <form className="admin-form" onSubmit={createPoll}>
             <label>{copy.question}<input name="question" required minLength={5} maxLength={240} /></label>
@@ -406,18 +418,18 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
           </form>
         </section>
 
-        <section className="admin-block"><h3>{copy.pollsTitle}</h3>
+        <section className="admin-block" id="admin-polls"><h3>{copy.pollsTitle}</h3>
           <div className="admin-list">{polls.map((poll) => <article key={poll.id}><div><strong>{poll.question}</strong><small>{poll.poll_options.reduce((total, option) => total + option.voteCount, 0)} {copy.votes}</small></div>
             <ul>{poll.poll_options.map((option) => <li key={option.id}>{option.label}<b>{option.voteCount}</b></li>)}</ul>
             <div className="row-actions"><button className="compact-button" onClick={() => togglePoll(poll)}>{poll.active ? copy.deactivate : copy.activate}</button>{!poll.active && <button className="compact-button danger" onClick={() => void deletePoll(poll)}><Trash2 size={14} />{copy.delete}</button>}</div></article>)}</div>
         </section>
 
-        <section className="admin-block"><h3>{copy.applications}</h3>
+        <section className="admin-block" id="admin-applications"><h3>{copy.applications}</h3>
           <div className="admin-list">{applications.map((application) => <article key={application.id}><div><strong>{application.profiles?.member_name}</strong><small>{application.status}</small></div><p>{application.reason}</p><p>{application.experience}</p><small>{application.availability}</small>
             <div className="row-actions">{application.status === 'pending' && <><button className="compact-button" onClick={() => updateApplication(application, 'approved')}><Check size={14} />{copy.approve}</button><button className="compact-button danger" onClick={() => updateApplication(application, 'rejected')}><X size={14} />{copy.reject}</button></>}<button className="compact-button danger" onClick={() => void deleteApplication(application)}><Trash2 size={14} />{copy.delete}</button></div></article>)}</div>
         </section>
 
-        <section className="admin-block member-access-admin"><h3>{copy.memberAccess}</h3>
+        <section className="admin-block member-access-admin" id="admin-access"><h3>{copy.memberAccess}</h3>
           <div className="access-tabs" role="tablist" aria-label={copy.memberAccess}>
             {(['pending', 'approved', 'inactive'] as const).map((filter) => <button type="button" role="tab" aria-selected={accessFilter === filter} className={accessFilter === filter ? 'active' : ''} onClick={() => setAccessFilter(filter)} key={filter}>
               {filter === 'pending' ? copy.accessPending : filter === 'approved' ? copy.accessApproved : copy.accessInactive}<span>{accessProfiles[filter].length}</span>
@@ -439,7 +451,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
           </div>
         </section>
 
-        <section className="admin-block"><h3>{copy.manageRoster}</h3>
+        <section className="admin-block" id="admin-roster"><h3>{copy.manageRoster}</h3>
           <form className="admin-form roster-form" key={editingMember?.id ?? 'new'} onSubmit={saveMember}>
             <label>{copy.memberName}<input name="memberName" required maxLength={60} defaultValue={editingMember?.member_name} /></label>
             <label>{copy.rank}<select name="rank" required defaultValue={editingMember?.rank ?? 'R3'}>{['R1', 'R2', 'R3', 'R4', 'R5'].map((rank) => <option key={rank}>{rank}</option>)}</select></label>
