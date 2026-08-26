@@ -15,9 +15,17 @@ export type DiscussionCopy = {
   loadFailed: string
   sendFailed: string
   translationFailed: string
+  addImages: string
+  removeImage: string
+  openImage: string
+  imageLimit: string
+  imageInvalid: string
+  imageProcessing: string
 }
 
-const en: DiscussionCopy = {
+type BaseDiscussionCopy = Omit<DiscussionCopy, 'addImages' | 'removeImage' | 'openImage' | 'imageLimit' | 'imageInvalid' | 'imageProcessing'>
+
+const en: BaseDiscussionCopy = {
   discussion: 'Discussion', noComments: 'No comments yet.', placeholder: 'Write a comment...', send: 'Send',
   signIn: 'Sign in as a verified member to join the discussion.', closed: 'This discussion is closed.',
   deleteComment: 'Delete comment', confirmDelete: 'Delete this comment?', translate: 'Translate', translating: 'Translating...',
@@ -25,7 +33,7 @@ const en: DiscussionCopy = {
   translationFailed: 'Unable to translate this comment.',
 }
 
-const copies: Record<Language, DiscussionCopy> = {
+const copies: Record<Language, BaseDiscussionCopy> = {
   en,
   pt: { discussion:'Discussão',noComments:'Ainda não existem comentários.',placeholder:'Escreva um comentário...',send:'Enviar',signIn:'Entre como membro verificado para participar na discussão.',closed:'Esta discussão está encerrada.',deleteComment:'Eliminar comentário',confirmDelete:'Eliminar este comentário?',translate:'Traduzir',translating:'A traduzir...',viewOriginal:'Ver original',loadFailed:'Não foi possível carregar a discussão.',sendFailed:'Não foi possível enviar o comentário.',translationFailed:'Não foi possível traduzir este comentário.' },
   es: { discussion:'Discusión',noComments:'Todavía no hay comentarios.',placeholder:'Escribe un comentario...',send:'Enviar',signIn:'Inicia sesión como miembro verificado para participar.',closed:'Esta discusión está cerrada.',deleteComment:'Eliminar comentario',confirmDelete:'¿Eliminar este comentario?',translate:'Traducir',translating:'Traduciendo...',viewOriginal:'Ver original',loadFailed:'No se pudo cargar la discusión.',sendFailed:'No se pudo enviar el comentario.',translationFailed:'No se pudo traducir este comentario.' },
@@ -45,4 +53,27 @@ const copies: Record<Language, DiscussionCopy> = {
   'zh-TW': { discussion:'討論',noComments:'尚無留言。',placeholder:'撰寫留言...',send:'傳送',signIn:'請以已驗證成員身分登入以參與討論。',closed:'此討論已關閉。',deleteComment:'刪除留言',confirmDelete:'刪除此留言？',translate:'翻譯',translating:'正在翻譯...',viewOriginal:'查看原文',loadFailed:'無法載入討論。',sendFailed:'無法傳送留言。',translationFailed:'無法翻譯此留言。' },
 }
 
-export const getDiscussionCopy = (language: Language) => copies[language] ?? en
+const imageCopies: Record<Language, Pick<DiscussionCopy, 'addImages' | 'removeImage' | 'openImage' | 'imageLimit' | 'imageInvalid' | 'imageProcessing'>> = {
+  en: { addImages:'Add images',removeImage:'Remove image',openImage:'Open image',imageLimit:'A comment may contain up to 5 images.',imageInvalid:'Use JPEG, PNG or WebP images up to 20 MB.',imageProcessing:'Optimizing images...' },
+  pt: { addImages:'Adicionar imagens',removeImage:'Remover imagem',openImage:'Abrir imagem',imageLimit:'Um comentário pode conter até 5 imagens.',imageInvalid:'Use imagens JPEG, PNG ou WebP até 20 MB.',imageProcessing:'A otimizar imagens...' },
+  es: { addImages:'Añadir imágenes',removeImage:'Eliminar imagen',openImage:'Abrir imagen',imageLimit:'Un comentario puede contener hasta 5 imágenes.',imageInvalid:'Usa imágenes JPEG, PNG o WebP de hasta 20 MB.',imageProcessing:'Optimizando imágenes...' },
+  fr: { addImages:'Ajouter des images',removeImage:'Supprimer l’image',openImage:'Ouvrir l’image',imageLimit:'Un commentaire peut contenir jusqu’à 5 images.',imageInvalid:'Utilisez des images JPEG, PNG ou WebP de 20 Mo maximum.',imageProcessing:'Optimisation des images...' },
+  de: { addImages:'Bilder hinzufügen',removeImage:'Bild entfernen',openImage:'Bild öffnen',imageLimit:'Ein Kommentar kann bis zu 5 Bilder enthalten.',imageInvalid:'Verwende JPEG-, PNG- oder WebP-Bilder bis 20 MB.',imageProcessing:'Bilder werden optimiert...' },
+  it: { addImages:'Aggiungi immagini',removeImage:'Rimuovi immagine',openImage:'Apri immagine',imageLimit:'Un commento può contenere fino a 5 immagini.',imageInvalid:'Usa immagini JPEG, PNG o WebP fino a 20 MB.',imageProcessing:'Ottimizzazione immagini...' },
+  pl: { addImages:'Dodaj obrazy',removeImage:'Usuń obraz',openImage:'Otwórz obraz',imageLimit:'Komentarz może zawierać do 5 obrazów.',imageInvalid:'Użyj obrazów JPEG, PNG lub WebP do 20 MB.',imageProcessing:'Optymalizowanie obrazów...' },
+  ru: { addImages:'Добавить изображения',removeImage:'Удалить изображение',openImage:'Открыть изображение',imageLimit:'Комментарий может содержать до 5 изображений.',imageInvalid:'Используйте JPEG, PNG или WebP до 20 МБ.',imageProcessing:'Оптимизация изображений...' },
+  tr: { addImages:'Görsel ekle',removeImage:'Görseli kaldır',openImage:'Görseli aç',imageLimit:'Bir yorum en fazla 5 görsel içerebilir.',imageInvalid:'En fazla 20 MB JPEG, PNG veya WebP kullanın.',imageProcessing:'Görseller optimize ediliyor...' },
+  id: { addImages:'Tambahkan gambar',removeImage:'Hapus gambar',openImage:'Buka gambar',imageLimit:'Komentar dapat berisi hingga 5 gambar.',imageInvalid:'Gunakan JPEG, PNG, atau WebP hingga 20 MB.',imageProcessing:'Mengoptimalkan gambar...' },
+  vi: { addImages:'Thêm hình ảnh',removeImage:'Xóa hình ảnh',openImage:'Mở hình ảnh',imageLimit:'Một bình luận có thể chứa tối đa 5 hình ảnh.',imageInvalid:'Dùng ảnh JPEG, PNG hoặc WebP tối đa 20 MB.',imageProcessing:'Đang tối ưu hình ảnh...' },
+  th: { addImages:'เพิ่มรูปภาพ',removeImage:'ลบรูปภาพ',openImage:'เปิดรูปภาพ',imageLimit:'ความคิดเห็นมีรูปภาพได้สูงสุด 5 รูป',imageInvalid:'ใช้รูป JPEG, PNG หรือ WebP ขนาดไม่เกิน 20 MB',imageProcessing:'กำลังปรับรูปภาพ...' },
+  ja: { addImages:'画像を追加',removeImage:'画像を削除',openImage:'画像を開く',imageLimit:'コメントには最大5枚の画像を追加できます。',imageInvalid:'20 MB以下のJPEG、PNG、WebPを使用してください。',imageProcessing:'画像を最適化しています...' },
+  ko: { addImages:'이미지 추가',removeImage:'이미지 삭제',openImage:'이미지 열기',imageLimit:'댓글에는 최대 5개의 이미지를 추가할 수 있습니다.',imageInvalid:'20MB 이하의 JPEG, PNG 또는 WebP를 사용하세요.',imageProcessing:'이미지 최적화 중...' },
+  ar: { addImages:'إضافة صور',removeImage:'إزالة الصورة',openImage:'فتح الصورة',imageLimit:'يمكن أن يحتوي التعليق على 5 صور كحد أقصى.',imageInvalid:'استخدم صور JPEG أو PNG أو WebP حتى 20 ميغابايت.',imageProcessing:'جارٍ تحسين الصور...' },
+  'zh-CN': { addImages:'添加图片',removeImage:'移除图片',openImage:'打开图片',imageLimit:'每条评论最多可包含5张图片。',imageInvalid:'请使用不超过20 MB的JPEG、PNG或WebP图片。',imageProcessing:'正在优化图片...' },
+  'zh-TW': { addImages:'新增圖片',removeImage:'移除圖片',openImage:'開啟圖片',imageLimit:'每則留言最多可包含5張圖片。',imageInvalid:'請使用不超過20 MB的JPEG、PNG或WebP圖片。',imageProcessing:'正在最佳化圖片...' },
+}
+
+export const getDiscussionCopy = (language: Language): DiscussionCopy => ({
+  ...(copies[language] ?? en),
+  ...imageCopies[language],
+})

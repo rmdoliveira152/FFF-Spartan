@@ -91,6 +91,7 @@ export type DiscussionComment = {
   comment_id: string
   member_name: string
   message: string
+  image_paths: string[]
   created_at: string
   is_own: boolean
   can_delete: boolean
