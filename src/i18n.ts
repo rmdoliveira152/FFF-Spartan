@@ -60,18 +60,18 @@ type MemberAccessCopy = {
   currentAccount: string; searchAccounts: string; noAccessResults: string
 }
 
-type AllianceCodeCopy = { codeLabel: string; codeTitle: string; codePlayers: string; codeAdmins: string }
+type AllianceCodeCopy = { codeLabel: string; codeTitle: string; codePlayers: string; codeAdmins: string; codeCourtesy: string }
 
 const allianceCodeCopy: Record<Language, AllianceCodeCopy> = {
-  en:{ codeLabel:'Alliance standard',codeTitle:'Operational code',codePlayers:'Other players',codeAdmins:'R4 · Administration' }, pt:{ codeLabel:'Padrão da aliança',codeTitle:'Código operacional',codePlayers:'Demais jogadores',codeAdmins:'R4 · Administração' },
-  es:{ codeLabel:'Estándar de la alianza',codeTitle:'Código operativo',codePlayers:'Demás jugadores',codeAdmins:'R4 · Administración' }, fr:{ codeLabel:'Standard de l’alliance',codeTitle:'Code opérationnel',codePlayers:'Autres joueurs',codeAdmins:'R4 · Administration' },
-  de:{ codeLabel:'Allianzstandard',codeTitle:'Einsatzkodex',codePlayers:'Andere Spieler',codeAdmins:'R4 · Verwaltung' }, it:{ codeLabel:'Standard dell’alleanza',codeTitle:'Codice operativo',codePlayers:'Altri giocatori',codeAdmins:'R4 · Amministrazione' },
-  pl:{ codeLabel:'Standard sojuszu',codeTitle:'Kodeks operacyjny',codePlayers:'Pozostali gracze',codeAdmins:'R4 · Administracja' }, ru:{ codeLabel:'Стандарт альянса',codeTitle:'Оперативный кодекс',codePlayers:'Остальные игроки',codeAdmins:'R4 · Администрация' },
-  tr:{ codeLabel:'İttifak standardı',codeTitle:'Operasyon kuralları',codePlayers:'Diğer oyuncular',codeAdmins:'R4 · Yönetim' }, id:{ codeLabel:'Standar aliansi',codeTitle:'Kode operasional',codePlayers:'Pemain lain',codeAdmins:'R4 · Administrasi' },
-  vi:{ codeLabel:'Tiêu chuẩn liên minh',codeTitle:'Quy tắc hoạt động',codePlayers:'Người chơi khác',codeAdmins:'R4 · Quản trị' }, th:{ codeLabel:'มาตรฐานพันธมิตร',codeTitle:'หลักปฏิบัติการ',codePlayers:'ผู้เล่นอื่น',codeAdmins:'R4 · ฝ่ายบริหาร' },
-  ja:{ codeLabel:'同盟基準',codeTitle:'運用規範',codePlayers:'その他のプレイヤー',codeAdmins:'R4 · 管理' }, ko:{ codeLabel:'동맹 기준',codeTitle:'운영 규정',codePlayers:'기타 플레이어',codeAdmins:'R4 · 관리' },
-  ar:{ codeLabel:'معيار التحالف',codeTitle:'قواعد العمليات',codePlayers:'اللاعبون الآخرون',codeAdmins:'R4 · الإدارة' }, 'zh-CN':{ codeLabel:'联盟标准',codeTitle:'行动准则',codePlayers:'其他玩家',codeAdmins:'R4 · 管理' },
-  'zh-TW':{ codeLabel:'聯盟標準',codeTitle:'行動準則',codePlayers:'其他玩家',codeAdmins:'R4 · 管理' },
+  en:{ codeLabel:'Alliance standard',codeTitle:'Operational code',codePlayers:'Other players',codeAdmins:'R4 · Administration',codeCourtesy:'Be kind and polite to other players.' }, pt:{ codeLabel:'Padrão da aliança',codeTitle:'Código operacional',codePlayers:'Demais jogadores',codeAdmins:'R4 · Administração',codeCourtesy:'Ser gentil e educado com outros jogadores.' },
+  es:{ codeLabel:'Estándar de la alianza',codeTitle:'Código operativo',codePlayers:'Demás jugadores',codeAdmins:'R4 · Administración',codeCourtesy:'Sé amable y educado con los demás jugadores.' }, fr:{ codeLabel:'Standard de l’alliance',codeTitle:'Code opérationnel',codePlayers:'Autres joueurs',codeAdmins:'R4 · Administration',codeCourtesy:'Soyez aimable et poli avec les autres joueurs.' },
+  de:{ codeLabel:'Allianzstandard',codeTitle:'Einsatzkodex',codePlayers:'Andere Spieler',codeAdmins:'R4 · Verwaltung',codeCourtesy:'Sei freundlich und höflich zu anderen Spielern.' }, it:{ codeLabel:'Standard dell’alleanza',codeTitle:'Codice operativo',codePlayers:'Altri giocatori',codeAdmins:'R4 · Amministrazione',codeCourtesy:'Sii gentile ed educato con gli altri giocatori.' },
+  pl:{ codeLabel:'Standard sojuszu',codeTitle:'Kodeks operacyjny',codePlayers:'Pozostali gracze',codeAdmins:'R4 · Administracja',codeCourtesy:'Bądź życzliwy i uprzejmy wobec innych graczy.' }, ru:{ codeLabel:'Стандарт альянса',codeTitle:'Оперативный кодекс',codePlayers:'Остальные игроки',codeAdmins:'R4 · Администрация',codeCourtesy:'Будьте добры и вежливы с другими игроками.' },
+  tr:{ codeLabel:'İttifak standardı',codeTitle:'Operasyon kuralları',codePlayers:'Diğer oyuncular',codeAdmins:'R4 · Yönetim',codeCourtesy:'Diğer oyunculara karşı nazik ve kibar ol.' }, id:{ codeLabel:'Standar aliansi',codeTitle:'Kode operasional',codePlayers:'Pemain lain',codeAdmins:'R4 · Administrasi',codeCourtesy:'Bersikap baik dan sopan kepada pemain lain.' },
+  vi:{ codeLabel:'Tiêu chuẩn liên minh',codeTitle:'Quy tắc hoạt động',codePlayers:'Người chơi khác',codeAdmins:'R4 · Quản trị',codeCourtesy:'Hãy tử tế và lịch sự với những người chơi khác.' }, th:{ codeLabel:'มาตรฐานพันธมิตร',codeTitle:'หลักปฏิบัติการ',codePlayers:'ผู้เล่นอื่น',codeAdmins:'R4 · ฝ่ายบริหาร',codeCourtesy:'มีน้ำใจและสุภาพต่อผู้เล่นคนอื่น' },
+  ja:{ codeLabel:'同盟基準',codeTitle:'運用規範',codePlayers:'その他のプレイヤー',codeAdmins:'R4 · 管理',codeCourtesy:'他のプレイヤーに親切かつ礼儀正しく接する。' }, ko:{ codeLabel:'동맹 기준',codeTitle:'운영 규정',codePlayers:'기타 플레이어',codeAdmins:'R4 · 관리',codeCourtesy:'다른 플레이어에게 친절하고 예의 바르게 대하세요.' },
+  ar:{ codeLabel:'معيار التحالف',codeTitle:'قواعد العمليات',codePlayers:'اللاعبون الآخرون',codeAdmins:'R4 · الإدارة',codeCourtesy:'كن لطيفًا ومهذبًا مع اللاعبين الآخرين.' }, 'zh-CN':{ codeLabel:'联盟标准',codeTitle:'行动准则',codePlayers:'其他玩家',codeAdmins:'R4 · 管理',codeCourtesy:'友善并礼貌地对待其他玩家。' },
+  'zh-TW':{ codeLabel:'聯盟標準',codeTitle:'行動準則',codePlayers:'其他玩家',codeAdmins:'R4 · 管理',codeCourtesy:'友善並有禮貌地對待其他玩家。' },
 }
 
 export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy & DynamicTranslationCopy & MemberAccessCopy & AllianceCodeCopy & EventGuideCopy

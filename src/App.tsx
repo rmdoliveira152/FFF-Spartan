@@ -280,7 +280,7 @@ function App() {
         <section className="section code-section" id="code">
           <header className="section-header"><div><p className="eyebrow">{copy.codeLabel}</p><h2>{copy.codeTitle}: {codeAudience === 'players' ? copy.codePlayers : copy.codeAdmins}</h2><p>{copy.rulesText}</p></div><Shield size={48} /></header>
           <div className="code-rank-tabs" role="tablist" aria-label={copy.codeTitle}>{codeAudiences.map((audience) => <button type="button" role="tab" aria-selected={codeAudience === audience} className={codeAudience === audience ? 'active' : ''} onClick={() => setCodeAudience(audience)} key={audience}>{audience === 'players' ? copy.codePlayers : copy.codeAdmins}</button>)}</div>
-          <div className="rules-grid">{codeRuleIndexes[codeAudience].map((ruleIndex, index) => <article key={copy.ruleItems[ruleIndex]}><span>{String(index + 1).padStart(2, '0')}</span><p>{copy.ruleItems[ruleIndex]}</p></article>)}</div>
+          <div className="rules-grid">{[...codeRuleIndexes[codeAudience].map((ruleIndex) => copy.ruleItems[ruleIndex]), ...(codeAudience === 'players' ? [copy.codeCourtesy] : [])].map((rule, index) => <article key={rule}><span>{String(index + 1).padStart(2, '0')}</span><p>{rule}</p></article>)}</div>
         </section>
       </main>
 
