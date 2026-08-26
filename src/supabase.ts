@@ -57,6 +57,7 @@ export type BoardNewsTranslation = {
 export type BoardNews = {
   id: string
   translations: Partial<Record<string, BoardNewsTranslation>>
+  image_paths: string[]
   default_language: string
   priority: 'standard' | 'important' | 'critical'
   published: boolean
@@ -66,6 +67,9 @@ export type BoardNews = {
   created_at: string
   updated_at: string
 }
+
+export const getBoardNewsImageUrl = (path: string) =>
+  supabase?.storage.from('board-news').getPublicUrl(path).data.publicUrl ?? ''
 
 export type R4Application = {
   id: string

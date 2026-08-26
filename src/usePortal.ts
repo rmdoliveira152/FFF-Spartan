@@ -58,7 +58,7 @@ export function usePortal() {
     if (!client) return
     const { data, error } = await client
       .from('board_news')
-      .select('id, translations, default_language, priority, published, published_at, expires_at, archived_at, created_at, updated_at')
+      .select('id, translations, image_paths, default_language, priority, published, published_at, expires_at, archived_at, created_at, updated_at')
       .eq('published', true)
       .lte('published_at', new Date().toISOString())
       .order('published_at', { ascending: false })

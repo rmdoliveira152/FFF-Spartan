@@ -3,7 +3,7 @@ import { Archive, CalendarDays, CalendarRange, ChevronRight, ExternalLink, Globe
 import { getCopy, languages, type Language } from './i18n'
 import { AdminPortal } from './AdminPortal'
 import { usePortal } from './usePortal'
-import { supabase, type BoardNews, type BoardNewsTranslation } from './supabase'
+import { getBoardNewsImageUrl, supabase, type BoardNews, type BoardNewsTranslation } from './supabase'
 import './App.css'
 
 type Metric = 'combat_power' | 'kills' | 'weekly_contribution'
@@ -212,6 +212,7 @@ function App() {
             {currentNews.map((item, index) => <article className={`board-news-card ${index === 0 ? 'featured' : ''}`} data-priority={item.priority} key={item.id}>
               <div className="board-news-meta"><span>{copy[item.priority]}</span><time><CalendarDays size={14} />{copy.createdOn}: {formatNewsDate(item.created_at)}</time></div>
               <h3>{item.translation.title}</h3><p>{item.translation.body}</p>
+              {item.image_paths.length > 0 && <div className="board-news-media">{item.image_paths.map((path, imageIndex) => <a href={getBoardNewsImageUrl(path)} target="_blank" rel="noreferrer" key={path}><img src={getBoardNewsImageUrl(path)} alt={`${item.translation.title} ${imageIndex + 1}`} loading={index === 0 && imageIndex === 0 ? 'eager' : 'lazy'} /></a>)}</div>}
               {item.canTranslate && <button className="news-translate-button" type="button" disabled={translatingNews === item.translationKey} onClick={() => void translateNews(item)}><Languages size={15} />{translatingNews === item.translationKey ? copy.translatingNews : item.isTranslated ? copy.viewOriginal : copy.translateNews}</button>}
               {newsTranslationErrors[item.id] && <small className="news-translation-error" role="alert">{newsTranslationErrors[item.id]}</small>}
               {item.expires_at && <div className="board-news-deadline"><span>{copy.expiresOn}</span><time>{formatNewsDate(item.expires_at)}</time></div>}
@@ -220,7 +221,7 @@ function App() {
           </div>
           {historicalNews.length > 0 && <div className="board-news-history">
             <button type="button" aria-expanded={historyOpen} onClick={() => setHistoryOpen((current) => !current)}><Archive size={17} />{copy.newsHistory}<span>{historicalNews.length}</span></button>
-            {historyOpen && <div className="history-list">{historicalNews.map((item) => <article key={item.id}><div><strong>{item.translation.title}</strong><small>{copy.createdOn}: {formatNewsDate(item.created_at)}</small></div><div className="history-news-content"><p>{item.translation.body}</p>{item.canTranslate && <button className="news-translate-button" type="button" disabled={translatingNews === item.translationKey} onClick={() => void translateNews(item)}><Languages size={15} />{translatingNews === item.translationKey ? copy.translatingNews : item.isTranslated ? copy.viewOriginal : copy.translateNews}</button>}{newsTranslationErrors[item.id] && <small className="news-translation-error" role="alert">{newsTranslationErrors[item.id]}</small>}</div><time>{copy.expiresOn}: {formatNewsDate(item.archived_at ?? item.expires_at!)}</time></article>)}</div>}
+            {historyOpen && <div className="history-list">{historicalNews.map((item) => <article key={item.id}><div><strong>{item.translation.title}</strong><small>{copy.createdOn}: {formatNewsDate(item.created_at)}</small></div><div className="history-news-content"><p>{item.translation.body}</p>{item.image_paths.length > 0 && <div className="board-news-media">{item.image_paths.map((path, imageIndex) => <a href={getBoardNewsImageUrl(path)} target="_blank" rel="noreferrer" key={path}><img src={getBoardNewsImageUrl(path)} alt={`${item.translation.title} ${imageIndex + 1}`} loading="lazy" /></a>)}</div>}{item.canTranslate && <button className="news-translate-button" type="button" disabled={translatingNews === item.translationKey} onClick={() => void translateNews(item)}><Languages size={15} />{translatingNews === item.translationKey ? copy.translatingNews : item.isTranslated ? copy.viewOriginal : copy.translateNews}</button>}{newsTranslationErrors[item.id] && <small className="news-translation-error" role="alert">{newsTranslationErrors[item.id]}</small>}</div><time>{copy.expiresOn}: {formatNewsDate(item.archived_at ?? item.expires_at!)}</time></article>)}</div>}
           </div>}
         </section>
 

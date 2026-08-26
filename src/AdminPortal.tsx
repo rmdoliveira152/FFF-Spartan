@@ -1,8 +1,8 @@
 import { useEffect, useEffectEvent, useState, type FormEvent } from 'react'
 import type { User } from '@supabase/supabase-js'
-import { Archive, Check, ClipboardList, LogOut, Megaphone, Pencil, Plus, RotateCcw, Search, Shield, Trash2, Users, Vote, X } from 'lucide-react'
+import { Archive, Check, ClipboardList, ImagePlus, LogOut, Megaphone, Pencil, Plus, RotateCcw, Search, Shield, Trash2, Users, Vote, X } from 'lucide-react'
 import { type Copy, type Language } from './i18n'
-import { supabase, type AllianceMember, type AvailableMember, type BoardNews, type BoardNewsTranslation, type PortalPoll, type Profile, type R4Application } from './supabase'
+import { getBoardNewsImageUrl, supabase, type AllianceMember, type AvailableMember, type BoardNews, type BoardNewsTranslation, type PortalPoll, type Profile, type R4Application } from './supabase'
 
 type Props = {
   open: boolean
@@ -43,6 +43,8 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
   const [editingNews, setEditingNews] = useState<BoardNews | null>(null)
   const [newsItems, setNewsItems] = useState<BoardNews[]>([])
   const [newsOriginal, setNewsOriginal] = useState<BoardNewsTranslation>(emptyNewsTranslation)
+  const [newsImagePaths, setNewsImagePaths] = useState<string[]>([])
+  const [newsImageFiles, setNewsImageFiles] = useState<File[]>([])
   const [polls, setPolls] = useState<PortalPoll[]>([])
   const [applications, setApplications] = useState<R4Application[]>([])
   const [profiles, setProfiles] = useState<Profile[]>([])
@@ -68,7 +70,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     if (!client || profile?.role !== 'admin') return
     const [pollResponse, newsResponse, applicationResponse, profileResponse, memberResponse] = await Promise.all([
       client.from('polls').select('id, question, active, closes_at, created_at, poll_options(id, label, position)').order('created_at', { ascending: false }),
-      client.from('board_news').select('id, translations, default_language, priority, published, published_at, expires_at, archived_at, created_at, updated_at').order('created_at', { ascending: false }),
+      client.from('board_news').select('id, translations, image_paths, default_language, priority, published, published_at, expires_at, archived_at, created_at, updated_at').order('created_at', { ascending: false }),
       client.from('r4_applications').select('id, user_id, reason, experience, availability, status, created_at').order('created_at', { ascending: false }),
       client.from('profiles').select('id, member_name, role, active, alliance_member_id, registration_status').order('member_name'),
       client.from('alliance_members').select('id, member_name, rank, player_level, combat_power, kills, weekly_contribution, active').order('member_name'),
@@ -203,11 +205,30 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
   const resetNewsEditor = () => {
     setEditingNews(null)
     setNewsOriginal(emptyNewsTranslation)
+    setNewsImagePaths([])
+    setNewsImageFiles([])
   }
 
   const editNews = (news: BoardNews) => {
     setEditingNews(news)
     setNewsOriginal(news.translations[news.default_language] ?? Object.values(news.translations)[0] ?? emptyNewsTranslation)
+    setNewsImagePaths(news.image_paths)
+    setNewsImageFiles([])
+  }
+
+  const selectNewsImages = (files: FileList | null) => {
+    const selectedFiles = Array.from(files ?? [])
+    if (newsImagePaths.length + newsImageFiles.length + selectedFiles.length > 4) {
+      setError(`${copy.newsImages}: 4 max.`)
+      return
+    }
+    const invalidFile = selectedFiles.find((file) => !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024)
+    if (invalidFile) {
+      setError(`${invalidFile.name}: PNG, JPEG or WebP, 5 MB max.`)
+      return
+    }
+    setError('')
+    setNewsImageFiles((current) => [...current, ...selectedFiles])
   }
 
   const saveNews = async (event: FormEvent<HTMLFormElement>) => {
@@ -225,8 +246,22 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     }
     const expiresAt = String(form.get('expiresAt'))
     const published = form.get('published') === 'on'
+    const uploadedPaths: string[] = []
+    for (const file of newsImageFiles) {
+      const extension = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg'
+      const path = `${user.id}/${crypto.randomUUID()}.${extension}`
+      const { error: uploadError } = await supabase.storage.from('board-news').upload(path, file, { contentType: file.type })
+      if (uploadError) {
+        if (uploadedPaths.length) await supabase.storage.from('board-news').remove(uploadedPaths)
+        setError(uploadError.message)
+        setBusy(false)
+        return
+      }
+      uploadedPaths.push(path)
+    }
     const values = {
       translations: { und: original },
+      image_paths: [...newsImagePaths, ...uploadedPaths],
       default_language: 'und',
       priority: String(form.get('priority')),
       published,
@@ -237,8 +272,13 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     const response = editingNews
       ? await supabase.from('board_news').update(values).eq('id', editingNews.id)
       : await supabase.from('board_news').insert({ ...values, created_by: user.id })
-    if (response.error) setError(response.error.message)
+    if (response.error) {
+      if (uploadedPaths.length) await supabase.storage.from('board-news').remove(uploadedPaths)
+      setError(response.error.message)
+    }
     else {
+      const removedPaths = editingNews?.image_paths.filter((path) => !newsImagePaths.includes(path)) ?? []
+      if (removedPaths.length) await supabase.storage.from('board-news').remove(removedPaths)
       resetNewsEditor()
       formElement.reset()
       await Promise.all([loadAdminData(), onRefreshBoardNews()])
@@ -263,6 +303,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     const { error: deleteError } = await supabase.from('board_news').delete().eq('id', news.id).not('archived_at', 'is', null)
     if (deleteError) setError(deleteError.message)
     else {
+      if (news.image_paths.length) await supabase.storage.from('board-news').remove(news.image_paths)
       if (editingNews?.id === news.id) resetNewsEditor()
       await loadAdminData()
     }
@@ -392,6 +433,11 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
             <p className="admin-form-hint">{copy.translationHint}</p>
             <label>{copy.newsHeadline}<input required maxLength={120} value={newsOriginal.title} onChange={(event) => setNewsOriginal((current) => ({ ...current, title: event.target.value }))} /></label>
             <label className="news-body-field">{copy.newsBody}<textarea required rows={5} maxLength={2000} value={newsOriginal.body} onChange={(event) => setNewsOriginal((current) => ({ ...current, body: event.target.value }))} /></label>
+            <label className="news-images-field"><span><ImagePlus size={16} />{copy.newsImages}</span><input type="file" accept="image/png,image/jpeg,image/webp" multiple disabled={newsImagePaths.length + newsImageFiles.length >= 4} onChange={(event) => { selectNewsImages(event.target.files); event.target.value = '' }} /></label>
+            {(newsImagePaths.length > 0 || newsImageFiles.length > 0) && <div className="news-image-selection">
+              {newsImagePaths.map((path, index) => <div key={path}><img src={getBoardNewsImageUrl(path)} alt={`${newsOriginal.title} ${index + 1}`} /><button type="button" title={copy.delete} onClick={() => setNewsImagePaths((current) => current.filter((item) => item !== path))}><X size={14} /></button></div>)}
+              {newsImageFiles.map((file, index) => <div className="news-image-pending" key={`${file.name}-${file.lastModified}-${index}`}><ImagePlus size={22} /><span>{file.name}</span><button type="button" title={copy.delete} onClick={() => setNewsImageFiles((current) => current.filter((_, itemIndex) => itemIndex !== index))}><X size={14} /></button></div>)}
+            </div>}
             <label>{copy.priority}<select name="priority" defaultValue={editingNews?.priority ?? 'standard'}><option value="standard">{copy.standard}</option><option value="important">{copy.important}</option><option value="critical">{copy.critical}</option></select></label>
             <label>{copy.expiresOn}<input name="expiresAt" type="datetime-local" defaultValue={toDateTimeInput(editingNews?.expires_at ?? null)} /></label>
             <label className="check-field"><input name="published" type="checkbox" defaultChecked={editingNews?.published ?? true} />{copy.publishNow}</label>
