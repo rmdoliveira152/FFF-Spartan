@@ -65,6 +65,28 @@ type NotificationCopy = {
   emailPreferences: string; notifyPollEmails: string; notifyNewsEmails: string
 }
 
+type ExportCopy = { exportStatistics: string; exportFailed: string; rosterSheet: string }
+
+const exportCopy: Record<Language, ExportCopy> = {
+  en:{exportStatistics:'Export Statistics',exportFailed:'Unable to export roster statistics.',rosterSheet:'Roster'},
+  pt:{exportStatistics:'Exportar Estatísticas',exportFailed:'Não foi possível exportar as estatísticas dos membros.',rosterSheet:'Membros'},
+  es:{exportStatistics:'Exportar estadísticas',exportFailed:'No se pudieron exportar las estadísticas de los miembros.',rosterSheet:'Miembros'},
+  fr:{exportStatistics:'Exporter les statistiques',exportFailed:'Impossible d’exporter les statistiques des membres.',rosterSheet:'Membres'},
+  de:{exportStatistics:'Statistiken exportieren',exportFailed:'Die Mitgliederstatistiken konnten nicht exportiert werden.',rosterSheet:'Mitglieder'},
+  it:{exportStatistics:'Esporta statistiche',exportFailed:'Impossibile esportare le statistiche dei membri.',rosterSheet:'Membri'},
+  pl:{exportStatistics:'Eksportuj statystyki',exportFailed:'Nie udało się wyeksportować statystyk członków.',rosterSheet:'Członkowie'},
+  ru:{exportStatistics:'Экспорт статистики',exportFailed:'Не удалось экспортировать статистику участников.',rosterSheet:'Участники'},
+  tr:{exportStatistics:'İstatistikleri dışa aktar',exportFailed:'Üye istatistikleri dışa aktarılamadı.',rosterSheet:'Üyeler'},
+  id:{exportStatistics:'Ekspor statistik',exportFailed:'Statistik anggota tidak dapat diekspor.',rosterSheet:'Anggota'},
+  vi:{exportStatistics:'Xuất thống kê',exportFailed:'Không thể xuất thống kê thành viên.',rosterSheet:'Thành viên'},
+  th:{exportStatistics:'ส่งออกสถิติ',exportFailed:'ไม่สามารถส่งออกสถิติสมาชิกได้',rosterSheet:'สมาชิก'},
+  ja:{exportStatistics:'統計をエクスポート',exportFailed:'メンバー統計をエクスポートできませんでした。',rosterSheet:'メンバー'},
+  ko:{exportStatistics:'통계 내보내기',exportFailed:'회원 통계를 내보낼 수 없습니다.',rosterSheet:'회원'},
+  ar:{exportStatistics:'تصدير الإحصاءات',exportFailed:'تعذر تصدير إحصاءات الأعضاء.',rosterSheet:'الأعضاء'},
+  'zh-CN':{exportStatistics:'导出统计',exportFailed:'无法导出成员统计。',rosterSheet:'成员'},
+  'zh-TW':{exportStatistics:'匯出統計',exportFailed:'無法匯出成員統計。',rosterSheet:'成員'},
+}
+
 type PerformanceCopy = {
   performanceHistory: string; recordPerformance: string; lastUpdate: string; neverUpdated: string
   snapshotDate: string; formation: string; saveSnapshot: string; performanceSaved: string
@@ -93,7 +115,7 @@ const allianceCodeCopy: Record<Language, AllianceCodeCopy> = {
   'zh-TW':{ codeLabel:'聯盟標準',codeTitle:'行動準則',codePlayers:'其他玩家',codeAdmins:'R4 · 管理',codeCourtesy:'友善並有禮貌地對待其他玩家。' },
 }
 
-export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy & DynamicTranslationCopy & MemberAccessCopy & NotificationCopy & PerformanceCopy & AllianceCodeCopy & EventGuideCopy & { codeAgreement: string }
+export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy & DynamicTranslationCopy & MemberAccessCopy & NotificationCopy & ExportCopy & PerformanceCopy & AllianceCodeCopy & EventGuideCopy & { codeAgreement: string }
 
 const en: BaseCopy = {
   navHome: 'Command', navRanks: 'Roster', navPolls: 'Polls', navR4: 'R4 application', navRules: 'Code', admin: 'Admin',
@@ -623,5 +645,5 @@ const automaticTranslationHint: Record<Language, string> = {
 
 export function getCopy(language: Language): Copy {
   const base = language === 'pt' ? pt : language === 'en' ? en : { ...en, ...translated[language] }
-  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...notificationCopy[language], ...performanceEnglish, ...performanceCopy[language], ...dailyPerformanceCopy[language], ...allianceCodeCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language], codeAgreement: codeAgreementCopy[language] }
+  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...notificationCopy[language], ...exportCopy[language], ...performanceEnglish, ...performanceCopy[language], ...dailyPerformanceCopy[language], ...allianceCodeCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language], codeAgreement: codeAgreementCopy[language] }
 }

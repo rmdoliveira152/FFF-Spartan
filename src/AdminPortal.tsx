@@ -537,13 +537,29 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
         pageStart += pageSize
       }
 
-      const headerStyle = { fontWeight: 'bold' as const, backgroundColor: '#ed3833', textColor: '#ffffff' }
+      const headerStyle = {
+        fontWeight: 'bold' as const,
+        backgroundColor: '#0055A4',
+        textColor: '#ffffff',
+        bottomBorderColor: '#EF4135',
+        bottomBorderStyle: 'thick' as const,
+        align: 'center' as const,
+        alignVertical: 'center' as const,
+        height: 30,
+        wrap: true,
+      }
       const sheetData = [
-        [copy.memberName, copy.rank, copy.playerLevel, 'PC', copy.kills, copy.weeklyContribution, ...[1, 2, 3, 4].map((number) => `${copy.formation} ${number} · ${copy.combatPower}`)]
+        [copy.memberName, copy.rank, copy.playerLevel, copy.combatPower, copy.kills, copy.weeklyContribution, ...[1, 2, 3, 4].map((number) => `${copy.formation} ${number} · ${copy.combatPower}`)]
           .map((value) => ({ value, ...headerStyle })),
-        ...adminMembers.map((member) => {
+        ...adminMembers.map((member, memberIndex) => {
           const formations = latestFormations.get(member.id)
-          return [
+          const rowStyle = {
+            backgroundColor: memberIndex % 2 === 0 ? '#ffffff' : '#F1F5F9',
+            textColor: '#1F2937',
+            alignVertical: 'center' as const,
+            height: 22,
+          }
+          return ([
             member.member_name,
             member.rank,
             member.player_level,
@@ -551,17 +567,21 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
             member.kills,
             member.weekly_contribution,
             ...[1, 2, 3, 4].map((number) => formations?.get(number) ?? null),
-          ]
+          ] as const).map((value, columnIndex) => ({
+            value: value ?? undefined,
+            ...rowStyle,
+            align: columnIndex === 0 ? 'left' as const : 'right' as const,
+          }))
         }),
       ]
       const { default: writeXlsxFile } = await import('write-excel-file/browser')
       await writeXlsxFile(sheetData, {
-        sheet: 'Roster',
+        sheet: copy.rosterSheet,
         stickyRowsCount: 1,
         columns: [{ width: 24 }, { width: 8 }, { width: 12 }, { width: 16 }, { width: 16 }, { width: 20 }, ...[1, 2, 3, 4].map(() => ({ width: 23 }))],
       }).toFile(`FFF-Spartan-roster-${todayUtc()}.xlsx`)
     } catch (exportError) {
-      setError(exportError instanceof Error ? exportError.message : 'Unable to export roster statistics.')
+      setError(exportError instanceof Error ? exportError.message : copy.exportFailed)
     } finally {
       setBusy(false)
     }
@@ -712,7 +732,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
           </div>
         </section>
 
-        <section className="admin-block" id="admin-roster"><div className="admin-block-heading"><h3>{copy.manageRoster}</h3><button className="compact-button" type="button" disabled={busy} onClick={() => void exportRosterStatistics()} aria-label="Export XLSX"><FileSpreadsheet size={16} />XLSX</button></div>
+        <section className="admin-block" id="admin-roster"><div className="admin-block-heading"><h3>{copy.manageRoster}</h3><button className="compact-button" type="button" disabled={busy} onClick={() => void exportRosterStatistics()}><FileSpreadsheet size={16} />{copy.exportStatistics}</button></div>
           {performanceMember && <form className="performance-entry-form" key={`${performanceMember.id}:${performanceDefaults?.recorded_at ?? 'new'}`} onSubmit={savePerformance}>
             <div className="performance-entry-heading"><div><small>{copy.recordPerformance}</small><strong>{performanceMember.member_name}</strong></div><button className="icon-button" type="button" title={copy.close} onClick={() => setPerformanceMember(null)}><X size={15} /></button></div>
             <p>{copy.sundayRecommended}</p>
