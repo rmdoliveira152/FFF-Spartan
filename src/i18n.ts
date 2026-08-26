@@ -541,6 +541,26 @@ const performancePortuguese: PerformanceCopy = {
   myStatistics:'As minhas estatísticas',selfPerformanceHint:'Atualize as suas estatísticas da semana atual ou anterior.',currentWeek:'Semana atual',previousWeek:'Semana anterior',viewEvolution:'Ver evolução',
 }
 
+const dailyPerformanceCopy: Record<Language, Partial<PerformanceCopy>> = {
+  en:{recordPerformance:'Record daily performance',saveSnapshot:'Save daily snapshot',performanceSaved:'Daily performance saved.',sundayRecommended:'One snapshot per day; saving again updates that day.',selfPerformanceHint:'Update your statistics for today or yesterday.',currentWeek:'Today',previousWeek:'Yesterday'},
+  pt:{recordPerformance:'Registar desempenho diário',saveSnapshot:'Guardar registo diário',performanceSaved:'Desempenho diário guardado.',sundayRecommended:'Um registo por dia; guardar novamente atualiza esse dia.',selfPerformanceHint:'Atualize as suas estatísticas de hoje ou de ontem.',currentWeek:'Hoje',previousWeek:'Ontem'},
+  es:{recordPerformance:'Registrar rendimiento diario',saveSnapshot:'Guardar registro diario',performanceSaved:'Rendimiento diario guardado.',sundayRecommended:'Un registro por día; guardar de nuevo actualiza ese día.',selfPerformanceHint:'Actualiza tus estadísticas de hoy o ayer.',currentWeek:'Hoy',previousWeek:'Ayer'},
+  fr:{recordPerformance:'Enregistrer la performance quotidienne',saveSnapshot:'Enregistrer le relevé quotidien',performanceSaved:'Performance quotidienne enregistrée.',sundayRecommended:'Un relevé par jour ; un nouvel enregistrement met ce jour à jour.',selfPerformanceHint:'Mettez à jour vos statistiques d’aujourd’hui ou d’hier.',currentWeek:'Aujourd’hui',previousWeek:'Hier'},
+  de:{recordPerformance:'Tägliche Leistung erfassen',saveSnapshot:'Tagesstand speichern',performanceSaved:'Tagesleistung gespeichert.',sundayRecommended:'Ein Stand pro Tag; erneutes Speichern aktualisiert diesen Tag.',selfPerformanceHint:'Aktualisiere deine Statistiken für heute oder gestern.',currentWeek:'Heute',previousWeek:'Gestern'},
+  it:{recordPerformance:'Registra prestazione giornaliera',saveSnapshot:'Salva rilevazione giornaliera',performanceSaved:'Prestazione giornaliera salvata.',sundayRecommended:'Una rilevazione al giorno; un nuovo salvataggio aggiorna quel giorno.',selfPerformanceHint:'Aggiorna le statistiche di oggi o ieri.',currentWeek:'Oggi',previousWeek:'Ieri'},
+  pl:{recordPerformance:'Zapisz dzienny wynik',saveSnapshot:'Zapisz dzienny stan',performanceSaved:'Dzienny wynik zapisany.',sundayRecommended:'Jeden zapis dziennie; ponowny zapis aktualizuje ten dzień.',selfPerformanceHint:'Zaktualizuj statystyki z dzisiaj lub wczoraj.',currentWeek:'Dzisiaj',previousWeek:'Wczoraj'},
+  ru:{recordPerformance:'Записать дневные показатели',saveSnapshot:'Сохранить дневную запись',performanceSaved:'Дневные показатели сохранены.',sundayRecommended:'Одна запись в день; повторное сохранение обновляет этот день.',selfPerformanceHint:'Обновите статистику за сегодня или вчера.',currentWeek:'Сегодня',previousWeek:'Вчера'},
+  tr:{recordPerformance:'Günlük performansı kaydet',saveSnapshot:'Günlük kaydı kaydet',performanceSaved:'Günlük performans kaydedildi.',sundayRecommended:'Günde bir kayıt; tekrar kaydetmek o günü günceller.',selfPerformanceHint:'Bugünün veya dünün istatistiklerini güncelleyin.',currentWeek:'Bugün',previousWeek:'Dün'},
+  id:{recordPerformance:'Catat performa harian',saveSnapshot:'Simpan catatan harian',performanceSaved:'Performa harian disimpan.',sundayRecommended:'Satu catatan per hari; menyimpan lagi akan memperbarui hari tersebut.',selfPerformanceHint:'Perbarui statistik hari ini atau kemarin.',currentWeek:'Hari ini',previousWeek:'Kemarin'},
+  vi:{recordPerformance:'Ghi hiệu suất hằng ngày',saveSnapshot:'Lưu bản ghi hằng ngày',performanceSaved:'Đã lưu hiệu suất hằng ngày.',sundayRecommended:'Mỗi ngày một bản ghi; lưu lại sẽ cập nhật ngày đó.',selfPerformanceHint:'Cập nhật thống kê hôm nay hoặc hôm qua.',currentWeek:'Hôm nay',previousWeek:'Hôm qua'},
+  th:{recordPerformance:'บันทึกผลงานรายวัน',saveSnapshot:'บันทึกข้อมูลรายวัน',performanceSaved:'บันทึกผลงานรายวันแล้ว',sundayRecommended:'หนึ่งรายการต่อวัน การบันทึกซ้ำจะอัปเดตวันนั้น',selfPerformanceHint:'อัปเดตสถิติของวันนี้หรือเมื่อวาน',currentWeek:'วันนี้',previousWeek:'เมื่อวาน'},
+  ja:{recordPerformance:'日次戦績を記録',saveSnapshot:'日次記録を保存',performanceSaved:'日次戦績を保存しました。',sundayRecommended:'1日1件の記録です。再保存するとその日の記録が更新されます。',selfPerformanceHint:'今日または昨日の戦績を更新できます。',currentWeek:'今日',previousWeek:'昨日'},
+  ko:{recordPerformance:'일일 성과 기록',saveSnapshot:'일일 기록 저장',performanceSaved:'일일 성과를 저장했습니다.',sundayRecommended:'하루에 한 건만 기록되며 다시 저장하면 해당 날짜가 업데이트됩니다.',selfPerformanceHint:'오늘 또는 어제의 통계를 업데이트하세요.',currentWeek:'오늘',previousWeek:'어제'},
+  ar:{recordPerformance:'تسجيل الأداء اليومي',saveSnapshot:'حفظ السجل اليومي',performanceSaved:'تم حفظ الأداء اليومي.',sundayRecommended:'سجل واحد يوميًا؛ الحفظ مرة أخرى يحدّث ذلك اليوم.',selfPerformanceHint:'حدّث إحصاءات اليوم أو الأمس.',currentWeek:'اليوم',previousWeek:'الأمس'},
+  'zh-CN':{recordPerformance:'记录每日表现',saveSnapshot:'保存每日记录',performanceSaved:'每日表现已保存。',sundayRecommended:'每天一条记录；再次保存会更新当天记录。',selfPerformanceHint:'更新今天或昨天的统计数据。',currentWeek:'今天',previousWeek:'昨天'},
+  'zh-TW':{recordPerformance:'記錄每日表現',saveSnapshot:'儲存每日記錄',performanceSaved:'每日表現已儲存。',sundayRecommended:'每天一筆記錄；再次儲存會更新當天記錄。',selfPerformanceHint:'更新今天或昨天的統計資料。',currentWeek:'今天',previousWeek:'昨天'},
+}
+
 const performanceCopy: Record<Language, Partial<PerformanceCopy>> = {
   en:performanceEnglish,
   pt:performancePortuguese,
@@ -603,5 +623,5 @@ const automaticTranslationHint: Record<Language, string> = {
 
 export function getCopy(language: Language): Copy {
   const base = language === 'pt' ? pt : language === 'en' ? en : { ...en, ...translated[language] }
-  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...notificationCopy[language], ...performanceEnglish, ...performanceCopy[language], ...allianceCodeCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language], codeAgreement: codeAgreementCopy[language] }
+  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...notificationCopy[language], ...performanceEnglish, ...performanceCopy[language], ...dailyPerformanceCopy[language], ...allianceCodeCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language], codeAgreement: codeAgreementCopy[language] }
 }

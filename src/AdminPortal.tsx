@@ -1,6 +1,6 @@
 import { useEffect, useEffectEvent, useState, type FormEvent } from 'react'
 import type { User } from '@supabase/supabase-js'
-import { Activity, Archive, Check, ClipboardList, ImagePlus, LogOut, Megaphone, Pencil, Plus, RotateCcw, Search, Shield, Trash2, Users, Vote, X } from 'lucide-react'
+import { Activity, Archive, Check, ClipboardList, FileSpreadsheet, ImagePlus, LogOut, Megaphone, Pencil, Plus, RotateCcw, Search, Shield, Trash2, Users, Vote, X } from 'lucide-react'
 import { type Copy, type Language } from './i18n'
 import { getBoardNewsImageUrl, supabase, type AllianceMember, type AvailableMember, type BoardNews, type BoardNewsTranslation, type MemberPerformanceSnapshot, type PortalPoll, type Profile, type R4Application } from './supabase'
 
@@ -48,28 +48,14 @@ const toDateTimeInput = (value: string | null) => {
   return new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16)
 }
 
-const toDateInput = (date: Date) => {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
-
-const latestSunday = () => {
+const todayUtc = () => {
   const date = new Date()
-  date.setDate(date.getDate() - date.getDay())
-  return toDateInput(date)
-}
-
-const latestSundayUtc = () => {
-  const date = new Date()
-  date.setUTCDate(date.getUTCDate() - date.getUTCDay())
   return date.toISOString().slice(0, 10)
 }
 
-const previousSundayUtc = () => {
-  const date = new Date(`${latestSundayUtc()}T12:00:00Z`)
-  date.setUTCDate(date.getUTCDate() - 7)
+const yesterdayUtc = () => {
+  const date = new Date(`${todayUtc()}T12:00:00Z`)
+  date.setUTCDate(date.getUTCDate() - 1)
   return date.toISOString().slice(0, 10)
 }
 
@@ -86,7 +72,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
   const [performanceDefaults, setPerformanceDefaults] = useState<MemberPerformanceSnapshot | null>(null)
   const [ownPerformanceHistory, setOwnPerformanceHistory] = useState<MemberPerformanceSnapshot[]>([])
   const [ownPerformanceLoadedFor, setOwnPerformanceLoadedFor] = useState<string | null>(null)
-  const [ownSnapshotDate, setOwnSnapshotDate] = useState(latestSundayUtc)
+  const [ownSnapshotDate, setOwnSnapshotDate] = useState(todayUtc)
   const [editingNews, setEditingNews] = useState<BoardNews | null>(null)
   const [newsItems, setNewsItems] = useState<BoardNews[]>([])
   const [newsOriginal, setNewsOriginal] = useState<BoardNewsTranslation>(emptyNewsTranslation)
@@ -526,6 +512,61 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     setBusy(false)
   }
 
+  const exportRosterStatistics = async () => {
+    if (!supabase) return
+    setBusy(true)
+    setError('')
+    try {
+      const latestFormations = new Map<string, Map<number, number>>()
+      const pageSize = 1000
+      let pageStart = 0
+      while (latestFormations.size < adminMembers.length) {
+        const { data, error: snapshotsError } = await supabase
+          .from('member_performance_snapshots')
+          .select('member_id, snapshot_date, member_formation_powers(formation_number, combat_power)')
+          .order('snapshot_date', { ascending: false })
+          .range(pageStart, pageStart + pageSize - 1)
+        if (snapshotsError) throw snapshotsError
+        for (const snapshot of data ?? []) {
+          if (latestFormations.has(snapshot.member_id)) continue
+          latestFormations.set(snapshot.member_id, new Map(
+            snapshot.member_formation_powers.map((formation) => [formation.formation_number, formation.combat_power]),
+          ))
+        }
+        if (!data || data.length < pageSize) break
+        pageStart += pageSize
+      }
+
+      const headerStyle = { fontWeight: 'bold' as const, backgroundColor: '#ed3833', textColor: '#ffffff' }
+      const sheetData = [
+        [copy.memberName, copy.rank, copy.playerLevel, 'PC', copy.kills, copy.weeklyContribution, ...[1, 2, 3, 4].map((number) => `${copy.formation} ${number} · ${copy.combatPower}`)]
+          .map((value) => ({ value, ...headerStyle })),
+        ...adminMembers.map((member) => {
+          const formations = latestFormations.get(member.id)
+          return [
+            member.member_name,
+            member.rank,
+            member.player_level,
+            member.combat_power,
+            member.kills,
+            member.weekly_contribution,
+            ...[1, 2, 3, 4].map((number) => formations?.get(number) ?? null),
+          ]
+        }),
+      ]
+      const { default: writeXlsxFile } = await import('write-excel-file/browser')
+      await writeXlsxFile(sheetData, {
+        sheet: 'Roster',
+        stickyRowsCount: 1,
+        columns: [{ width: 24 }, { width: 8 }, { width: 12 }, { width: 16 }, { width: 16 }, { width: 20 }, ...[1, 2, 3, 4].map(() => ({ width: 23 }))],
+      }).toFile(`FFF-Spartan-roster-${todayUtc()}.xlsx`)
+    } catch (exportError) {
+      setError(exportError instanceof Error ? exportError.message : 'Unable to export roster statistics.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const deleteMember = async (member: AllianceMember) => {
     if (!supabase || !window.confirm(copy.confirmDelete)) return
     setError('')
@@ -574,7 +615,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
         {profile?.active && profile.registration_status === 'approved' && ownMember && ownPerformanceLoadedFor === ownMember.id && <form className="performance-entry-form own-performance-form" key={`${ownMember.id}:${ownSnapshotDate}:${ownPerformanceDefaults?.recorded_at ?? 'new'}`} onSubmit={saveOwnPerformance}>
           <div className="performance-entry-heading"><div><small>{copy.myStatistics}</small><strong>{ownMember.member_name}</strong></div><Activity size={20} /></div>
           <p>{copy.selfPerformanceHint}</p>
-          <label>{copy.snapshotDate}<select name="snapshotDate" value={ownSnapshotDate} onChange={(event) => setOwnSnapshotDate(event.target.value)}><option value={latestSundayUtc()}>{copy.currentWeek} · {latestSundayUtc()}</option><option value={previousSundayUtc()}>{copy.previousWeek} · {previousSundayUtc()}</option></select></label>
+          <label>{copy.snapshotDate}<select name="snapshotDate" value={ownSnapshotDate} onChange={(event) => setOwnSnapshotDate(event.target.value)}><option value={todayUtc()}>{copy.currentWeek} · {todayUtc()}</option><option value={yesterdayUtc()}>{copy.previousWeek} · {yesterdayUtc()}</option></select></label>
           <label>{copy.combatPower}<input name="combatPower" type="number" required min={0} max={maximumSafeInteger} defaultValue={ownMember.combat_power} /></label>
           <label>{copy.kills}<input name="kills" type="number" required min={0} max={maximumSafeInteger} defaultValue={ownMember.kills} /></label>
           <label>{copy.weeklyContribution}<input name="weeklyContribution" type="number" required min={0} max={maximumSafeInteger} defaultValue={ownMember.weekly_contribution} /></label>
@@ -671,11 +712,11 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
           </div>
         </section>
 
-        <section className="admin-block" id="admin-roster"><h3>{copy.manageRoster}</h3>
+        <section className="admin-block" id="admin-roster"><div className="admin-block-heading"><h3>{copy.manageRoster}</h3><button className="compact-button" type="button" disabled={busy} onClick={() => void exportRosterStatistics()} aria-label="Export XLSX"><FileSpreadsheet size={16} />XLSX</button></div>
           {performanceMember && <form className="performance-entry-form" key={`${performanceMember.id}:${performanceDefaults?.recorded_at ?? 'new'}`} onSubmit={savePerformance}>
             <div className="performance-entry-heading"><div><small>{copy.recordPerformance}</small><strong>{performanceMember.member_name}</strong></div><button className="icon-button" type="button" title={copy.close} onClick={() => setPerformanceMember(null)}><X size={15} /></button></div>
             <p>{copy.sundayRecommended}</p>
-            <label>{copy.snapshotDate}<input name="snapshotDate" type="date" required max={toDateInput(new Date())} defaultValue={latestSunday()} /></label>
+            <label>{copy.snapshotDate}<input name="snapshotDate" type="date" required max={todayUtc()} defaultValue={todayUtc()} /></label>
             <label>{copy.combatPower}<input name="combatPower" type="number" required min={0} defaultValue={performanceMember.combat_power} /></label>
             <label>{copy.kills}<input name="kills" type="number" required min={0} defaultValue={performanceMember.kills} /></label>
             <label>{copy.weeklyContribution}<input name="weeklyContribution" type="number" required min={0} defaultValue={performanceMember.weekly_contribution} /></label>

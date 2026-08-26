@@ -244,6 +244,8 @@ footer img { width:110px; opacity:.65; }
 .admin-section-nav svg { flex:0 0 auto; color:var(--red); }
 .admin-block { padding:22px; border:1px solid var(--line); background:#111614; scroll-margin-top:72px; }
 .admin-block h3 { display:flex; align-items:center; gap:8px; margin:0 0 18px; color:#fff; font:700 1.25rem/1 'Barlow Condensed',sans-serif; text-transform:uppercase; }
+.admin-block-heading { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:18px; }
+.admin-block-heading h3 { margin:0; }
 .admin-form { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
 .admin-form label { display:grid; gap:7px; color:#b7bdb7; font-size:.75rem; font-weight:700; text-transform:uppercase; }
 .admin-form label:nth-child(2) { grid-row:span 2; }
