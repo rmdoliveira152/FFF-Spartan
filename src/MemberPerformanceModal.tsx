@@ -82,6 +82,7 @@ export function MemberPerformanceModal({ member, copy, language, canView, onClos
                 <XAxis dataKey="date" stroke="#879088" fontSize={11} />
                 <YAxis stroke="#879088" fontSize={11} tickFormatter={compactPower} width={58} />
                 <Tooltip formatter={(value) => Number(value).toLocaleString(language)} contentStyle={{ background: '#171d1b', border: '1px solid #3a4540' }} />
+                <Legend />
                 <Line type="monotone" dataKey="combat_power" name={copy.combatPower} stroke="#ed3833" strokeWidth={3} dot={{ r: 3 }} />
               </LineChart>
             </ResponsiveContainer>
