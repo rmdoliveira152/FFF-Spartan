@@ -207,6 +207,27 @@
 .roster-admin-filters { display:grid; grid-template-columns:minmax(180px,1fr) repeat(3,auto); gap:8px; align-items:center; }
 .roster-admin-filters select { min-height:40px; border:1px solid var(--line); background:#151b18; color:#fff; padding:0 10px; }
 .audit-list article { gap:7px; }
+.audit-card { min-width:0; border:1px solid var(--line); background:#171d1b; }
+.audit-card summary { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:16px; cursor:pointer; list-style:none; }
+.audit-card summary::-webkit-details-marker { display:none; }
+.audit-card summary > span:first-child { min-width:0; display:grid; gap:7px; }
+.audit-card summary strong { overflow-wrap:anywhere; }
+.audit-card summary small { color:var(--muted); }
+.audit-card-meta { min-width:0; display:flex; align-items:center; justify-content:flex-end; gap:8px; text-align:right; }
+.audit-card-meta small { overflow-wrap:anywhere; }
+.audit-card-meta svg { flex:0 0 auto; transition:transform .2s ease; }
+.audit-card[open] .audit-card-meta svg { transform:rotate(180deg); }
+.audit-summary-popover { position:relative; display:grid; gap:12px; margin:0 12px 12px; padding:14px; border:1px solid #4b554f; background:#202824; box-shadow:0 12px 28px rgba(0,0,0,.28); }
+.audit-summary-popover::before { position:absolute; top:-7px; left:24px; width:12px; height:12px; border-top:1px solid #4b554f; border-left:1px solid #4b554f; background:#202824; content:''; transform:rotate(45deg); }
+.audit-summary-popover > strong { font-size:.78rem; text-transform:uppercase; }
+.audit-summary-popover ul { display:grid; gap:8px; margin:0; padding:0; list-style:none; }
+.audit-summary-popover li { display:grid; grid-template-columns:minmax(110px,.7fr) minmax(0,1.3fr); gap:12px; padding-top:8px; border-top:1px solid var(--line); font-size:.82rem; }
+.audit-summary-popover li b { color:#cbd0cb; }
+.audit-summary-popover li span { min-width:0; color:var(--muted); overflow-wrap:anywhere; }
+.audit-summary-popover p { margin:0; color:var(--muted); }
+.audit-summary-popover .compact-button { justify-self:start; }
+.audit-pagination { display:flex; align-items:center; justify-content:center; margin-top:14px; }
+.audit-pagination small { color:var(--muted); text-align:center; text-transform:uppercase; }
 button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible { outline:2px solid #f1b84b; outline-offset:2px; }
 @media (max-width:700px) { .performance-indicators { grid-template-columns:1fr; } .roster-admin-filters { grid-template-columns:1fr 1fr; } .roster-admin-search { grid-column:1 / -1; } }
 .performance-empty,.performance-gate { padding:40px 20px; color:var(--muted); border:1px solid var(--line); text-align:center; }
@@ -417,6 +438,9 @@ footer img { width:110px; opacity:.65; }
   .admin-block { padding:18px 14px; }
   .admin-block-heading { align-items:stretch; flex-direction:column; }
   .admin-block-heading .compact-button { align-self:stretch; min-width:0; min-height:42px; padding:8px 10px; white-space:normal; }
+  .audit-card summary { align-items:stretch; flex-direction:column; }
+  .audit-card-meta { justify-content:space-between; text-align:left; }
+  .audit-summary-popover li { grid-template-columns:1fr; gap:3px; }
   .roster-admin-filters { grid-template-columns:1fr; }
   .roster-admin-search { grid-column:auto; }
   .brand > span:last-child { font-size:1rem; }

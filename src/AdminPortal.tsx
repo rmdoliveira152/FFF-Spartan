@@ -6,6 +6,7 @@ import { getBoardNewsImageUrl, supabase, type AdminAuditEvent, type AdminMemberL
 import { LocalizedIntegerInput } from './LocalizedIntegerInput'
 import { parseLocalizedInteger } from './localizedInteger'
 import { useDialogFocus } from './useDialogFocus'
+import { AuditEventCard } from './AuditEventCard'
 
 type Props = {
   open: boolean
@@ -70,6 +71,8 @@ const yesterdayUtc = () => {
 }
 
 const maximumSafeInteger = Number.MAX_SAFE_INTEGER
+const auditBatchSize = 20
+const auditDisplayLimit = 100
 
 export function AdminPortal({ open, copy, language, user, profile, availableMembers, members: initialMembers, onClose, onSignIn, onSignUp, onRequestPasswordReset, onUpdatePassword, onUpdateEmailPreferences, passwordRecovery, onSignOut, onRefreshPolls, onRefreshBoardNews, onRefreshMembers, onRefreshAvailableMembers }: Props) {
   const [error, setError] = useState('')
@@ -96,6 +99,8 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
   const [memberLogins, setMemberLogins] = useState<AdminMemberLogin[]>([])
   const [indicators, setIndicators] = useState<PerformanceIndicator[]>([])
   const [auditEvents, setAuditEvents] = useState<AdminAuditEvent[]>([])
+  const [auditHasMore, setAuditHasMore] = useState(false)
+  const [auditLoadingMore, setAuditLoadingMore] = useState(false)
   const [memberQuery, setMemberQuery] = useState('')
   const [memberRank, setMemberRank] = useState('ALL')
   const [memberStatus, setMemberStatus] = useState('ALL')
@@ -140,7 +145,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
       client.from('alliance_members').select('id, member_name, rank, player_level, combat_power, kills, weekly_contribution, active, performance_updated_at').order('member_name'),
       client.rpc('admin_member_last_logins'),
       client.rpc('admin_performance_indicators'),
-      client.from('admin_audit_events').select('id, actor_id, action, resource_kind, resource_id, changes, created_at').order('created_at', { ascending: false }).limit(100),
+      client.from('admin_audit_events').select('id, actor_id, action, resource_kind, resource_id, changes, created_at').order('id', { ascending: false }).limit(auditBatchSize),
     ])
     if (pollResponse.error) throw pollResponse.error
     if (newsResponse.error) throw newsResponse.error
@@ -173,7 +178,30 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     setAdminMembers((memberResponse.data ?? []) as AllianceMember[])
     setMemberLogins((loginResponse.data ?? []) as AdminMemberLogin[])
     setIndicators((indicatorResponse.data ?? []) as PerformanceIndicator[])
-    setAuditEvents((auditResponse.data ?? []) as AdminAuditEvent[])
+    const initialAuditEvents = (auditResponse.data ?? []) as AdminAuditEvent[]
+    setAuditEvents(initialAuditEvents)
+    setAuditHasMore(initialAuditEvents.length === auditBatchSize)
+  }
+
+  const loadMoreAuditEvents = async () => {
+    const client = supabase
+    const oldestId = auditEvents.at(-1)?.id
+    const remaining = auditDisplayLimit - auditEvents.length
+    if (!client || !oldestId || remaining <= 0 || auditLoadingMore) return
+    setAuditLoadingMore(true)
+    const requested = Math.min(auditBatchSize, remaining)
+    const { data, error: auditError } = await client.from('admin_audit_events')
+      .select('id, actor_id, action, resource_kind, resource_id, changes, created_at')
+      .lt('id', oldestId)
+      .order('id', { ascending: false })
+      .limit(requested)
+    if (auditError) setError(auditError.message)
+    else {
+      const nextEvents = (data ?? []) as AdminAuditEvent[]
+      setAuditEvents((current) => [...current, ...nextEvents])
+      setAuditHasMore(nextEvents.length === requested && auditEvents.length + nextEvents.length < auditDisplayLimit)
+    }
+    setAuditLoadingMore(false)
   }
 
   const loadAdminDataEvent = useEffectEvent(loadAdminData)
@@ -870,7 +898,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
           <div className="roster-admin-filters"><label className="roster-admin-search"><Search size={17} /><input type="search" value={memberQuery} onChange={(event) => setMemberQuery(event.target.value)} placeholder={copy.search} /></label><select aria-label={copy.rank} value={memberRank} onChange={(event) => setMemberRank(event.target.value)}><option value="ALL">{copy.rank}</option>{['R1','R2','R3','R4','R5'].map((rank) => <option key={rank}>{rank}</option>)}</select><select aria-label={copy.active} value={memberStatus} onChange={(event) => setMemberStatus(event.target.value)}><option value="ALL">{copy.rosterAll}</option><option value="active">{copy.rosterActive}</option><option value="inactive">{copy.rosterInactive}</option></select><select aria-label={copy.lastUpdate} value={memberFreshness} onChange={(event) => setMemberFreshness(event.target.value)}><option value="ALL">{copy.lastUpdate}</option><option value="fresh">≤ 14d</option><option value="stale">&gt; 14d</option></select></div>
           <div className="member-access-list roster-admin-list">{filteredAdminMembers.map((member) => { const login = memberLoginById.get(member.id); return <div key={member.id}><span><strong>{member.member_name}</strong><small>{member.rank} · Lv. {member.player_level} · {member.combat_power.toLocaleString()} · {member.active ? copy.active : copy.deactivate}</small><small>{copy.lastUpdate}: {member.performance_updated_at ? new Intl.DateTimeFormat(language, { dateStyle: 'medium' }).format(new Date(member.performance_updated_at)) : copy.neverUpdated}</small><small>{copy.lastPortalLogin}: {!login?.account_id ? copy.noLinkedAccount : login.last_sign_in_at ? new Intl.DateTimeFormat(language, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(login.last_sign_in_at)) : copy.neverSignedIn}</small></span><span className="row-actions"><button className="icon-button performance-button" type="button" title={copy.recordPerformance} onClick={() => void openPerformanceEditor(member)}><Activity size={15} /></button><button className="icon-button" type="button" title={copy.editMember} onClick={() => setEditingMember(member)}><Pencil size={15} /></button><button className="icon-button danger" type="button" title={copy.delete} onClick={() => deleteMember(member)}><Trash2 size={15} /></button></span></div> })}</div>
         </section>
-        <section className="admin-block" id="admin-audit"><h3><History size={18} />{copy.adminDashboard} · {copy.performanceHistory}</h3><div className="admin-list audit-list">{auditEvents.map((event) => <article key={event.id}><div><strong>{event.resource_kind} · {event.action}</strong><small>{new Intl.DateTimeFormat(language, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(event.created_at))}</small></div><small>{event.actor_id ? profiles.find((item) => item.id === event.actor_id)?.member_name ?? event.actor_id : 'system'}{event.resource_id ? ` · ${event.resource_id}` : ''}</small></article>)}</div></section>
+        <section className="admin-block" id="admin-audit"><h3><History size={18} />{copy.adminDashboard} · {copy.performanceHistory}</h3><div className="admin-list audit-list">{auditEvents.map((event) => <AuditEventCard event={event} actorName={event.actor_id ? `${profiles.find((item) => item.id === event.actor_id)?.member_name ?? event.actor_id}${event.resource_id ? ` · ${event.resource_id}` : ''}` : 'system'} copy={copy} language={language} key={event.id} />)}</div><div className="audit-pagination">{auditHasMore && auditEvents.length < auditDisplayLimit && <button className="compact-button" type="button" disabled={auditLoadingMore} onClick={() => void loadMoreAuditEvents()}>{copy.auditLoadMore}</button>}{auditEvents.length >= auditDisplayLimit && <small>{copy.auditLimitReached}</small>}</div></section>
       </div>}
       {error && profile?.role !== 'admin' && <p className="form-error" role="alert">{error}</p>}
     </section>

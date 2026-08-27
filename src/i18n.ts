@@ -91,6 +91,31 @@ type RosterFilterCopy = { rosterAll: string; rosterActive: string; rosterInactiv
 
 type LoginActivityCopy = { lastPortalLogin: string; neverSignedIn: string; noLinkedAccount: string }
 
+type AuditCopy = {
+  auditSummary: string; auditNoDetails: string; auditEmptyValue: string; auditYes: string; auditNo: string
+  registrationStatus: string; auditLoadMore: string; auditLimitReached: string
+}
+
+const auditCopy: Record<Language, AuditCopy> = {
+  en:{auditSummary:'Change summary',auditNoDetails:'No additional details available.',auditEmptyValue:'None',auditYes:'Yes',auditNo:'No',registrationStatus:'Registration status',auditLoadMore:'Load more',auditLimitReached:'Display limit of 100 events reached.'},
+  pt:{auditSummary:'Resumo da alteração',auditNoDetails:'Sem detalhes adicionais disponíveis.',auditEmptyValue:'Nenhum',auditYes:'Sim',auditNo:'Não',registrationStatus:'Estado do registo',auditLoadMore:'Carregar mais',auditLimitReached:'Limite de exibição de 100 eventos atingido.'},
+  es:{auditSummary:'Resumen del cambio',auditNoDetails:'No hay detalles adicionales disponibles.',auditEmptyValue:'Ninguno',auditYes:'Sí',auditNo:'No',registrationStatus:'Estado del registro',auditLoadMore:'Cargar más',auditLimitReached:'Se alcanzó el límite de 100 eventos.'},
+  fr:{auditSummary:'Résumé de la modification',auditNoDetails:'Aucun détail supplémentaire disponible.',auditEmptyValue:'Aucun',auditYes:'Oui',auditNo:'Non',registrationStatus:'Statut de l’inscription',auditLoadMore:'Charger plus',auditLimitReached:'Limite d’affichage de 100 événements atteinte.'},
+  de:{auditSummary:'Änderungsübersicht',auditNoDetails:'Keine weiteren Details verfügbar.',auditEmptyValue:'Keine',auditYes:'Ja',auditNo:'Nein',registrationStatus:'Registrierungsstatus',auditLoadMore:'Mehr laden',auditLimitReached:'Anzeigelimit von 100 Ereignissen erreicht.'},
+  it:{auditSummary:'Riepilogo della modifica',auditNoDetails:'Nessun dettaglio aggiuntivo disponibile.',auditEmptyValue:'Nessuno',auditYes:'Sì',auditNo:'No',registrationStatus:'Stato registrazione',auditLoadMore:'Carica altro',auditLimitReached:'Raggiunto il limite di 100 eventi.'},
+  pl:{auditSummary:'Podsumowanie zmiany',auditNoDetails:'Brak dodatkowych szczegółów.',auditEmptyValue:'Brak',auditYes:'Tak',auditNo:'Nie',registrationStatus:'Status rejestracji',auditLoadMore:'Wczytaj więcej',auditLimitReached:'Osiągnięto limit wyświetlania 100 zdarzeń.'},
+  ru:{auditSummary:'Сводка изменений',auditNoDetails:'Дополнительные сведения отсутствуют.',auditEmptyValue:'Нет',auditYes:'Да',auditNo:'Нет',registrationStatus:'Статус регистрации',auditLoadMore:'Загрузить ещё',auditLimitReached:'Достигнут лимит отображения: 100 событий.'},
+  tr:{auditSummary:'Değişiklik özeti',auditNoDetails:'Ek ayrıntı yok.',auditEmptyValue:'Yok',auditYes:'Evet',auditNo:'Hayır',registrationStatus:'Kayıt durumu',auditLoadMore:'Daha fazla yükle',auditLimitReached:'100 olay görüntüleme sınırına ulaşıldı.'},
+  id:{auditSummary:'Ringkasan perubahan',auditNoDetails:'Tidak ada detail tambahan.',auditEmptyValue:'Tidak ada',auditYes:'Ya',auditNo:'Tidak',registrationStatus:'Status pendaftaran',auditLoadMore:'Muat lebih banyak',auditLimitReached:'Batas tampilan 100 peristiwa tercapai.'},
+  vi:{auditSummary:'Tóm tắt thay đổi',auditNoDetails:'Không có chi tiết bổ sung.',auditEmptyValue:'Không có',auditYes:'Có',auditNo:'Không',registrationStatus:'Trạng thái đăng ký',auditLoadMore:'Tải thêm',auditLimitReached:'Đã đạt giới hạn hiển thị 100 sự kiện.'},
+  th:{auditSummary:'สรุปการเปลี่ยนแปลง',auditNoDetails:'ไม่มีรายละเอียดเพิ่มเติม',auditEmptyValue:'ไม่มี',auditYes:'ใช่',auditNo:'ไม่',registrationStatus:'สถานะการลงทะเบียน',auditLoadMore:'โหลดเพิ่มเติม',auditLimitReached:'ถึงขีดจำกัดการแสดงผล 100 เหตุการณ์แล้ว'},
+  ja:{auditSummary:'変更の概要',auditNoDetails:'追加の詳細はありません。',auditEmptyValue:'なし',auditYes:'はい',auditNo:'いいえ',registrationStatus:'登録状況',auditLoadMore:'さらに読み込む',auditLimitReached:'100件の表示上限に達しました。'},
+  ko:{auditSummary:'변경 요약',auditNoDetails:'추가 세부 정보가 없습니다.',auditEmptyValue:'없음',auditYes:'예',auditNo:'아니요',registrationStatus:'가입 상태',auditLoadMore:'더 불러오기',auditLimitReached:'이벤트 100개 표시 한도에 도달했습니다.'},
+  ar:{auditSummary:'ملخص التغيير',auditNoDetails:'لا توجد تفاصيل إضافية.',auditEmptyValue:'لا يوجد',auditYes:'نعم',auditNo:'لا',registrationStatus:'حالة التسجيل',auditLoadMore:'تحميل المزيد',auditLimitReached:'تم بلوغ حد عرض 100 حدث.'},
+  'zh-CN':{auditSummary:'更改摘要',auditNoDetails:'没有其他详细信息。',auditEmptyValue:'无',auditYes:'是',auditNo:'否',registrationStatus:'注册状态',auditLoadMore:'加载更多',auditLimitReached:'已达到 100 个事件的显示上限。'},
+  'zh-TW':{auditSummary:'變更摘要',auditNoDetails:'沒有其他詳細資訊。',auditEmptyValue:'無',auditYes:'是',auditNo:'否',registrationStatus:'註冊狀態',auditLoadMore:'載入更多',auditLimitReached:'已達到 100 個事件的顯示上限。'},
+}
+
 const loginActivityCopy: Record<Language, LoginActivityCopy> = {
   en:{lastPortalLogin:'Last portal login',neverSignedIn:'Never signed in',noLinkedAccount:'No linked account'},
   pt:{lastPortalLogin:'Último login no portal',neverSignedIn:'Nunca iniciou sessão',noLinkedAccount:'Sem conta associada'},
@@ -213,7 +238,7 @@ const allianceCodeCopy: Record<Language, AllianceCodeCopy> = {
   'zh-TW':{ codeLabel:'聯盟標準',codeTitle:'行動準則',codePlayers:'其他玩家',codeAdmins:'R4 · 管理',codeCourtesy:'友善並有禮貌地對待其他玩家。' },
 }
 
-export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy & DynamicTranslationCopy & MemberAccessCopy & AuthFeedbackCopy & RosterFilterCopy & LoginActivityCopy & AdminRoleCopy & NotificationCopy & PollAdminCopy & ExportCopy & PerformanceCopy & AllianceCodeCopy & EventGuideCopy & { codeAgreement: string }
+export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy & DynamicTranslationCopy & MemberAccessCopy & AuthFeedbackCopy & RosterFilterCopy & LoginActivityCopy & AuditCopy & AdminRoleCopy & NotificationCopy & PollAdminCopy & ExportCopy & PerformanceCopy & AllianceCodeCopy & EventGuideCopy & { codeAgreement: string }
 
 const en: BaseCopy = {
   navHome: 'Command', navRanks: 'Roster', navPolls: 'Polls', navR4: 'R4 application', navRules: 'Code', admin: 'Admin',
@@ -783,5 +808,5 @@ const automaticTranslationHint: Record<Language, string> = {
 
 export function getCopy(language: Language): Copy {
   const base = language === 'pt' ? pt : language === 'en' ? en : { ...en, ...translated[language] }
-  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...authFeedbackCopy[language], ...rosterFilterCopy[language], ...loginActivityCopy[language], ...adminRoleCopy[language], ...notificationCopy[language], ...pollAdminCopy[language], ...exportCopy[language], ...performanceEnglish, ...performanceCopy[language], ...dailyPerformanceCopy[language], ...performanceIndicatorCopy[language], ...allianceCodeCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language], gameServerTime: gameServerTimeCopy[language], codeAgreement: codeAgreementCopy[language] }
+  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...authFeedbackCopy[language], ...rosterFilterCopy[language], ...loginActivityCopy[language], ...auditCopy[language], ...adminRoleCopy[language], ...notificationCopy[language], ...pollAdminCopy[language], ...exportCopy[language], ...performanceEnglish, ...performanceCopy[language], ...dailyPerformanceCopy[language], ...performanceIndicatorCopy[language], ...allianceCodeCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language], gameServerTime: gameServerTimeCopy[language], codeAgreement: codeAgreementCopy[language] }
 }
