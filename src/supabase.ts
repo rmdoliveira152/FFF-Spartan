@@ -34,6 +34,12 @@ export type AllianceMember = {
   performance_updated_at: string | null
 }
 
+export type AdminMemberLogin = {
+  member_id: string
+  account_id: string | null
+  last_sign_in_at: string | null
+}
+
 export type MemberPerformanceSnapshot = {
   id: string
   snapshot_date: string

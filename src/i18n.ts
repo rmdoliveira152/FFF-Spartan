@@ -67,6 +67,28 @@ type MemberAccessCopy = {
 
 type RosterFilterCopy = { rosterAll: string; rosterActive: string; rosterInactive: string }
 
+type LoginActivityCopy = { lastPortalLogin: string; neverSignedIn: string; noLinkedAccount: string }
+
+const loginActivityCopy: Record<Language, LoginActivityCopy> = {
+  en:{lastPortalLogin:'Last portal login',neverSignedIn:'Never signed in',noLinkedAccount:'No linked account'},
+  pt:{lastPortalLogin:'Último login no portal',neverSignedIn:'Nunca iniciou sessão',noLinkedAccount:'Sem conta associada'},
+  es:{lastPortalLogin:'Último acceso al portal',neverSignedIn:'Nunca inició sesión',noLinkedAccount:'Sin cuenta vinculada'},
+  fr:{lastPortalLogin:'Dernière connexion au portail',neverSignedIn:'Jamais connecté',noLinkedAccount:'Aucun compte associé'},
+  de:{lastPortalLogin:'Letzte Portal-Anmeldung',neverSignedIn:'Noch nie angemeldet',noLinkedAccount:'Kein verknüpftes Konto'},
+  it:{lastPortalLogin:'Ultimo accesso al portale',neverSignedIn:'Mai effettuato l’accesso',noLinkedAccount:'Nessun account associato'},
+  pl:{lastPortalLogin:'Ostatnie logowanie w portalu',neverSignedIn:'Nigdy się nie logował',noLinkedAccount:'Brak połączonego konta'},
+  ru:{lastPortalLogin:'Последний вход на портал',neverSignedIn:'Ни разу не входил',noLinkedAccount:'Нет привязанной учётной записи'},
+  tr:{lastPortalLogin:'Son portal girişi',neverSignedIn:'Hiç giriş yapmadı',noLinkedAccount:'Bağlı hesap yok'},
+  id:{lastPortalLogin:'Login portal terakhir',neverSignedIn:'Belum pernah masuk',noLinkedAccount:'Tidak ada akun tertaut'},
+  vi:{lastPortalLogin:'Lần đăng nhập cổng gần nhất',neverSignedIn:'Chưa từng đăng nhập',noLinkedAccount:'Không có tài khoản liên kết'},
+  th:{lastPortalLogin:'เข้าสู่ระบบพอร์ทัลล่าสุด',neverSignedIn:'ยังไม่เคยเข้าสู่ระบบ',noLinkedAccount:'ไม่มีบัญชีที่เชื่อมโยง'},
+  ja:{lastPortalLogin:'ポータル最終ログイン',neverSignedIn:'ログイン履歴なし',noLinkedAccount:'連携アカウントなし'},
+  ko:{lastPortalLogin:'마지막 포털 로그인',neverSignedIn:'로그인한 적 없음',noLinkedAccount:'연결된 계정 없음'},
+  ar:{lastPortalLogin:'آخر تسجيل دخول للبوابة',neverSignedIn:'لم يسجل الدخول من قبل',noLinkedAccount:'لا يوجد حساب مرتبط'},
+  'zh-CN':{lastPortalLogin:'门户上次登录',neverSignedIn:'从未登录',noLinkedAccount:'没有关联账户'},
+  'zh-TW':{lastPortalLogin:'入口網站上次登入',neverSignedIn:'從未登入',noLinkedAccount:'沒有關聯帳戶'},
+}
+
 type AdminRoleCopy = {
   promoteToAdmin: string; demoteToMember: string; confirmPromoteAdmin: string; confirmDemoteAdmin: string
 }
@@ -169,7 +191,7 @@ const allianceCodeCopy: Record<Language, AllianceCodeCopy> = {
   'zh-TW':{ codeLabel:'聯盟標準',codeTitle:'行動準則',codePlayers:'其他玩家',codeAdmins:'R4 · 管理',codeCourtesy:'友善並有禮貌地對待其他玩家。' },
 }
 
-export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy & DynamicTranslationCopy & MemberAccessCopy & RosterFilterCopy & AdminRoleCopy & NotificationCopy & PollAdminCopy & ExportCopy & PerformanceCopy & AllianceCodeCopy & EventGuideCopy & { codeAgreement: string }
+export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy & DynamicTranslationCopy & MemberAccessCopy & RosterFilterCopy & LoginActivityCopy & AdminRoleCopy & NotificationCopy & PollAdminCopy & ExportCopy & PerformanceCopy & AllianceCodeCopy & EventGuideCopy & { codeAgreement: string }
 
 const en: BaseCopy = {
   navHome: 'Command', navRanks: 'Roster', navPolls: 'Polls', navR4: 'R4 application', navRules: 'Code', admin: 'Admin',
@@ -739,5 +761,5 @@ const automaticTranslationHint: Record<Language, string> = {
 
 export function getCopy(language: Language): Copy {
   const base = language === 'pt' ? pt : language === 'en' ? en : { ...en, ...translated[language] }
-  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...rosterFilterCopy[language], ...adminRoleCopy[language], ...notificationCopy[language], ...pollAdminCopy[language], ...exportCopy[language], ...performanceEnglish, ...performanceCopy[language], ...dailyPerformanceCopy[language], ...performanceIndicatorCopy[language], ...allianceCodeCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language], gameServerTime: gameServerTimeCopy[language], codeAgreement: codeAgreementCopy[language] }
+  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...rosterFilterCopy[language], ...loginActivityCopy[language], ...adminRoleCopy[language], ...notificationCopy[language], ...pollAdminCopy[language], ...exportCopy[language], ...performanceEnglish, ...performanceCopy[language], ...dailyPerformanceCopy[language], ...performanceIndicatorCopy[language], ...allianceCodeCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language], gameServerTime: gameServerTimeCopy[language], codeAgreement: codeAgreementCopy[language] }
 }

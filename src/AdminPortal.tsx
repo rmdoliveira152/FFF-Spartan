@@ -2,7 +2,7 @@ import { useEffect, useEffectEvent, useRef, useState, type FormEvent } from 'rea
 import type { User } from '@supabase/supabase-js'
 import { Activity, Archive, Check, ClipboardList, FileSpreadsheet, History, ImagePlus, LogOut, Megaphone, Pencil, Plus, RotateCcw, Search, Shield, Trash2, TrendingDown, TrendingUp, Users, Vote, X } from 'lucide-react'
 import { type Copy, type Language } from './i18n'
-import { getBoardNewsImageUrl, supabase, type AdminAuditEvent, type AllianceMember, type AvailableMember, type BoardNews, type BoardNewsTranslation, type MemberPerformanceSnapshot, type PerformanceIndicator, type PortalPoll, type Profile, type R4Application } from './supabase'
+import { getBoardNewsImageUrl, supabase, type AdminAuditEvent, type AdminMemberLogin, type AllianceMember, type AvailableMember, type BoardNews, type BoardNewsTranslation, type MemberPerformanceSnapshot, type PerformanceIndicator, type PortalPoll, type Profile, type R4Application } from './supabase'
 import { LocalizedIntegerInput } from './LocalizedIntegerInput'
 import { parseLocalizedInteger } from './localizedInteger'
 import { useDialogFocus } from './useDialogFocus'
@@ -93,6 +93,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
   const [applications, setApplications] = useState<R4Application[]>([])
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [adminMembers, setAdminMembers] = useState<AllianceMember[]>(initialMembers)
+  const [memberLogins, setMemberLogins] = useState<AdminMemberLogin[]>([])
   const [indicators, setIndicators] = useState<PerformanceIndicator[]>([])
   const [auditEvents, setAuditEvents] = useState<AdminAuditEvent[]>([])
   const [memberQuery, setMemberQuery] = useState('')
@@ -114,6 +115,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     .filter((member) => memberFreshness === 'ALL' || (memberFreshness === 'stale' ? !member.performance_updated_at || filterReferenceTime - Date.parse(member.performance_updated_at) > 14 * 86_400_000 : Boolean(member.performance_updated_at) && filterReferenceTime - Date.parse(member.performance_updated_at!) <= 14 * 86_400_000))
   const filteredNews = newsItems.filter((news) => newsFilter === 'archived' ? Boolean(news.archived_at) : newsFilter === 'expired' ? !news.archived_at && Boolean(news.expires_at && Date.parse(news.expires_at) <= filterReferenceTime) : !news.archived_at && (!news.expires_at || Date.parse(news.expires_at) > filterReferenceTime))
   const filteredPolls = polls.filter((poll) => pollFilter === 'all' || (pollFilter === 'active' ? poll.active : !poll.active))
+  const memberLoginById = new Map(memberLogins.map((login) => [login.member_id, login]))
   const ownMember = profile?.alliance_member_id ? initialMembers.find((member) => member.id === profile.alliance_member_id) ?? null : null
   const ownPerformanceDefaults = ownPerformanceHistory.find((snapshot) => snapshot.snapshot_date === ownSnapshotDate)
     ?? ownPerformanceHistory.at(-1)
@@ -130,12 +132,13 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
   const loadAdminData = async () => {
     const client = supabase
     if (!client || profile?.role !== 'admin') return
-    const [pollResponse, newsResponse, applicationResponse, profileResponse, memberResponse, indicatorResponse, auditResponse] = await Promise.all([
+    const [pollResponse, newsResponse, applicationResponse, profileResponse, memberResponse, loginResponse, indicatorResponse, auditResponse] = await Promise.all([
       client.from('polls').select('id, question, active, closes_at, created_at, poll_options(id, label, position)').order('created_at', { ascending: false }),
       client.from('board_news').select('id, translations, image_paths, default_language, priority, published, published_at, expires_at, archived_at, created_at, updated_at').order('created_at', { ascending: false }),
       client.from('r4_applications').select('id, user_id, reason, experience, availability, status, created_at').order('created_at', { ascending: false }),
       client.from('profiles').select('id, member_name, role, active, alliance_member_id, registration_status, notify_poll_emails, notify_news_emails').order('member_name'),
       client.from('alliance_members').select('id, member_name, rank, player_level, combat_power, kills, weekly_contribution, active, performance_updated_at').order('member_name'),
+      client.rpc('admin_member_last_logins'),
       client.rpc('admin_performance_indicators'),
       client.from('admin_audit_events').select('id, actor_id, action, resource_kind, resource_id, changes, created_at').order('created_at', { ascending: false }).limit(100),
     ])
@@ -144,6 +147,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     if (applicationResponse.error) throw applicationResponse.error
     if (profileResponse.error) throw profileResponse.error
     if (memberResponse.error) throw memberResponse.error
+    if (loginResponse.error) throw loginResponse.error
     if (indicatorResponse.error) throw indicatorResponse.error
     if (auditResponse.error) throw auditResponse.error
 
@@ -167,6 +171,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     })) as R4Application[])
     setProfiles(memberProfiles)
     setAdminMembers((memberResponse.data ?? []) as AllianceMember[])
+    setMemberLogins((loginResponse.data ?? []) as AdminMemberLogin[])
     setIndicators((indicatorResponse.data ?? []) as PerformanceIndicator[])
     setAuditEvents((auditResponse.data ?? []) as AdminAuditEvent[])
   }
@@ -857,7 +862,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
             <div className="row-actions"><button className="primary-button" type="submit" disabled={busy}>{editingMember ? copy.save : copy.addMember}</button>{editingMember && <button className="ghost-button" type="button" onClick={() => setEditingMember(null)}>{copy.cancel}</button>}</div>
           </form>
           <div className="roster-admin-filters"><label className="roster-admin-search"><Search size={17} /><input type="search" value={memberQuery} onChange={(event) => setMemberQuery(event.target.value)} placeholder={copy.search} /></label><select aria-label={copy.rank} value={memberRank} onChange={(event) => setMemberRank(event.target.value)}><option value="ALL">{copy.rank}</option>{['R1','R2','R3','R4','R5'].map((rank) => <option key={rank}>{rank}</option>)}</select><select aria-label={copy.active} value={memberStatus} onChange={(event) => setMemberStatus(event.target.value)}><option value="ALL">{copy.rosterAll}</option><option value="active">{copy.rosterActive}</option><option value="inactive">{copy.rosterInactive}</option></select><select aria-label={copy.lastUpdate} value={memberFreshness} onChange={(event) => setMemberFreshness(event.target.value)}><option value="ALL">{copy.lastUpdate}</option><option value="fresh">≤ 14d</option><option value="stale">&gt; 14d</option></select></div>
-          <div className="member-access-list roster-admin-list">{filteredAdminMembers.map((member) => <div key={member.id}><span><strong>{member.member_name}</strong><small>{member.rank} · Lv. {member.player_level} · {member.combat_power.toLocaleString()} · {member.active ? copy.active : copy.deactivate}</small><small>{copy.lastUpdate}: {member.performance_updated_at ? new Intl.DateTimeFormat(language, { dateStyle: 'medium' }).format(new Date(member.performance_updated_at)) : copy.neverUpdated}</small></span><span className="row-actions"><button className="icon-button performance-button" type="button" title={copy.recordPerformance} onClick={() => void openPerformanceEditor(member)}><Activity size={15} /></button><button className="icon-button" type="button" title={copy.editMember} onClick={() => setEditingMember(member)}><Pencil size={15} /></button><button className="icon-button danger" type="button" title={copy.delete} onClick={() => deleteMember(member)}><Trash2 size={15} /></button></span></div>)}</div>
+          <div className="member-access-list roster-admin-list">{filteredAdminMembers.map((member) => { const login = memberLoginById.get(member.id); return <div key={member.id}><span><strong>{member.member_name}</strong><small>{member.rank} · Lv. {member.player_level} · {member.combat_power.toLocaleString()} · {member.active ? copy.active : copy.deactivate}</small><small>{copy.lastUpdate}: {member.performance_updated_at ? new Intl.DateTimeFormat(language, { dateStyle: 'medium' }).format(new Date(member.performance_updated_at)) : copy.neverUpdated}</small><small>{copy.lastPortalLogin}: {!login?.account_id ? copy.noLinkedAccount : login.last_sign_in_at ? new Intl.DateTimeFormat(language, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(login.last_sign_in_at)) : copy.neverSignedIn}</small></span><span className="row-actions"><button className="icon-button performance-button" type="button" title={copy.recordPerformance} onClick={() => void openPerformanceEditor(member)}><Activity size={15} /></button><button className="icon-button" type="button" title={copy.editMember} onClick={() => setEditingMember(member)}><Pencil size={15} /></button><button className="icon-button danger" type="button" title={copy.delete} onClick={() => deleteMember(member)}><Trash2 size={15} /></button></span></div> })}</div>
         </section>
         <section className="admin-block" id="admin-audit"><h3><History size={18} />{copy.adminDashboard} · {copy.performanceHistory}</h3><div className="admin-list audit-list">{auditEvents.map((event) => <article key={event.id}><div><strong>{event.resource_kind} · {event.action}</strong><small>{new Intl.DateTimeFormat(language, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(event.created_at))}</small></div><small>{event.actor_id ? profiles.find((item) => item.id === event.actor_id)?.member_name ?? event.actor_id : 'system'}{event.resource_id ? ` · ${event.resource_id}` : ''}</small></article>)}</div></section>
       </div>}
