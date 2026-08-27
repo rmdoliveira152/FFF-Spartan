@@ -288,7 +288,7 @@ footer img { width:110px; opacity:.65; }
 .auth-link { justify-self:start; padding:0; color:#b7bdb7; border:0; border-bottom:1px solid currentColor; background:transparent; cursor:pointer; }
 .auth-link:hover { color:#fff; }
 .close-button { position:absolute; top:14px; right:14px; width:38px; height:38px; display:grid; place-items:center; color:#fff; border:1px solid var(--line); background:transparent; cursor:pointer; }
-.login-modal.admin-portal { width:min(1040px,100%); max-height:calc(100vh - 40px); overflow-y:auto; }
+.login-modal.admin-portal { width:min(1040px,100%); max-height:calc(100vh - 40px); overflow-x:hidden; overflow-y:auto; overscroll-behavior:contain; }
 .account-state { display:grid; gap:18px; }
 .account-state p { margin:0; color:var(--muted); }
 .account-state .ghost-button { justify-self:start; }
@@ -317,8 +317,8 @@ footer img { width:110px; opacity:.65; }
 .admin-form .check-field input { width:auto; accent-color:var(--red); }
 .email-preferences { display:flex; align-items:center; flex-wrap:wrap; gap:10px 20px; margin:0; padding:14px 16px; border:1px solid var(--line); }
 .email-preferences legend { padding:0 7px; color:var(--muted); font-size:.72rem; font-weight:700; text-transform:uppercase; }
-.email-preferences .check-field { display:flex; align-items:center; gap:7px; color:#d7ddd8; font-size:.8rem; font-weight:700; }
-.email-preferences input { accent-color:var(--red); }
+.email-preferences .check-field { display:flex; align-items:center; gap:7px; min-width:0; color:#d7ddd8; font-size:.8rem; font-weight:700; overflow-wrap:anywhere; }
+.email-preferences input[type='checkbox'] { flex:0 0 auto; width:20px; height:20px; margin:0; padding:0; accent-color:var(--red); }
 .news-admin-form { margin-bottom:22px; }
 .news-admin-form label:nth-child(2) { grid-row:auto; }
 .news-admin-form label:has(svg) { display:flex; align-items:center; flex-direction:row; flex-wrap:wrap; }
@@ -411,6 +411,7 @@ footer img { width:110px; opacity:.65; }
 @media (max-width:680px) {
   .admin-section-nav { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .admin-section-nav button { min-height:56px; padding:8px; }
+  .email-preferences { align-items:stretch; flex-direction:column; }
   .brand > span:last-child { font-size:1rem; }
   .language-picker { padding:0 7px; }
   .language-picker select { width:72px; }
