@@ -213,6 +213,8 @@
 .audit-card summary > span:first-child { min-width:0; display:grid; gap:7px; }
 .audit-card summary strong { overflow-wrap:anywhere; }
 .audit-card summary small { color:var(--muted); }
+.audit-card summary .audit-subject { color:#fff; text-transform:none; }
+.audit-card summary .audit-subject b { color:var(--red); text-transform:uppercase; }
 .audit-card-meta { min-width:0; display:flex; align-items:center; justify-content:flex-end; gap:8px; text-align:right; }
 .audit-card-meta small { overflow-wrap:anywhere; }
 .audit-card-meta svg { flex:0 0 auto; transition:transform .2s ease; }
@@ -225,6 +227,8 @@
 .audit-summary-popover li b { color:#cbd0cb; }
 .audit-summary-popover li span { min-width:0; color:var(--muted); overflow-wrap:anywhere; }
 .audit-summary-popover p { margin:0; color:var(--muted); }
+.audit-summary-popover .audit-summary-subject { padding-bottom:10px; color:#fff; border-bottom:1px solid var(--line); }
+.audit-summary-subject b { color:var(--red); }
 .audit-summary-popover .compact-button { justify-self:start; }
 .audit-pagination { display:flex; align-items:center; justify-content:center; margin-top:14px; }
 .audit-pagination small { color:var(--muted); text-align:center; text-transform:uppercase; }

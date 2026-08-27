@@ -132,6 +132,7 @@ export type AdminAuditEvent = {
   action: string
   resource_kind: string
   resource_id: string | null
+  subject_name: string | null
   changes: Record<string, unknown>
   created_at: string
 }

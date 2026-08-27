@@ -6,6 +6,7 @@ import type { AdminAuditEvent } from './supabase'
 type Props = {
   event: AdminAuditEvent
   actorName: string
+  subjectName: string | null
   copy: Copy
   language: Language
 }
@@ -64,18 +65,19 @@ function auditRows(event: AdminAuditEvent) {
     .map((field) => ({ field, before: before[field], after: after[field] }))
 }
 
-export function AuditEventCard({ event, actorName, copy, language }: Props) {
+export function AuditEventCard({ event, actorName, subjectName, copy, language }: Props) {
   const [translated, setTranslated] = useState(language === 'en')
   const summaryLanguage = translated ? language : 'en'
   const rows = auditRows(event)
 
   return <details className="audit-card">
     <summary>
-      <span><strong>{event.resource_kind} · {event.action}</strong><small>{new Intl.DateTimeFormat(language, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(event.created_at))}</small></span>
+      <span><strong>{event.resource_kind} · {event.action}</strong>{subjectName && <small className="audit-subject"><b>{copy.member}:</b> {subjectName}</small>}<small>{new Intl.DateTimeFormat(language, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(event.created_at))}</small></span>
       <span className="audit-card-meta"><small>{actorName}</small><ChevronDown size={17} /></span>
     </summary>
     <div className="audit-summary-popover">
       <strong>{translated ? copy.auditSummary : 'Change summary'}</strong>
+      {subjectName && <p className="audit-summary-subject"><b>{translated ? copy.member : 'Member'}:</b> {subjectName}</p>}
       {rows.length ? <ul>{rows.map(({ field, before, after }) => <li key={field}>
         <b>{translated ? localizedLabel(field, copy) : englishLabels[field] ?? field}</b>
         <span>{event.action === 'update' ? `${formatValue(before, summaryLanguage, copy)} → ${formatValue(after, summaryLanguage, copy)}` : formatValue(event.action === 'delete' ? before : after, summaryLanguage, copy)}</span>
