@@ -65,26 +65,26 @@ type MemberAccessCopy = {
   currentAccount: string; searchAccounts: string; noAccessResults: string
 }
 
-type AuthFeedbackCopy = { registrationCooldown: string }
+type AuthFeedbackCopy = { registrationCooldown: string; registrationAlreadyExists: string }
 
 const authFeedbackCopy: Record<Language, AuthFeedbackCopy> = {
-  en:{registrationCooldown:'A registration request was made recently. Wait {seconds} seconds before trying again.'},
-  pt:{registrationCooldown:'Foi feito um pedido de registo recentemente. Aguarde {seconds} segundos antes de tentar novamente.'},
-  es:{registrationCooldown:'Se realizó una solicitud de registro recientemente. Espera {seconds} segundos antes de volver a intentarlo.'},
-  fr:{registrationCooldown:'Une demande d’inscription a été effectuée récemment. Attendez {seconds} secondes avant de réessayer.'},
-  de:{registrationCooldown:'Kürzlich wurde eine Registrierung angefordert. Warte {seconds} Sekunden, bevor du es erneut versuchst.'},
-  it:{registrationCooldown:'È stata effettuata una richiesta di registrazione di recente. Attendi {seconds} secondi prima di riprovare.'},
-  pl:{registrationCooldown:'Niedawno wysłano prośbę o rejestrację. Poczekaj {seconds} sekund przed ponowną próbą.'},
-  ru:{registrationCooldown:'Недавно уже был отправлен запрос на регистрацию. Подождите {seconds} секунд перед повторной попыткой.'},
-  tr:{registrationCooldown:'Kısa süre önce bir kayıt isteği yapıldı. Tekrar denemeden önce {seconds} saniye bekleyin.'},
-  id:{registrationCooldown:'Permintaan pendaftaran baru saja dibuat. Tunggu {seconds} detik sebelum mencoba lagi.'},
-  vi:{registrationCooldown:'Một yêu cầu đăng ký vừa được gửi. Hãy đợi {seconds} giây trước khi thử lại.'},
-  th:{registrationCooldown:'มีการส่งคำขอลงทะเบียนเมื่อไม่นานมานี้ โปรดรอ {seconds} วินาทีก่อนลองอีกครั้ง'},
-  ja:{registrationCooldown:'登録リクエストが直前に送信されました。{seconds}秒待ってからもう一度お試しください。'},
-  ko:{registrationCooldown:'최근에 가입 요청이 전송되었습니다. {seconds}초 후에 다시 시도하세요.'},
-  ar:{registrationCooldown:'تم إرسال طلب تسجيل مؤخرًا. انتظر {seconds} ثانية قبل المحاولة مرة أخرى.'},
-  'zh-CN':{registrationCooldown:'最近已提交注册请求。请等待 {seconds} 秒后重试。'},
-  'zh-TW':{registrationCooldown:'最近已提交註冊請求。請等待 {seconds} 秒後再試。'},
+  en:{registrationCooldown:'A registration request was made recently. Wait {seconds} seconds before trying again.',registrationAlreadyExists:'This player already has a registration awaiting review. Use Sign in instead of creating another account.'},
+  pt:{registrationCooldown:'Foi feito um pedido de registo recentemente. Aguarde {seconds} segundos antes de tentar novamente.',registrationAlreadyExists:'Este jogador já tem um registo a aguardar aprovação. Use Entrar em vez de criar outra conta.'},
+  es:{registrationCooldown:'Se realizó una solicitud de registro recientemente. Espera {seconds} segundos antes de volver a intentarlo.',registrationAlreadyExists:'Este jugador ya tiene un registro pendiente de aprobación. Usa Iniciar sesión en lugar de crear otra cuenta.'},
+  fr:{registrationCooldown:'Une demande d’inscription a été effectuée récemment. Attendez {seconds} secondes avant de réessayer.',registrationAlreadyExists:'Ce joueur a déjà une inscription en attente d’approbation. Utilisez Se connecter au lieu de créer un autre compte.'},
+  de:{registrationCooldown:'Kürzlich wurde eine Registrierung angefordert. Warte {seconds} Sekunden, bevor du es erneut versuchst.',registrationAlreadyExists:'Für diesen Spieler wartet bereits eine Registrierung auf Freigabe. Verwende Anmelden, statt ein weiteres Konto zu erstellen.'},
+  it:{registrationCooldown:'È stata effettuata una richiesta di registrazione di recente. Attendi {seconds} secondi prima di riprovare.',registrationAlreadyExists:'Questo giocatore ha già una registrazione in attesa di approvazione. Usa Accedi invece di creare un altro account.'},
+  pl:{registrationCooldown:'Niedawno wysłano prośbę o rejestrację. Poczekaj {seconds} sekund przed ponowną próbą.',registrationAlreadyExists:'Ten gracz ma już rejestrację oczekującą na zatwierdzenie. Użyj opcji Zaloguj się zamiast tworzyć kolejne konto.'},
+  ru:{registrationCooldown:'Недавно уже был отправлен запрос на регистрацию. Подождите {seconds} секунд перед повторной попыткой.',registrationAlreadyExists:'Регистрация этого игрока уже ожидает одобрения. Используйте вход вместо создания другой учётной записи.'},
+  tr:{registrationCooldown:'Kısa süre önce bir kayıt isteği yapıldı. Tekrar denemeden önce {seconds} saniye bekleyin.',registrationAlreadyExists:'Bu oyuncunun zaten onay bekleyen bir kaydı var. Başka hesap oluşturmak yerine Giriş yap seçeneğini kullanın.'},
+  id:{registrationCooldown:'Permintaan pendaftaran baru saja dibuat. Tunggu {seconds} detik sebelum mencoba lagi.',registrationAlreadyExists:'Pemain ini sudah memiliki pendaftaran yang menunggu persetujuan. Gunakan Masuk, jangan membuat akun lain.'},
+  vi:{registrationCooldown:'Một yêu cầu đăng ký vừa được gửi. Hãy đợi {seconds} giây trước khi thử lại.',registrationAlreadyExists:'Người chơi này đã có đăng ký đang chờ phê duyệt. Hãy Đăng nhập thay vì tạo tài khoản khác.'},
+  th:{registrationCooldown:'มีการส่งคำขอลงทะเบียนเมื่อไม่นานมานี้ โปรดรอ {seconds} วินาทีก่อนลองอีกครั้ง',registrationAlreadyExists:'ผู้เล่นนี้มีการลงทะเบียนที่รอการอนุมัติแล้ว โปรดเข้าสู่ระบบแทนการสร้างบัญชีใหม่'},
+  ja:{registrationCooldown:'登録リクエストが直前に送信されました。{seconds}秒待ってからもう一度お試しください。',registrationAlreadyExists:'このプレイヤーの登録はすでに承認待ちです。別のアカウントを作成せず、ログインしてください。'},
+  ko:{registrationCooldown:'최근에 가입 요청이 전송되었습니다. {seconds}초 후에 다시 시도하세요.',registrationAlreadyExists:'이 플레이어는 이미 승인 대기 중인 가입 요청이 있습니다. 다른 계정을 만들지 말고 로그인하세요.'},
+  ar:{registrationCooldown:'تم إرسال طلب تسجيل مؤخرًا. انتظر {seconds} ثانية قبل المحاولة مرة أخرى.',registrationAlreadyExists:'لدى هذا اللاعب تسجيل ينتظر الموافقة بالفعل. استخدم تسجيل الدخول بدلًا من إنشاء حساب آخر.'},
+  'zh-CN':{registrationCooldown:'最近已提交注册请求。请等待 {seconds} 秒后重试。',registrationAlreadyExists:'该玩家已有待审核的注册。请直接登录，不要创建其他账户。'},
+  'zh-TW':{registrationCooldown:'最近已提交註冊請求。請等待 {seconds} 秒後再試。',registrationAlreadyExists:'該玩家已有待審核的註冊。請直接登入，不要建立其他帳戶。'},
 }
 
 type RosterFilterCopy = { rosterAll: string; rosterActive: string; rosterInactive: string }

@@ -23,12 +23,14 @@ export function usePortal() {
     setMembers((data ?? []) as AllianceMember[])
   }
 
-  const loadAvailableMembers = async () => {
+  const loadAvailableMembers = async (): Promise<AvailableMember[]> => {
     const client = supabase
-    if (!client) return
+    if (!client) return []
     const { data, error } = await client.rpc('available_alliance_members')
     if (error) throw error
-    setAvailableMembers((data ?? []) as AvailableMember[])
+    const available = (data ?? []) as AvailableMember[]
+    setAvailableMembers(available)
+    return available
   }
 
   const loadPolls = async () => {
@@ -147,6 +149,10 @@ export function usePortal() {
 
   const signUp = async (email: string, password: string, allianceMemberId: string): Promise<ActionResult> => {
     if (!supabase) return { ok: false, message: 'Supabase is not configured.' }
+    const available = await loadAvailableMembers()
+    if (!available.some((member) => member.id === allianceMemberId)) {
+      return { ok: false, message: 'Alliance member already has a registration.', code: 'member_registration_exists' }
+    }
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -237,6 +243,6 @@ export function usePortal() {
     refreshPolls: loadPolls,
     refreshBoardNews: loadBoardNews,
     refreshMembers: loadMembers,
-    refreshAvailableMembers: loadAvailableMembers,
+    refreshAvailableMembers: async () => { await loadAvailableMembers() },
   }
 }
