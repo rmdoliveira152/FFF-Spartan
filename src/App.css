@@ -468,7 +468,7 @@ footer img { width:110px; opacity:.65; }
   footer p { margin:0; }
   footer img { width:90px; }
   .login-modal { padding:28px 20px; }
-  .admin-section-nav { top:-28px; }
+  .admin-section-nav { position:static; }
   .admin-form { grid-template-columns:1fr; }
   .roster-form { grid-template-columns:1fr; }
   .admin-form label:nth-child(2) { grid-row:auto; }
