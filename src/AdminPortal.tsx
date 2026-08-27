@@ -732,13 +732,13 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
         <div className="admin-heading"><span>{copy.signedInAs}: <strong>{profile.member_name}</strong></span><button className="ghost-button" onClick={onSignOut}><LogOut size={16} />{copy.signOut}</button></div>
         <fieldset className="email-preferences"><legend>{copy.emailPreferences}</legend><label className="check-field"><input type="checkbox" checked={profile.notify_poll_emails} onChange={(event) => void saveEmailPreferences(event.target.checked, profile.notify_news_emails)} />{copy.notifyPollEmails}</label><label className="check-field"><input type="checkbox" checked={profile.notify_news_emails} onChange={(event) => void saveEmailPreferences(profile.notify_poll_emails, event.target.checked)} />{copy.notifyNewsEmails}</label></fieldset>
         <nav className="admin-section-nav" aria-label={copy.adminDashboard}>
-          <button type="button" onClick={() => scrollToAdminSection('admin-news')}><Megaphone size={16} />{copy.manageNews}</button>
-          <button type="button" onClick={() => scrollToAdminSection('admin-create-poll')}><Plus size={16} />{copy.createPoll}</button>
-          <button type="button" onClick={() => scrollToAdminSection('admin-polls')}><Vote size={16} />{copy.pollsTitle}</button>
-          <button type="button" onClick={() => scrollToAdminSection('admin-applications')}><ClipboardList size={16} />{copy.applications}</button>
-          <button type="button" onClick={() => scrollToAdminSection('admin-access')}><Shield size={16} />{copy.memberAccess}</button>
-          <button type="button" onClick={() => scrollToAdminSection('admin-roster')}><Users size={16} />{copy.manageRoster}</button>
-          <button type="button" onClick={() => scrollToAdminSection('admin-audit')}><History size={16} />{copy.adminDashboard}</button>
+          <button type="button" onClick={() => scrollToAdminSection('admin-news')}><Megaphone size={16} /><span>{copy.manageNews}</span></button>
+          <button type="button" onClick={() => scrollToAdminSection('admin-create-poll')}><Plus size={16} /><span>{copy.createPoll}</span></button>
+          <button type="button" onClick={() => scrollToAdminSection('admin-polls')}><Vote size={16} /><span>{copy.pollsTitle}</span></button>
+          <button type="button" onClick={() => scrollToAdminSection('admin-applications')}><ClipboardList size={16} /><span>{copy.applications}</span></button>
+          <button type="button" onClick={() => scrollToAdminSection('admin-access')}><Shield size={16} /><span>{copy.memberAccess}</span></button>
+          <button type="button" onClick={() => scrollToAdminSection('admin-roster')}><Users size={16} /><span>{copy.manageRoster}</span></button>
+          <button type="button" onClick={() => scrollToAdminSection('admin-audit')}><History size={16} /><span>{copy.adminDashboard}</span></button>
         </nav>
         {error && <p className="form-error" role="alert">{error}</p>}
 
