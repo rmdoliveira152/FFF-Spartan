@@ -75,8 +75,14 @@ function App() {
     if (kind === 'comment_posted') return discussionCopy.discussion
     if (kind === 'r4_approved') return `${copy.applications}: ${copy.approve}`
     if (kind === 'r4_rejected') return `${copy.applications}: ${copy.reject}`
+    if (kind === 'registration_pending') return `${copy.memberAccess}: ${copy.accessPending}`
     if (kind === 'registration_approved') return copy.registrationSent
     return copy.memberAccess
+  }
+
+  const openNotification = (eventKind: string) => {
+    setNotificationsOpen(false)
+    if (eventKind === 'registration_pending') setAdminOpen(true)
   }
 
   useEffect(() => {
@@ -259,7 +265,7 @@ function App() {
             <button className="notification-button" type="button" aria-label={notificationHeadings[language][0]} aria-expanded={notificationsOpen} onClick={() => setNotificationsOpen((current) => !current)}><Bell size={17} />{unreadNotifications > 0 && <span>{unreadNotifications}</span>}</button>
             {notificationsOpen && <div className="notification-panel">
               <div><strong>{notificationHeadings[language][0]}</strong><button type="button" title={notificationHeadings[language][1]} onClick={() => void portal.markNotificationsRead()}><CheckCheck size={16} /></button></div>
-              {portal.notifications.length === 0 ? <small>{copy.noAccessResults}</small> : portal.notifications.map((notification) => <a className={notification.read_at ? '' : 'unread'} href={notification.resource_kind === 'poll' || notification.resource_kind === 'polls' ? '#polls' : notification.resource_kind === 'board_news' ? '#news' : '#application'} onClick={() => setNotificationsOpen(false)} key={notification.id}><span>{notificationLabel(notification.event_kind)}</span><small>{new Intl.DateTimeFormat(language, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(notification.created_at))}</small></a>)}
+              {portal.notifications.length === 0 ? <small>{copy.noAccessResults}</small> : portal.notifications.map((notification) => <a className={notification.read_at ? '' : 'unread'} href={notification.event_kind === 'registration_pending' ? '#admin-access' : notification.resource_kind === 'poll' || notification.resource_kind === 'polls' ? '#polls' : notification.resource_kind === 'board_news' ? '#news' : '#application'} onClick={() => openNotification(notification.event_kind)} key={notification.id}><span>{notificationLabel(notification.event_kind)}</span><small>{new Intl.DateTimeFormat(language, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(notification.created_at))}</small></a>)}
             </div>}
           </div>}
           <button className="admin-button" onClick={() => setAdminOpen(true)}>
