@@ -65,6 +65,28 @@ type MemberAccessCopy = {
   currentAccount: string; searchAccounts: string; noAccessResults: string
 }
 
+type AuthFeedbackCopy = { registrationCooldown: string }
+
+const authFeedbackCopy: Record<Language, AuthFeedbackCopy> = {
+  en:{registrationCooldown:'A registration request was made recently. Wait {seconds} seconds before trying again.'},
+  pt:{registrationCooldown:'Foi feito um pedido de registo recentemente. Aguarde {seconds} segundos antes de tentar novamente.'},
+  es:{registrationCooldown:'Se realizó una solicitud de registro recientemente. Espera {seconds} segundos antes de volver a intentarlo.'},
+  fr:{registrationCooldown:'Une demande d’inscription a été effectuée récemment. Attendez {seconds} secondes avant de réessayer.'},
+  de:{registrationCooldown:'Kürzlich wurde eine Registrierung angefordert. Warte {seconds} Sekunden, bevor du es erneut versuchst.'},
+  it:{registrationCooldown:'È stata effettuata una richiesta di registrazione di recente. Attendi {seconds} secondi prima di riprovare.'},
+  pl:{registrationCooldown:'Niedawno wysłano prośbę o rejestrację. Poczekaj {seconds} sekund przed ponowną próbą.'},
+  ru:{registrationCooldown:'Недавно уже был отправлен запрос на регистрацию. Подождите {seconds} секунд перед повторной попыткой.'},
+  tr:{registrationCooldown:'Kısa süre önce bir kayıt isteği yapıldı. Tekrar denemeden önce {seconds} saniye bekleyin.'},
+  id:{registrationCooldown:'Permintaan pendaftaran baru saja dibuat. Tunggu {seconds} detik sebelum mencoba lagi.'},
+  vi:{registrationCooldown:'Một yêu cầu đăng ký vừa được gửi. Hãy đợi {seconds} giây trước khi thử lại.'},
+  th:{registrationCooldown:'มีการส่งคำขอลงทะเบียนเมื่อไม่นานมานี้ โปรดรอ {seconds} วินาทีก่อนลองอีกครั้ง'},
+  ja:{registrationCooldown:'登録リクエストが直前に送信されました。{seconds}秒待ってからもう一度お試しください。'},
+  ko:{registrationCooldown:'최근에 가입 요청이 전송되었습니다. {seconds}초 후에 다시 시도하세요.'},
+  ar:{registrationCooldown:'تم إرسال طلب تسجيل مؤخرًا. انتظر {seconds} ثانية قبل المحاولة مرة أخرى.'},
+  'zh-CN':{registrationCooldown:'最近已提交注册请求。请等待 {seconds} 秒后重试。'},
+  'zh-TW':{registrationCooldown:'最近已提交註冊請求。請等待 {seconds} 秒後再試。'},
+}
+
 type RosterFilterCopy = { rosterAll: string; rosterActive: string; rosterInactive: string }
 
 type LoginActivityCopy = { lastPortalLogin: string; neverSignedIn: string; noLinkedAccount: string }
@@ -191,7 +213,7 @@ const allianceCodeCopy: Record<Language, AllianceCodeCopy> = {
   'zh-TW':{ codeLabel:'聯盟標準',codeTitle:'行動準則',codePlayers:'其他玩家',codeAdmins:'R4 · 管理',codeCourtesy:'友善並有禮貌地對待其他玩家。' },
 }
 
-export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy & DynamicTranslationCopy & MemberAccessCopy & RosterFilterCopy & LoginActivityCopy & AdminRoleCopy & NotificationCopy & PollAdminCopy & ExportCopy & PerformanceCopy & AllianceCodeCopy & EventGuideCopy & { codeAgreement: string }
+export type Copy = BaseCopy & RecoveryCopy & BoardNewsCopy & DynamicTranslationCopy & MemberAccessCopy & AuthFeedbackCopy & RosterFilterCopy & LoginActivityCopy & AdminRoleCopy & NotificationCopy & PollAdminCopy & ExportCopy & PerformanceCopy & AllianceCodeCopy & EventGuideCopy & { codeAgreement: string }
 
 const en: BaseCopy = {
   navHome: 'Command', navRanks: 'Roster', navPolls: 'Polls', navR4: 'R4 application', navRules: 'Code', admin: 'Admin',
@@ -761,5 +783,5 @@ const automaticTranslationHint: Record<Language, string> = {
 
 export function getCopy(language: Language): Copy {
   const base = language === 'pt' ? pt : language === 'en' ? en : { ...en, ...translated[language] }
-  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...rosterFilterCopy[language], ...loginActivityCopy[language], ...adminRoleCopy[language], ...notificationCopy[language], ...pollAdminCopy[language], ...exportCopy[language], ...performanceEnglish, ...performanceCopy[language], ...dailyPerformanceCopy[language], ...performanceIndicatorCopy[language], ...allianceCodeCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language], gameServerTime: gameServerTimeCopy[language], codeAgreement: codeAgreementCopy[language] }
+  return { ...base, ...recoveryCopy[language], ...boardNewsCopy[language], ...dynamicTranslationCopy[language], ...memberAccessCopy[language], ...authFeedbackCopy[language], ...rosterFilterCopy[language], ...loginActivityCopy[language], ...adminRoleCopy[language], ...notificationCopy[language], ...pollAdminCopy[language], ...exportCopy[language], ...performanceEnglish, ...performanceCopy[language], ...dailyPerformanceCopy[language], ...performanceIndicatorCopy[language], ...allianceCodeCopy[language], ...eventGuideCopy[language], translationHint: automaticTranslationHint[language], createdOn: createdOnCopy[language], newsImages: newsImagesCopy[language], gameServerTime: gameServerTimeCopy[language], codeAgreement: codeAgreementCopy[language] }
 }

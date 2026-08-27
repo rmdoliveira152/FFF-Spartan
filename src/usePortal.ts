@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { isSupabaseConfigured, supabase, type AllianceMember, type AvailableMember, type BoardNews, type MemberNotification, type PortalPoll, type Profile } from './supabase'
 
-type ActionResult = { ok: true } | { ok: false; message: string }
+type ActionResult = { ok: true } | { ok: false; message: string; code?: string; retryAfter?: number }
 
 export function usePortal() {
   const [user, setUser] = useState<User | null>(null)
@@ -152,7 +152,10 @@ export function usePortal() {
       password,
       options: { data: { alliance_member_id: allianceMemberId } },
     })
-    if (error) return { ok: false, message: error.message }
+    if (error) {
+      const retryAfter = Number(error.message.match(/after (\d+) seconds?/i)?.[1]) || undefined
+      return { ok: false, message: error.message, code: error.code, retryAfter }
+    }
     await loadAvailableMembers()
     return { ok: true }
   }

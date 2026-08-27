@@ -17,7 +17,7 @@ type Props = {
   members: AllianceMember[]
   onClose: () => void
   onSignIn: (email: string, password: string) => Promise<{ ok: boolean; message?: string }>
-  onSignUp: (email: string, password: string, allianceMemberId: string) => Promise<{ ok: boolean; message?: string }>
+  onSignUp: (email: string, password: string, allianceMemberId: string) => Promise<{ ok: boolean; message?: string; code?: string; retryAfter?: number }>
   onRequestPasswordReset: (email: string) => Promise<{ ok: boolean; message?: string }>
   onUpdatePassword: (password: string) => Promise<{ ok: boolean; message?: string }>
   onUpdateEmailPreferences: (pollEmails: boolean, newsEmails: boolean) => Promise<{ ok: boolean; message?: string }>
@@ -220,7 +220,11 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
     setMessage('')
     const form = new FormData(event.currentTarget)
     const result = await onSignUp(String(form.get('email')), String(form.get('password')), String(form.get('allianceMemberId')))
-    if (!result.ok) setError(result.message ?? 'Unable to register.')
+    if (!result.ok) {
+      setError(result.code === 'over_email_send_rate_limit'
+        ? copy.registrationCooldown.replace('{seconds}', String(result.retryAfter ?? 60))
+        : result.message ?? 'Unable to register.')
+    }
     else setMessage(copy.registrationSent)
     setBusy(false)
   }
