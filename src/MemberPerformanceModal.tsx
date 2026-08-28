@@ -107,7 +107,7 @@ export function MemberPerformanceModal({ member, copy, language, canView, onClos
                 <CartesianGrid stroke="#2c3531" strokeDasharray="3 3" />
                 <XAxis dataKey="date" stroke="#879088" fontSize={11} />
                 <YAxis stroke="#879088" fontSize={11} tickFormatter={compactPower} width={58} />
-                <Tooltip formatter={(value) => Number(value).toLocaleString(language)} contentStyle={{ background: '#171d1b', border: '1px solid #3a4540' }} />
+                <Tooltip formatter={(value) => compactPower(Number(value))} contentStyle={{ background: '#171d1b', border: '1px solid #3a4540' }} />
                 <Legend />
                 {[1, 2, 3, 4].map((number, index) => <Line type="monotone" dataKey={`formation_${number}`} name={`${copy.formation} ${number}`} stroke={['#f1b84b', '#59a6d8', '#70b77e', '#b58bd3'][index]} strokeWidth={2} dot={{ r: 2 }} key={number} />)}
               </LineChart>
