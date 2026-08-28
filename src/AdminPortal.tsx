@@ -3,6 +3,8 @@ import type { User } from '@supabase/supabase-js'
 import { Activity, Archive, Check, ClipboardList, FileSpreadsheet, History, ImagePlus, LogOut, Megaphone, Pencil, Plus, RotateCcw, Search, Shield, Trash2, TrendingDown, TrendingUp, Users, Vote, X } from 'lucide-react'
 import { type Copy, type Language } from './i18n'
 import { getBoardNewsImageUrl, supabase, type AdminAuditEvent, type AdminMemberLogin, type AllianceMember, type AvailableMember, type BoardNews, type BoardNewsTranslation, type MemberPerformanceSnapshot, type PerformanceIndicator, type PortalPoll, type Profile, type R4Application } from './supabase'
+import { FormationPowerInput } from './FormationPowerInput'
+import { parseFormationPower } from './formationPower'
 import { LocalizedIntegerInput } from './LocalizedIntegerInput'
 import { parseLocalizedInteger } from './localizedInteger'
 import { useDialogFocus } from './useDialogFocus'
@@ -271,7 +273,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
       requested_combat_power: parseLocalizedInteger(form.get('combatPower')),
       requested_kills: parseLocalizedInteger(form.get('kills')),
       requested_weekly_contribution: parseLocalizedInteger(form.get('weeklyContribution')),
-      requested_formations: [1, 2, 3, 4].map((number) => parseLocalizedInteger(form.get(`formation${number}`))),
+      requested_formations: [1, 2, 3, 4].map((number) => parseFormationPower(form.get(`formation${number}`), form.get(`formation${number}Unit`))),
     })
     if (saveError) setError(saveError.message)
     else {
@@ -619,7 +621,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
       requested_combat_power: parseLocalizedInteger(form.get('combatPower')),
       requested_kills: parseLocalizedInteger(form.get('kills')),
       requested_weekly_contribution: parseLocalizedInteger(form.get('weeklyContribution')),
-      requested_formations: [1, 2, 3, 4].map((number) => parseLocalizedInteger(form.get(`formation${number}`))),
+      requested_formations: [1, 2, 3, 4].map((number) => parseFormationPower(form.get(`formation${number}`), form.get(`formation${number}Unit`))),
     })
     if (saveError) setError(saveError.message)
     else {
@@ -760,7 +762,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
           <label>{copy.combatPower}<LocalizedIntegerInput name="combatPower" language={language} maximum={maximumSafeInteger} defaultValue={ownMember.combat_power} /></label>
           <label>{copy.kills}<LocalizedIntegerInput name="kills" language={language} maximum={maximumSafeInteger} defaultValue={ownMember.kills} /></label>
           <label>{copy.weeklyContribution}<LocalizedIntegerInput name="weeklyContribution" language={language} maximum={maximumSafeInteger} defaultValue={ownMember.weekly_contribution} /></label>
-          {[1, 2, 3, 4].map((number) => <label key={number}>{copy.formation} {number}<LocalizedIntegerInput name={`formation${number}`} language={language} maximum={maximumSafeInteger} defaultValue={ownPerformanceDefaults?.[`formation_${number}` as keyof MemberPerformanceSnapshot] as number ?? 0} /></label>)}
+          {[1, 2, 3, 4].map((number) => <label key={number}>{copy.formation} {number}<FormationPowerInput name={`formation${number}`} defaultValue={ownPerformanceDefaults?.[`formation_${number}` as keyof MemberPerformanceSnapshot] as number ?? 0} /></label>)}
           <div className="row-actions"><button className="primary-button" type="submit" disabled={busy}>{copy.saveSnapshot}</button></div>
         </form>}
         {profile && <fieldset className="email-preferences"><legend>{copy.emailPreferences}</legend><label className="check-field"><input type="checkbox" checked={profile.notify_poll_emails} onChange={(event) => void saveEmailPreferences(event.target.checked, profile.notify_news_emails)} />{copy.notifyPollEmails}</label><label className="check-field"><input type="checkbox" checked={profile.notify_news_emails} onChange={(event) => void saveEmailPreferences(profile.notify_poll_emails, event.target.checked)} />{copy.notifyNewsEmails}</label></fieldset>}
@@ -882,7 +884,7 @@ export function AdminPortal({ open, copy, language, user, profile, availableMemb
             <label>{copy.combatPower}<LocalizedIntegerInput name="combatPower" language={language} defaultValue={performanceMember.combat_power} /></label>
             <label>{copy.kills}<LocalizedIntegerInput name="kills" language={language} defaultValue={performanceMember.kills} /></label>
             <label>{copy.weeklyContribution}<LocalizedIntegerInput name="weeklyContribution" language={language} defaultValue={performanceMember.weekly_contribution} /></label>
-            {[1, 2, 3, 4].map((number) => <label key={number}>{copy.formation} {number}<LocalizedIntegerInput name={`formation${number}`} language={language} defaultValue={performanceDefaults?.[`formation_${number}` as keyof MemberPerformanceSnapshot] as number ?? 0} /></label>)}
+            {[1, 2, 3, 4].map((number) => <label key={number}>{copy.formation} {number}<FormationPowerInput name={`formation${number}`} defaultValue={performanceDefaults?.[`formation_${number}` as keyof MemberPerformanceSnapshot] as number ?? 0} /></label>)}
             <div className="row-actions"><button className="primary-button" type="submit" disabled={busy}>{copy.saveSnapshot}</button><button className="ghost-button" type="button" onClick={() => setPerformanceMember(null)}>{copy.cancel}</button></div>
           </form>}
           <form className="admin-form roster-form" key={editingMember?.id ?? 'new'} onSubmit={saveMember}>

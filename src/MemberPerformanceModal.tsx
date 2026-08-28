@@ -1,6 +1,7 @@
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { Activity, LogIn, TrendingUp, X } from 'lucide-react'
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { formatCompactPower } from './formationPower'
 import { type Copy, type Language } from './i18n'
 import { supabase, type AllianceMember, type MemberPerformanceSnapshot } from './supabase'
 import { useDialogFocus } from './useDialogFocus'
@@ -14,7 +15,6 @@ type Props = {
   onSignIn: () => void
 }
 
-const compactPower = (value: number) => new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(value)
 type TrendPeriod = 7 | 30 | 90 | 'all'
 
 export function MemberPerformanceModal({ member, copy, language, canView, onClose, onSignIn }: Props) {
@@ -57,6 +57,7 @@ export function MemberPerformanceModal({ member, copy, language, canView, onClos
     ...snapshot,
     date: new Intl.DateTimeFormat(language, { day: '2-digit', month: 'short' }).format(new Date(`${snapshot.snapshot_date}T12:00:00`)),
   }))
+  const compactPower = (value: number) => formatCompactPower(value, language)
 
   return <div className="modal-backdrop performance-backdrop" onMouseDown={onClose}>
     <section className="performance-modal" ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="performance-title" onKeyDown={(event) => { if (event.key === 'Escape') onClose() }} onMouseDown={(event) => event.stopPropagation()}>
